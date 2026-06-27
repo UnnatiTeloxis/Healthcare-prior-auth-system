@@ -855,7 +855,7 @@
     <section class="step-panel active" id="step1" aria-labelledby="step1Title">
       <div class="card">
         <h2 class="card-title" id="step1Title">Validation Profile (Pre-selected)</h2>
-        <p class="card-subtitle">The system will validate against the US Core Patient profile.</p>
+        <p class="card-subtitle" id="profileSubtitle">The system will validate against the selected US Core profile.</p>
         <div class="profile-info" id="profileInfo" role="region" aria-label="Active validation profile">
           <div class="profile-badge">
             <h4 id="profile-name">📋 US Core Patient</h4>
@@ -863,14 +863,14 @@
           </div>
           <p id="profile-description">Validates patient demographics, identifiers, and contact information per US Core Implementation Guide.</p>
           <div class="profile-required">
-            <strong>Required by US Core Patient:</strong>
-            <ul>
+            <strong id="profileRequiredLabel">Required by US Core Patient:</strong>
+            <ul id="profileRequiredList">
               <li>identifier (<code>Patient.identifier</code>)</li>
               <li>name (<code>Patient.name</code>)</li>
               <li>gender (<code>Patient.gender</code>)</li>
             </ul>
-            <strong>Included in sample as Must Support:</strong>
-            <ul>
+            <strong id="profileSupportLabel">Included in sample as Must Support:</strong>
+            <ul id="profileSupportList">
               <li>birthDate (<code>Patient.birthDate</code>)</li>
               <li>telecom (<code>Patient.telecom</code>)</li>
               <li>address (<code>Patient.address</code>)</li>
@@ -1051,11 +1051,157 @@
         'name (Patient.name)',
         'gender (Patient.gender)'
       ],
+      supportFields: [
+        'birthDate (Patient.birthDate)',
+        'telecom (Patient.telecom)',
+        'address (Patient.address)',
+        'communication language (Patient.communication.language)'
+      ],
       profile: 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient'
     };
 
     function getSelectedProfile() {
+      return state.activeProfile || ACTIVE_PROFILE;
+    }
+
+    const PROFILE_CATALOG = {
+      patient: ACTIVE_PROFILE,
+      observationVitalSigns: {
+        id: 'us-core-observation-vital-signs',
+        name: 'US Core Observation (Vital Signs)',
+        icon: '🫀',
+        resourceType: 'Observation',
+        description: 'Validates vital signs observations per US Core.',
+        requiredFields: [],
+        supportFields: [],
+        profile: 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-vital-signs'
+      },
+      observationLab: {
+        id: 'us-core-observation-lab',
+        name: 'US Core Observation (Lab)',
+        icon: '🧪',
+        resourceType: 'Observation',
+        description: 'Validates laboratory observations per US Core.',
+        requiredFields: [],
+        supportFields: [],
+        profile: 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab'
+      }
+    };
+
+    const PROFILE_URL_INDEX = Object.values(PROFILE_CATALOG).reduce((acc, profile) => {
+      acc[profile.profile] = profile;
+      return acc;
+    }, {});
+
+    const VITAL_SIGNS_LOINC = new Set([
+      '8302-2', // Body height
+      '8306-3', // Body height -- lying
+      '29463-7', // Body weight
+      '39156-5', // Body mass index
+      '8462-4', // Diastolic blood pressure
+      '8480-6', // Systolic blood pressure
+      '8310-5', // Body temperature
+      '8867-4', // Heart rate
+      '9279-1', // Respiratory rate
+      '2708-6' // Oxygen saturation
+    ]);
+
+    function extractMetaProfile(resource) {
+      const metaProfile = resource?.meta?.profile;
+      if (Array.isArray(metaProfile) && metaProfile.length) return metaProfile[0];
+      if (typeof metaProfile === 'string') return metaProfile;
+      return null;
+    }
+
+    function isVitalSignsObservation(resource) {
+      const codings = resource?.code?.coding;
+      if (!Array.isArray(codings)) return false;
+      return codings.some(coding =>
+        coding?.system === 'http://loinc.org' && VITAL_SIGNS_LOINC.has(coding?.code)
+      );
+    }
+
+    function resolveProfileForResource(resource) {
+      const resourceType = resource?.resourceType || ACTIVE_PROFILE.resourceType;
+      const metaProfile = extractMetaProfile(resource);
+      const metaMatch = metaProfile ? PROFILE_URL_INDEX[metaProfile] : null;
+      if (metaMatch && metaMatch.resourceType === resourceType) {
+        return metaMatch;
+      }
+
+      if (resourceType === 'Observation') {
+        return isVitalSignsObservation(resource)
+          ? PROFILE_CATALOG.observationVitalSigns
+          : PROFILE_CATALOG.observationLab;
+      }
+
+      if (resourceType === 'Patient') {
+        return ACTIVE_PROFILE;
+      }
+
       return ACTIVE_PROFILE;
+    }
+
+    function renderProfileInfo(profile) {
+      const subtitle = document.getElementById('profileSubtitle');
+      if (subtitle) {
+        subtitle.textContent = `The system will validate against the ${profile.name} profile.`;
+      }
+
+      const nameEl = document.getElementById('profile-name');
+      if (nameEl) {
+        nameEl.textContent = `${profile.icon || '📋'} ${profile.name}`;
+      }
+
+      const descEl = document.getElementById('profile-description');
+      if (descEl) {
+        descEl.textContent = profile.description || 'Validates FHIR resources against the selected US Core profile.';
+      }
+
+      const requiredLabel = document.getElementById('profileRequiredLabel');
+      if (requiredLabel) {
+        requiredLabel.textContent = `Required by ${profile.name}:`;
+      }
+
+      const supportLabel = document.getElementById('profileSupportLabel');
+      if (supportLabel) {
+        supportLabel.textContent = 'Included in sample as Must Support:';
+      }
+
+      const requiredList = document.getElementById('profileRequiredList');
+      if (requiredList) {
+        const requiredItems = (profile.requiredFields && profile.requiredFields.length)
+          ? profile.requiredFields
+          : ['See profile documentation for required elements.'];
+        requiredList.innerHTML = requiredItems.map(item => `<li>${item}</li>`).join('');
+      }
+
+      const supportList = document.getElementById('profileSupportList');
+      if (supportList) {
+        const supportItems = (profile.supportFields && profile.supportFields.length)
+          ? profile.supportFields
+          : ['Not specified for this profile sample.'];
+        supportList.innerHTML = supportItems.map(item => `<li>${item}</li>`).join('');
+      }
+
+      const urlEl = document.getElementById('profile-url');
+      if (urlEl) {
+        urlEl.innerHTML = `<strong>Profile URL:</strong> ${profile.profile}`;
+      }
+    }
+
+    function refreshActiveProfile() {
+      try {
+        const parsed = JSON.parse(state.inputData || '');
+        const profile = resolveProfileForResource(parsed);
+        state.activeProfile = profile;
+        renderProfileInfo(profile);
+      } catch (_) {
+        if (!state.activeProfile) {
+          state.activeProfile = ACTIVE_PROFILE;
+          renderProfileInfo(state.activeProfile);
+        }
+      }
     }
 
     const SAMPLE_PATIENT = `{
@@ -1152,7 +1298,8 @@
       inputMethod: 'paste',
       uploadedFileName: null,
       results: null,
-      activeFilter: 'all'
+      activeFilter: 'all',
+      activeProfile: ACTIVE_PROFILE
     };
 
     // --- Init ---
@@ -1160,6 +1307,7 @@
       renderSteps();
       document.getElementById('jsonInput').value = SAMPLE_PATIENT;
       updateLineNumbers();
+      refreshActiveProfile();
       bindEvents();
     }
 
@@ -1234,12 +1382,13 @@
     }
 
     function renderValidateSummary() {
-      const profile = getSelectedProfile();
-      let resourceType = profile.resourceType;
       let size = new Blob([state.inputData]).size;
+      let resourceType = ACTIVE_PROFILE.resourceType;
+      let profile = getSelectedProfile();
       try {
         const parsed = JSON.parse(state.inputData);
         if (parsed.resourceType) resourceType = parsed.resourceType;
+        profile = resolveProfileForResource(parsed);
       } catch (_) {}
 
       document.getElementById('validateSummary').innerHTML = `
@@ -1278,10 +1427,17 @@
       }, 500);
 
       const startedAt = performance.now();
+      const profileUsed = resolveProfileForResource(parsed);
+      state.activeProfile = profileUsed;
+      renderProfileInfo(profileUsed);
+      const metaProfile = extractMetaProfile(parsed);
+      if (metaProfile && metaProfile !== profileUsed.profile) {
+        showToast(`Resource profile does not match ${parsed.resourceType}; validating against ${profileUsed.name}.`, 'info');
+      }
       try {
-        const apiResult = await submitValidation(parsed);
-        state.results = normalizeValidationResult(apiResult, startedAt);
-        state.results.profile = getSelectedProfile().name;
+        const apiResult = await submitValidation(parsed, profileUsed);
+        state.results = normalizeValidationResult(apiResult, startedAt, profileUsed);
+        state.results.profile = profileUsed.name;
 
         clearInterval(interval);
         bar.style.width = '100%';
@@ -1302,11 +1458,11 @@
       }
     }
 
-    async function submitValidation(parsed) {
+    async function submitValidation(parsed, profileUsed) {
       const request = {
         resource: state.inputData,
-        profiles: [getSelectedProfile().profile],
-        resource_type: parsed.resourceType || getSelectedProfile().resourceType
+        profiles: [profileUsed.profile],
+        resource_type: parsed.resourceType || profileUsed.resourceType
       };
 
       let lastError = null;
@@ -1336,7 +1492,7 @@
       throw lastError || new Error('Validation API is unavailable');
     }
 
-    function normalizeValidationResult(apiResult, startedAt) {
+    function normalizeValidationResult(apiResult, startedAt, profileUsed) {
       const issues = (apiResult.issues || []).map(normalizeIssue);
       const errors = Number(apiResult.error_count ?? issues.filter(i => i.severity === 'error').length);
       const warnings = Number(apiResult.warning_count ?? issues.filter(i => i.severity === 'warning').length);
@@ -1347,6 +1503,9 @@
         id: `VAL-${Date.now()}`,
         timestamp: new Date().toISOString(),
         executionTime: `${((performance.now() - startedAt) / 1000).toFixed(3)}s`,
+        profile: profileUsed.name,
+        profileUrl: profileUsed.profile,
+        profileResourceType: profileUsed.resourceType,
         summary: { total: errors + warnings + info, errors, warnings, info },
         status: apiResult.valid ? 'PASSED' : 'FAILED',
         complianceScore: `${score}%`,
@@ -1476,7 +1635,7 @@
                 <span class="severity-pill info">OK</span>
                 <div>
                   <div class="issue-msg">No validator issues returned for this filter.</div>
-                  <div class="issue-location">US Core Patient validation completed</div>
+                  <div class="issue-location">${state.results.profile || 'Validation'} completed</div>
                 </div>
               </div>
             </div>
@@ -1571,7 +1730,9 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       const r = state.results;
-      const profile = getSelectedProfile();
+      const profile = r?.profileUrl
+        ? { name: r.profile, profile: r.profileUrl, resourceType: r.profileResourceType || 'Patient' }
+        : getSelectedProfile();
       const margin = 14;
       const pageWidth = doc.internal.pageSize.getWidth();
       let y = margin;
@@ -1819,6 +1980,7 @@
       document.getElementById('jsonInput').addEventListener('input', () => {
         updateLineNumbers();
         state.inputData = document.getElementById('jsonInput').value;
+        refreshActiveProfile();
       });
 
       document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1869,6 +2031,7 @@
           updateLineNumbers();
           document.querySelector('[data-tab="paste"]').click();
         }
+        refreshActiveProfile();
         showToast('File loaded: ' + file.name, 'success');
       };
       reader.readAsText(file);
