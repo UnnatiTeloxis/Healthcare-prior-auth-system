@@ -1,2 +1,3 @@
-// BatchRunner.tsx
-export {};
+﻿export default function BatchRunner() {
+  return null;
+}

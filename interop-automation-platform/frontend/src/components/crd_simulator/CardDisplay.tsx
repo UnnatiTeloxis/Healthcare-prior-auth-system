@@ -1,2 +1,3 @@
-// CardDisplay.tsx
-export {};
+﻿export default function CardDisplay() {
+  return null;
+}

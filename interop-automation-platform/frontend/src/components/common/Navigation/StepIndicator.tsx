@@ -1,2 +1,3 @@
-// StepIndicator.tsx
-export {};
+﻿export default function StepIndicator() {
+  return null;
+}

@@ -1,2 +1,2 @@
-// fhirValidator.types.ts
+﻿// fhirValidator.types
 export {};

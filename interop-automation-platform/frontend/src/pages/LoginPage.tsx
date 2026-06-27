@@ -1,2 +1,3 @@
-// LoginPage.tsx
-export {};
+﻿export default function LoginPage() {
+  return null;
+}

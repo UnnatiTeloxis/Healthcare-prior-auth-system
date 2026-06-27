@@ -1,2 +1,3 @@
-// DTRSimulatorPage.tsx
-export {};
+﻿export default function DTRSimulatorPage() {
+  return null;
+}

@@ -1,2 +1,3 @@
-// ResultsDisplay.tsx
-export {};
+﻿export default function ResultsDisplay() {
+  return null;
+}

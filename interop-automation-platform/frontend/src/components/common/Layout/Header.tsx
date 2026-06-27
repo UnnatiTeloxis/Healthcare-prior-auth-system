@@ -1,2 +1,3 @@
-// Header.tsx
-export {};
+﻿export default function Header() {
+  return null;
+}

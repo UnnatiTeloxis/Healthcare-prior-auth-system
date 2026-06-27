@@ -1,2 +1,2 @@
-// dtrSimulator.ts
+﻿// dtrSimulator
 export {};

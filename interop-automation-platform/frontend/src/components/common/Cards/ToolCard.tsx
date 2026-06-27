@@ -1,2 +1,3 @@
-// ToolCard.tsx
-export {};
+﻿export default function ToolCard() {
+  return null;
+}

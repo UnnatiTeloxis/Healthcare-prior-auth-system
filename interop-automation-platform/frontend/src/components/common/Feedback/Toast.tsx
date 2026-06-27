@@ -1,2 +1,3 @@
-// Toast.tsx
-export {};
+﻿export default function Toast() {
+  return null;
+}

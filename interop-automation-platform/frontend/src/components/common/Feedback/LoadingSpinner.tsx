@@ -1,2 +1,3 @@
-// LoadingSpinner.tsx
-export {};
+﻿export default function LoadingSpinner() {
+  return null;
+}

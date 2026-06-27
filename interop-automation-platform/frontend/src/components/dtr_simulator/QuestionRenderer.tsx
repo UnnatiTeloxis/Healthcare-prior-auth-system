@@ -1,2 +1,3 @@
-// QuestionRenderer.tsx
-export {};
+﻿export default function QuestionRenderer() {
+  return null;
+}

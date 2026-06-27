@@ -1,2 +1,3 @@
-// FHIRValidatorPage.tsx
-export {};
+﻿export default function FHIRValidatorPage() {
+  return null;
+}

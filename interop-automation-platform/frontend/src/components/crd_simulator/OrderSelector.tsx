@@ -1,2 +1,3 @@
-// OrderSelector.tsx
-export {};
+﻿export default function OrderSelector() {
+  return null;
+}

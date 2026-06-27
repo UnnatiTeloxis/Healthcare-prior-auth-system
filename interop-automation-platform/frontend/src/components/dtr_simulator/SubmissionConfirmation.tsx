@@ -1,2 +1,3 @@
-// SubmissionConfirmation.tsx
-export {};
+﻿export default function SubmissionConfirmation() {
+  return null;
+}

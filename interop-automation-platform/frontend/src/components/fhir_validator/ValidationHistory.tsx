@@ -1,2 +1,3 @@
-// ValidationHistory.tsx
-export {};
+﻿export default function ValidationHistory() {
+  return null;
+}

@@ -1,2 +1,3 @@
-// FormRenderer.tsx
-export {};
+﻿export default function FormRenderer() {
+  return null;
+}

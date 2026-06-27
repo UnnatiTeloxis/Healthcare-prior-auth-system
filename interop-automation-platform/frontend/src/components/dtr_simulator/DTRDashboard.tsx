@@ -1,2 +1,3 @@
-// DTRDashboard.tsx
-export {};
+﻿export default function DTRDashboard() {
+  return null;
+}

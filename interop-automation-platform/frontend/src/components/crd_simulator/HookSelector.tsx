@@ -1,2 +1,3 @@
-// HookSelector.tsx
-export {};
+﻿export default function HookSelector() {
+  return null;
+}

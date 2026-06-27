@@ -1,2 +1,3 @@
-// InputPanel.tsx
-export {};
+﻿export default function InputPanel() {
+  return null;
+}

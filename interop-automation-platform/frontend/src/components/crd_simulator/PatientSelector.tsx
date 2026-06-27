@@ -1,2 +1,3 @@
-// PatientSelector.tsx
-export {};
+﻿export default function PatientSelector() {
+  return null;
+}

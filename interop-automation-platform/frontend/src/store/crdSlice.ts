@@ -1,2 +1,2 @@
-// crdSlice.ts
+﻿// crdSlice
 export {};

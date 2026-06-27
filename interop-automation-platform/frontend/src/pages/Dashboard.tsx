@@ -1,2 +1,3 @@
-// Dashboard.tsx
-export {};
+﻿export default function Dashboard() {
+  return null;
+}

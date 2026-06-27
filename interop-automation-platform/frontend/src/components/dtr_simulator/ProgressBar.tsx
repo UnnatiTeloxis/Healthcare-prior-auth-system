@@ -1,2 +1,3 @@
-// ProgressBar.tsx
-export {};
+﻿export default function ProgressBar() {
+  return null;
+}

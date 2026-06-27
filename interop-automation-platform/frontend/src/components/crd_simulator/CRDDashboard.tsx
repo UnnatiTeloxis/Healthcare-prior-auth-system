@@ -1,2 +1,3 @@
-// CRDDashboard.tsx
-export {};
+﻿export default function CRDDashboard() {
+  return null;
+}

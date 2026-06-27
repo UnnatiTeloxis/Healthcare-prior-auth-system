@@ -1,2 +1,3 @@
-// Sidebar.tsx
-export {};
+﻿export default function Sidebar() {
+  return null;
+}

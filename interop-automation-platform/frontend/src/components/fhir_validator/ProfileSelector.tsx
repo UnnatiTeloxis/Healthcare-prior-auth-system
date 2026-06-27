@@ -1,2 +1,3 @@
-// ProfileSelector.tsx
-export {};
+﻿export default function ProfileSelector() {
+  return null;
+}
