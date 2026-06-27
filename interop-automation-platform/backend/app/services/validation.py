@@ -26,8 +26,8 @@ class ValidationService:
             
             is_valid, issues = parse_operation_outcome(operation_outcome)
             
-            # Count issues by severity
-            error_count = sum(1 for i in issues if i['severity'] == 'error')
+            # Count issues by severity (fatal counts as error)
+            error_count = sum(1 for i in issues if i['severity'] in ('error', 'fatal'))
             warning_count = sum(1 for i in issues if i['severity'] == 'warning')
             info_count = sum(1 for i in issues if i['severity'] == 'information')
             
@@ -45,7 +45,7 @@ class ValidationService:
                 invalid_fields = []
                 
                 for issue in issues:
-                    if issue['severity'] == 'error':
+                    if issue['severity'] in ('error', 'fatal'):
                         msg = issue['message'].lower()
                         # Check for missing required fields
                         if 'minimum required' in msg or 'required element' in msg:

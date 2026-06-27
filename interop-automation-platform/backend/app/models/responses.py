@@ -4,6 +4,7 @@ from enum import Enum
 
 
 class IssueSeverity(str, Enum):
+    fatal = "fatal"
     error = "error"
     warning = "warning"
     information = "information"
