@@ -1,0 +1,2 @@
+// ValidatorDashboard.tsx
+export {};

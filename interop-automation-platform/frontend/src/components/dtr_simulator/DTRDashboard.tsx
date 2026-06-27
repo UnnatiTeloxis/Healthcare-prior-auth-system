@@ -1,0 +1,2 @@
+// DTRDashboard.tsx
+export {};

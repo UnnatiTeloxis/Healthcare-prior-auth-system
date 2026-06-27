@@ -1,0 +1,2 @@
+// Dashboard.tsx
+export {};

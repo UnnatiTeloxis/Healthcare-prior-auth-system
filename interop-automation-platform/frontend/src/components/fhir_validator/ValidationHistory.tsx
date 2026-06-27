@@ -1,0 +1,2 @@
+// ValidationHistory.tsx
+export {};

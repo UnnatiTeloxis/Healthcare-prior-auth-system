@@ -1,0 +1,2 @@
+// DTRSimulatorPage.tsx
+export {};

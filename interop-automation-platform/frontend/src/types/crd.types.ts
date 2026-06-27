@@ -1,0 +1,2 @@
+// crd.types.ts
+export {};

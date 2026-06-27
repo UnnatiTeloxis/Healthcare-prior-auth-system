@@ -1,0 +1,2 @@
+// crdSimulator.ts
+export {};

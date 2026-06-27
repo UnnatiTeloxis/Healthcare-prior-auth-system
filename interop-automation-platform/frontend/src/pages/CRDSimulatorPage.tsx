@@ -1,0 +1,2 @@
+// CRDSimulatorPage.tsx
+export {};

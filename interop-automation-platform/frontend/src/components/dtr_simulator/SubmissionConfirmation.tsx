@@ -1,0 +1,2 @@
+// SubmissionConfirmation.tsx
+export {};

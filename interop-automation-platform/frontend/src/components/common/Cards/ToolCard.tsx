@@ -1,0 +1,2 @@
+// ToolCard.tsx
+export {};

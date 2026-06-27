@@ -1,0 +1,2 @@
+// dtrSimulator.ts
+export {};

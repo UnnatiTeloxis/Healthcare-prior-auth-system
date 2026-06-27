@@ -1,0 +1,2 @@
+// dtrSlice.ts
+export {};

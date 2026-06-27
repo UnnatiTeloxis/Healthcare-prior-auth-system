@@ -1,0 +1,2 @@
+// StepIndicator.tsx
+export {};

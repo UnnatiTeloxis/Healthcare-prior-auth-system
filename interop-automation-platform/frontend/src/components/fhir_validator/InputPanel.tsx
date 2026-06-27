@@ -1,0 +1,2 @@
+// InputPanel.tsx
+export {};
