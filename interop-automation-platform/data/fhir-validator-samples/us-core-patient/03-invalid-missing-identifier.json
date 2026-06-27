@@ -1,0 +1,19 @@
+{
+  "resourceType": "Patient",
+  "id": "sample-invalid-missing-identifier",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+    ]
+  },
+  "name": [
+    {
+      "family": "Rivera",
+      "given": [
+        "Jordan"
+      ]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1978-04-03"
+}

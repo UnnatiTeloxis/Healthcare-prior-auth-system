@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     FHIR_SERVER_URL: str = "http://localhost:8080"
     FHIR_SERVER_TIMEOUT: int = 30
     FHIR_SERVER_RETRIES: int = 3
+    INFERNO_VALIDATOR_URL: str = "http://fhir-validator-wrapper:4567"
+    DEFAULT_IGS: str = "hl7.fhir.us.core#6.1.0"
+    CORS_ORIGINS: str = "*"
 
     # Terminology Server
     TERMINOLOGY_SERVER_URL: str = "https://tx.fhir.org/r4"
@@ -72,6 +75,18 @@ class Settings(BaseSettings):
     @property
     def ACCESS_TOKEN_EXPIRE_MINUTES(self) -> int:
         return self.AUTH_ACCESS_TOKEN_EXPIRE_MINUTES
+
+    @property
+    def inferno_validator_url(self) -> str:
+        return self.INFERNO_VALIDATOR_URL
+
+    @property
+    def default_igs_list(self) -> list[str]:
+        return [ig.strip() for ig in self.DEFAULT_IGS.split(",") if ig.strip()]
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
 
 
 settings = Settings()
