@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  fhir-validator-wrapper:
+    image: infernocommunity/fhir-validator-service:latest
+    container_name: fhir-validator-wrapper
+    ports:
+      - "4567:4567"
+    environment:
+      - DISABLE_TX=false
+      - TX_SERVER_URL=https://tx.fhir.org/r4
+      - DISPLAY_ISSUES_ARE_WARNINGS=false
+    volumes:
+      - ./igs:/igs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4567/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fhir-validator-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - INFERNO_VALIDATOR_URL=http://fhir-validator-wrapper:4567
+      - DEFAULT_IGS=hl7.fhir.us.core#6.1.0,hl7.fhir.us.davinci-pas#2.0.1,hl7.fhir.us.davinci-crd#2.0.1,hl7.fhir.us.davinci-dtr#2.0.1,hl7.fhir.us.carin-bb#2.0.0
+      - CORS_ORIGINS=*
+    depends_on:
+      fhir-validator-wrapper:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: fhir-validator-frontend
+    ports:
+      - "80:80"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  igs:
