@@ -2,9 +2,7 @@
   "resourceType": "Patient",
   "id": "sample-valid-minimal",
   "meta": {
-    "profile": [
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
-    ]
+    "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]
   },
   "identifier": [
     {
@@ -15,9 +13,7 @@
   "name": [
     {
       "family": "Nguyen",
-      "given": [
-        "Taylor"
-      ]
+      "given": ["Taylor"]
     }
   ],
   "gender": "unknown",

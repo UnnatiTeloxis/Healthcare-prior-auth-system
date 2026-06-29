@@ -2,9 +2,7 @@
   "resourceType": "Patient",
   "id": "sample-invalid-bad-gender",
   "meta": {
-    "profile": [
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
-    ]
+    "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]
   },
   "identifier": [
     {
@@ -15,9 +13,7 @@
   "name": [
     {
       "family": "Patel",
-      "given": [
-        "Morgan"
-      ]
+      "given": ["Morgan"]
     }
   ],
   "gender": "not-a-valid-fhir-gender",

@@ -115,11 +115,31 @@
     }
   ],
   "telecom": [
-    { "system": "phone", "value": "555-100-9001", "use": "home" },
-    { "system": "phone", "value": "555-200-9001", "use": "work" },
-    { "system": "phone", "value": "555-300-9001", "use": "mobile" },
-    { "system": "email", "value": "maria.hernandez@example.com", "use": "home" },
-    { "system": "email", "value": "m.hernandez@work.example.com", "use": "work" }
+    {
+      "system": "phone",
+      "value": "555-100-9001",
+      "use": "home"
+    },
+    {
+      "system": "phone",
+      "value": "555-200-9001",
+      "use": "work"
+    },
+    {
+      "system": "phone",
+      "value": "555-300-9001",
+      "use": "mobile"
+    },
+    {
+      "system": "email",
+      "value": "maria.hernandez@example.com",
+      "use": "home"
+    },
+    {
+      "system": "email",
+      "value": "m.hernandez@work.example.com",
+      "use": "work"
+    }
   ],
   "gender": "female",
   "birthDate": "1979-11-02",
@@ -179,7 +199,11 @@
         "given": ["Carlos"]
       },
       "telecom": [
-        { "system": "phone", "value": "555-400-9001", "use": "mobile" }
+        {
+          "system": "phone",
+          "value": "555-400-9001",
+          "use": "mobile"
+        }
       ]
     }
   ],

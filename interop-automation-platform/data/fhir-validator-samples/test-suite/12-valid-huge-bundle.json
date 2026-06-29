@@ -12,9 +12,17 @@
           "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]
         },
         "identifier": [
-          { "system": "http://hospital.example.org/mrn", "value": "B-MRN-1" }
+          {
+            "system": "http://hospital.example.org/mrn",
+            "value": "B-MRN-1"
+          }
         ],
-        "name": [{ "family": "Bundle", "given": ["Alpha"] }],
+        "name": [
+          {
+            "family": "Bundle",
+            "given": ["Alpha"]
+          }
+        ],
         "gender": "male",
         "birthDate": "1990-01-01"
       }
@@ -28,9 +36,17 @@
           "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]
         },
         "identifier": [
-          { "system": "http://hospital.example.org/mrn", "value": "B-MRN-2" }
+          {
+            "system": "http://hospital.example.org/mrn",
+            "value": "B-MRN-2"
+          }
         ],
-        "name": [{ "family": "Bundle", "given": ["Beta"] }],
+        "name": [
+          {
+            "family": "Bundle",
+            "given": ["Beta"]
+          }
+        ],
         "gender": "female",
         "birthDate": "1992-02-02"
       }
@@ -57,10 +73,16 @@
         ],
         "code": {
           "coding": [
-            { "system": "http://loinc.org", "code": "8302-2", "display": "Body height" }
+            {
+              "system": "http://loinc.org",
+              "code": "8302-2",
+              "display": "Body height"
+            }
           ]
         },
-        "subject": { "reference": "Patient/bundle-patient-1" },
+        "subject": {
+          "reference": "Patient/bundle-patient-1"
+        },
         "effectiveDateTime": "2024-01-10T10:00:00Z",
         "valueQuantity": {
           "value": 180,
@@ -92,10 +114,16 @@
         ],
         "code": {
           "coding": [
-            { "system": "http://loinc.org", "code": "29463-7", "display": "Body weight" }
+            {
+              "system": "http://loinc.org",
+              "code": "29463-7",
+              "display": "Body weight"
+            }
           ]
         },
-        "subject": { "reference": "Patient/bundle-patient-1" },
+        "subject": {
+          "reference": "Patient/bundle-patient-1"
+        },
         "effectiveDateTime": "2024-01-10T10:00:00Z",
         "valueQuantity": {
           "value": 75,
@@ -127,10 +155,16 @@
         ],
         "code": {
           "coding": [
-            { "system": "http://loinc.org", "code": "2339-0", "display": "Glucose [Mass/volume] in Blood" }
+            {
+              "system": "http://loinc.org",
+              "code": "2339-0",
+              "display": "Glucose [Mass/volume] in Blood"
+            }
           ]
         },
-        "subject": { "reference": "Patient/bundle-patient-2" },
+        "subject": {
+          "reference": "Patient/bundle-patient-2"
+        },
         "effectiveDateTime": "2024-01-11T08:30:00Z",
         "valueQuantity": {
           "value": 102,

@@ -17,7 +17,7 @@ class InfernoClient:
 
     async def _get_client(self) -> httpx.AsyncClient:
         if self.client is None:
-            self.client = httpx.AsyncClient(timeout=120.0)
+            self.client = httpx.AsyncClient(timeout=600.0)
         return self.client
 
     async def close(self) -> None:
