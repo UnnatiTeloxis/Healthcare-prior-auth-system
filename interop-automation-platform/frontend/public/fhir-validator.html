@@ -1592,16 +1592,6 @@
             <h4>Export Report (PDF)</h4>
             <p>Download a formatted PDF report</p>
           </div>
-          <div class="action-card" id="copyResultsBtn" tabindex="0" role="button">
-            <i class="fas fa-copy"></i>
-            <h4>Copy Results</h4>
-            <p>Copy to clipboard</p>
-          </div>
-          <div class="action-card" id="fixRetryBtn" tabindex="0" role="button">
-            <i class="fas fa-wrench"></i>
-            <h4>Fix & Retry</h4>
-            <p>Return to data input</p>
-          </div>
           <div class="action-card" id="newValidationBtn" tabindex="0" role="button">
             <i class="fas fa-redo"></i>
             <h4>Start New Validation</h4>
@@ -3849,8 +3839,6 @@
       document.getElementById('step5Back').addEventListener('click', prevStep);
       document.getElementById('exportJsonBtn').addEventListener('click', exportJson);
       document.getElementById('exportPdfBtn').addEventListener('click', exportPdf);
-      document.getElementById('copyResultsBtn').addEventListener('click', copyResults);
-      document.getElementById('fixRetryBtn').addEventListener('click', () => { goToStep(1); showToast('Edit your data and re-validate', 'info'); });
       document.getElementById('newValidationBtn').addEventListener('click', resetValidation);
 
       document.getElementById('viewInReportsLink')?.addEventListener('click', e => {
