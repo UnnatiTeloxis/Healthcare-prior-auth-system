@@ -1,0 +1,25 @@
+{
+  "resourceType": "Patient",
+  "id": "sample-valid-minimal",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+    ]
+  },
+  "identifier": [
+    {
+      "system": "http://hospital.smarthealthit.org",
+      "value": "MIN-10001"
+    }
+  ],
+  "name": [
+    {
+      "family": "Nguyen",
+      "given": [
+        "Taylor"
+      ]
+    }
+  ],
+  "gender": "unknown",
+  "birthDate": "1992-09-14"
+}

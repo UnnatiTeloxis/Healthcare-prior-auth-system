@@ -1,4 +1,25 @@
 services:
+  fhir-validator-wrapper:
+    image: infernocommunity/fhir-validator-service:latest
+    container_name: interop_fhir_validator_wrapper
+    ports:
+      - "4567:4567"
+    environment:
+      DISABLE_TX: "false"
+      TX_SERVER_URL: https://tx.fhir.org/r4
+      DISPLAY_ISSUES_ARE_WARNINGS: "false"
+    volumes:
+      - ./igs:/igs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4567/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - interop_network
+    restart: unless-stopped
+
   postgres:
     image: postgres:15-alpine
     container_name: interop_postgres
@@ -43,6 +64,9 @@ services:
     environment:
       DATABASE_URL: postgresql://interop:interop123@postgres:5432/interop
       REDIS_URL: redis://redis:6379
+      INFERNO_VALIDATOR_URL: http://fhir-validator-wrapper:4567
+      DEFAULT_IGS: hl7.fhir.us.core#6.1.0
+      CORS_ORIGINS: "*"
       PYTHONUNBUFFERED: "1"
     volumes:
       - ./backend:/app
@@ -51,6 +75,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      fhir-validator-wrapper:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]

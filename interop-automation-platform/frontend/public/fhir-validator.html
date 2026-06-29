@@ -9,6 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" crossorigin="anonymous"></script>
   <style>
     :root {
       --primary: #1a56db;
@@ -266,6 +268,45 @@
     .profile-info h4 { font-size: 1rem; margin-bottom: 0.35rem; }
     .profile-info p { font-size: 0.875rem; color: var(--text-muted); }
     .profile-info .required { margin-top: 0.5rem; font-size: 0.8125rem; color: var(--primary); font-weight: 500; }
+
+    .profile-badge {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .profile-badge h4 { margin: 0; color: var(--text); }
+    .badge-active {
+      background: var(--success);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .profile-required {
+      margin-top: 0.75rem;
+      font-size: 0.875rem;
+    }
+    .profile-required ul {
+      margin: 8px 0 12px 0;
+      padding-left: 20px;
+      list-style-type: disc;
+    }
+    .profile-required ul li {
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+    .profile-required ul li code {
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--secondary);
+      font-family: Consolas, Monaco, monospace;
+    }
 
     /* Tabs */
     .tabs {
@@ -795,7 +836,7 @@
             <p>Interop Automation Platform</p>
           </div>
         </div>
-        <div class="step-badge" id="stepBadge" aria-live="polite">Step 1 of 5: Select Profile</div>
+        <div class="step-badge" id="stepBadge" aria-live="polite">Step 1 of 5: Review Profile</div>
       </div>
     </div>
   </header>
@@ -813,25 +854,33 @@
     <!-- Step 1 -->
     <section class="step-panel active" id="step1" aria-labelledby="step1Title">
       <div class="card">
-        <h2 class="card-title" id="step1Title">Choose Validation Profile</h2>
-        <p class="card-subtitle">Select the FHIR profile or implementation guide to validate against.</p>
-        <div class="form-group">
-          <label class="form-label" for="profileSelect">Profile</label>
-          <select class="form-select" id="profileSelect" aria-describedby="profileInfo">
-            <option value="us-core-patient">US Core Patient</option>
-            <option value="us-core-practitioner">US Core Practitioner</option>
-            <option value="us-core-organization">US Core Organization</option>
-            <option value="us-core-condition">US Core Condition</option>
-            <option value="us-core-medication">US Core MedicationRequest</option>
-            <option value="us-core-observation">US Core Observation</option>
-            <option value="us-core-coverage">US Core Coverage</option>
-            <option value="us-core-claim">US Core Claim</option>
-            <option value="davinci-crd-coverage">Da Vinci CRD Coverage</option>
-            <option value="davinci-dtr-questionnaire">Da Vinci DTR Questionnaire</option>
-            <option value="custom">Custom Profile Upload</option>
-          </select>
+        <h2 class="card-title" id="step1Title">Validation Profile (Pre-selected)</h2>
+        <p class="card-subtitle" id="profileSubtitle">The system will validate against the selected US Core profile.</p>
+        <div class="profile-info" id="profileInfo" role="region" aria-label="Active validation profile">
+          <div class="profile-badge">
+            <h4 id="profile-name">📋 US Core Patient</h4>
+            <span class="badge badge-active" aria-label="Active profile">✅ Active Profile</span>
+          </div>
+          <p id="profile-description">Validates patient demographics, identifiers, and contact information per US Core Implementation Guide.</p>
+          <div class="profile-required">
+            <strong id="profileRequiredLabel">Required by US Core Patient:</strong>
+            <ul id="profileRequiredList">
+              <li>identifier (<code>Patient.identifier</code>)</li>
+              <li>name (<code>Patient.name</code>)</li>
+              <li>gender (<code>Patient.gender</code>)</li>
+            </ul>
+            <strong id="profileSupportLabel">Included in sample as Must Support:</strong>
+            <ul id="profileSupportList">
+              <li>birthDate (<code>Patient.birthDate</code>)</li>
+              <li>telecom (<code>Patient.telecom</code>)</li>
+              <li>address (<code>Patient.address</code>)</li>
+              <li>communication language (<code>Patient.communication.language</code>)</li>
+            </ul>
+          </div>
+          <p id="profile-url" style="font-size:0.8125rem;color:var(--text-muted);margin-top:0.35rem;">
+            <strong>Profile URL:</strong> http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient
+          </p>
         </div>
-        <div class="profile-info" id="profileInfo" role="region" aria-live="polite"></div>
         <div class="btn-row">
           <button class="btn btn-primary" id="step1Next" type="button">
             Next: Provide Data <i class="fas fa-arrow-right" aria-hidden="true"></i>
@@ -991,175 +1040,252 @@
   </div>
 
   <script>
-    const PROFILES = {
-      'us-core-patient': {
-        name: 'US Core Patient',
-        icon: '📋',
-        resourceType: 'Patient',
-        description: 'Validates patient demographics, identifiers, and contact information per US Core IG.',
-        required: 'name, birthDate, gender, identifier',
-        profile: 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient'
-      },
-      'us-core-practitioner': {
-        name: 'US Core Practitioner',
-        icon: '👨‍⚕️',
-        resourceType: 'Practitioner',
-        description: 'Validates practitioner identity, qualifications, and contact details.',
-        required: 'name, identifier',
-        profile: 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner'
-      },
-      'us-core-organization': {
-        name: 'US Core Organization',
-        icon: '🏥',
-        resourceType: 'Organization',
-        description: 'Validates healthcare organization identifiers and addresses.',
-        required: 'name, identifier',
-        profile: 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization'
-      },
-      'us-core-condition': {
-        name: 'US Core Condition',
-        icon: '🩺',
-        resourceType: 'Condition',
-        description: 'Validates problem/condition clinical status and coding.',
-        required: 'clinicalStatus, code, subject',
-        profile: 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition'
-      },
-      'us-core-medication': {
-        name: 'US Core MedicationRequest',
-        icon: '💊',
-        resourceType: 'MedicationRequest',
-        description: 'Validates medication orders including intent and status.',
-        required: 'status, intent, medication, subject',
-        profile: 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest'
-      },
-      'us-core-observation': {
-        name: 'US Core Observation',
-        icon: '📊',
+    const ACTIVE_PROFILE = {
+      id: 'us-core-patient',
+      name: 'US Core Patient',
+      icon: '📋',
+      resourceType: 'Patient',
+      description: 'Validates patient demographics, identifiers, and contact information per US Core Implementation Guide.',
+      requiredFields: [
+        'identifier (Patient.identifier)',
+        'name (Patient.name)',
+        'gender (Patient.gender)'
+      ],
+      supportFields: [
+        'birthDate (Patient.birthDate)',
+        'telecom (Patient.telecom)',
+        'address (Patient.address)',
+        'communication language (Patient.communication.language)'
+      ],
+      profile: 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient'
+    };
+
+    function getSelectedProfile() {
+      return state.activeProfile || ACTIVE_PROFILE;
+    }
+
+    const PROFILE_CATALOG = {
+      patient: ACTIVE_PROFILE,
+      observationVitalSigns: {
+        id: 'us-core-observation-vital-signs',
+        name: 'US Core Observation (Vital Signs)',
+        icon: '🫀',
         resourceType: 'Observation',
-        description: 'Validates clinical observations with proper status and code.',
-        required: 'status, code, subject',
-        profile: 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation'
+        description: 'Validates vital signs observations per US Core.',
+        requiredFields: [],
+        supportFields: [],
+        profile: 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-vital-signs'
       },
-      'us-core-coverage': {
-        name: 'US Core Coverage',
-        icon: '🛡️',
-        resourceType: 'Coverage',
-        description: 'Validates insurance coverage beneficiary and payor information.',
-        required: 'status, beneficiary, payor',
-        profile: 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage'
-      },
-      'us-core-claim': {
-        name: 'US Core Claim',
-        icon: '📄',
-        resourceType: 'Claim',
-        description: 'Validates claim resources for billing and prior authorization.',
-        required: 'status, type, patient, provider',
-        profile: 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-claim'
-      },
-      'davinci-crd-coverage': {
-        name: 'Da Vinci CRD Coverage',
-        icon: '🔗',
-        resourceType: 'Coverage',
-        description: 'Validates Coverage for Coverage Requirements Discovery workflows.',
-        required: 'status, beneficiary, class, type',
-        profile: 'http://hl7.org/fhir/us/davinci-crd/StructureDefinition/crd-coverage'
-      },
-      'davinci-dtr-questionnaire': {
-        name: 'Da Vinci DTR Questionnaire',
-        icon: '📝',
-        resourceType: 'Questionnaire',
-        description: 'Validates Questionnaire resources for Documentation Templates & Rules.',
-        required: 'status, item',
-        profile: 'http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaire'
-      },
-      'custom': {
-        name: 'Custom Profile Upload',
-        icon: '⚙️',
-        resourceType: 'Any',
-        description: 'Upload a custom StructureDefinition profile for validation.',
-        required: 'Depends on uploaded profile',
-        profile: 'Custom StructureDefinition'
+      observationLab: {
+        id: 'us-core-observation-lab',
+        name: 'US Core Observation (Lab)',
+        icon: '🧪',
+        resourceType: 'Observation',
+        description: 'Validates laboratory observations per US Core.',
+        requiredFields: [],
+        supportFields: [],
+        profile: 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab'
       }
     };
 
+    const PROFILE_URL_INDEX = Object.values(PROFILE_CATALOG).reduce((acc, profile) => {
+      acc[profile.profile] = profile;
+      return acc;
+    }, {});
+
+    const VITAL_SIGNS_LOINC = new Set([
+      '8302-2', // Body height
+      '8306-3', // Body height -- lying
+      '29463-7', // Body weight
+      '39156-5', // Body mass index
+      '8462-4', // Diastolic blood pressure
+      '8480-6', // Systolic blood pressure
+      '8310-5', // Body temperature
+      '8867-4', // Heart rate
+      '9279-1', // Respiratory rate
+      '2708-6' // Oxygen saturation
+    ]);
+
+    function extractMetaProfile(resource) {
+      const metaProfile = resource?.meta?.profile;
+      if (Array.isArray(metaProfile) && metaProfile.length) return metaProfile[0];
+      if (typeof metaProfile === 'string') return metaProfile;
+      return null;
+    }
+
+    function isVitalSignsObservation(resource) {
+      const codings = resource?.code?.coding;
+      if (!Array.isArray(codings)) return false;
+      return codings.some(coding =>
+        coding?.system === 'http://loinc.org' && VITAL_SIGNS_LOINC.has(coding?.code)
+      );
+    }
+
+    function resolveProfileForResource(resource) {
+      const resourceType = resource?.resourceType || ACTIVE_PROFILE.resourceType;
+      const metaProfile = extractMetaProfile(resource);
+      const metaMatch = metaProfile ? PROFILE_URL_INDEX[metaProfile] : null;
+      if (metaMatch && metaMatch.resourceType === resourceType) {
+        return metaMatch;
+      }
+
+      if (resourceType === 'Observation') {
+        return isVitalSignsObservation(resource)
+          ? PROFILE_CATALOG.observationVitalSigns
+          : PROFILE_CATALOG.observationLab;
+      }
+
+      if (resourceType === 'Patient') {
+        return ACTIVE_PROFILE;
+      }
+
+      return ACTIVE_PROFILE;
+    }
+
+    function renderProfileInfo(profile) {
+      const subtitle = document.getElementById('profileSubtitle');
+      if (subtitle) {
+        subtitle.textContent = `The system will validate against the ${profile.name} profile.`;
+      }
+
+      const nameEl = document.getElementById('profile-name');
+      if (nameEl) {
+        nameEl.textContent = `${profile.icon || '📋'} ${profile.name}`;
+      }
+
+      const descEl = document.getElementById('profile-description');
+      if (descEl) {
+        descEl.textContent = profile.description || 'Validates FHIR resources against the selected US Core profile.';
+      }
+
+      const requiredLabel = document.getElementById('profileRequiredLabel');
+      if (requiredLabel) {
+        requiredLabel.textContent = `Required by ${profile.name}:`;
+      }
+
+      const supportLabel = document.getElementById('profileSupportLabel');
+      if (supportLabel) {
+        supportLabel.textContent = 'Included in sample as Must Support:';
+      }
+
+      const requiredList = document.getElementById('profileRequiredList');
+      if (requiredList) {
+        const requiredItems = (profile.requiredFields && profile.requiredFields.length)
+          ? profile.requiredFields
+          : ['See profile documentation for required elements.'];
+        requiredList.innerHTML = requiredItems.map(item => `<li>${item}</li>`).join('');
+      }
+
+      const supportList = document.getElementById('profileSupportList');
+      if (supportList) {
+        const supportItems = (profile.supportFields && profile.supportFields.length)
+          ? profile.supportFields
+          : ['Not specified for this profile sample.'];
+        supportList.innerHTML = supportItems.map(item => `<li>${item}</li>`).join('');
+      }
+
+      const urlEl = document.getElementById('profile-url');
+      if (urlEl) {
+        urlEl.innerHTML = `<strong>Profile URL:</strong> ${profile.profile}`;
+      }
+    }
+
+    function refreshActiveProfile() {
+      try {
+        const parsed = JSON.parse(state.inputData || '');
+        const profile = resolveProfileForResource(parsed);
+        state.activeProfile = profile;
+        renderProfileInfo(profile);
+      } catch (_) {
+        if (!state.activeProfile) {
+          state.activeProfile = ACTIVE_PROFILE;
+          renderProfileInfo(state.activeProfile);
+        }
+      }
+    }
+
     const SAMPLE_PATIENT = `{
   "resourceType": "Patient",
-  "id": "example",
+  "id": "us-core-sample-patient",
   "meta": {
     "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]
   },
   "identifier": [
     {
-      "system": "http://example.org/mrn",
-      "value": "MRN-12345"
+      "use": "usual",
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MR",
+            "display": "Medical Record Number"
+          }
+        ],
+        "text": "Medical Record Number"
+      },
+      "system": "http://hospital.smarthealthit.org",
+      "value": "1032702"
     }
   ],
+  "active": true,
   "name": [
     {
-      "family": "Smith",
-      "given": ["John"]
+      "use": "official",
+      "family": "Baxter",
+      "given": ["Amy", "V."],
+      "suffix": ["PharmD"]
     }
   ],
-  "gender": "male",
-  "birthDate": "1980-01-15"
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "555-555-5555",
+      "use": "home"
+    },
+    {
+      "system": "email",
+      "value": "amy.baxter@example.com"
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1987-02-20",
+  "address": [
+    {
+      "use": "home",
+      "line": ["183 Mountain View St"],
+      "city": "Mounds",
+      "state": "OK",
+      "postalCode": "74048",
+      "country": "US"
+    }
+  ],
+  "communication": [
+    {
+      "language": {
+        "coding": [
+          {
+            "system": "urn:ietf:bcp:47",
+            "code": "en-US",
+            "display": "English (United States)"
+          }
+        ],
+        "text": "English"
+      },
+      "preferred": true
+    }
+  ]
 }`;
 
-    const SAMPLE_RESULTS = {
-      id: 'VAL-2026-001',
-      timestamp: '2026-06-27T10:30:00Z',
-      executionTime: '0.234s',
-      summary: { total: 6, errors: 2, warnings: 3, info: 1 },
-      status: 'FAILED',
-      complianceScore: '65%',
-      issues: [
-        {
-          severity: 'error', code: 'REQUIRED-001', location: 'Patient.name.given',
-          jsonPath: '$.name[0].given', message: 'Missing required field: Patient.name.given',
-          suggestion: 'Add given name to Patient.name array',
-          example: '"name": [{"family": "Smith", "given": ["John"]}]',
-          documentation: 'US Core Patient requires at least one given name'
-        },
-        {
-          severity: 'error', code: 'TYPE-001', location: 'Patient.birthDate',
-          jsonPath: '$.birthDate', message: 'Invalid date format',
-          suggestion: 'Use ISO 8601 date format: YYYY-MM-DD',
-          example: '"birthDate": "1980-01-15"',
-          documentation: 'FHIR date format is YYYY-MM-DD'
-        },
-        {
-          severity: 'warning', code: 'TERMINOLOGY-001', location: 'Patient.gender',
-          jsonPath: '$.gender', message: 'Gender should use standard value set',
-          suggestion: 'Use: male, female, other, unknown',
-          example: '"gender": "male"',
-          documentation: 'Patient gender must be from FHIR administrative-gender'
-        },
-        {
-          severity: 'warning', code: 'STRUCTURE-002', location: 'Patient.telecom',
-          jsonPath: '$.telecom[0]', message: 'Telecom missing system field',
-          suggestion: "Add system: 'phone' or 'email'",
-          example: '"telecom": [{"system": "phone", "value": "555-1234"}]',
-          documentation: 'Telecom requires system to be specified'
-        },
-        {
-          severity: 'warning', code: 'CARDINALITY-001', location: 'Patient.address',
-          jsonPath: '$.address', message: 'Address missing required postalCode',
-          suggestion: 'Add postalCode to address',
-          example: '"address": [{"postalCode": "21201"}]',
-          documentation: 'US Core requires postalCode in address'
-        },
-        {
-          severity: 'info', code: 'PROFILE-001', location: 'Patient.meta.profile',
-          jsonPath: '$.meta.profile[0]', message: 'Profile reference is valid',
-          suggestion: 'Profile is recognized and supported',
-          example: 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient',
-          documentation: 'US Core Patient profile is supported'
-        }
-      ]
-    };
+    const VALIDATION_ENDPOINTS = [
+      '/api/v1/fhir/validate',
+      '/api/v1/validate/',
+      'http://localhost:8000/api/v1/fhir/validate',
+      'http://localhost:8000/api/v1/validate/'
+    ];
 
-    const STEPS = ['Select Profile', 'Provide Data', 'Validate', 'Results', 'Actions'];
+    const STEPS = ['Review Profile', 'Provide Data', 'Validate', 'Results', 'Actions'];
     const STEP_TITLES = [
-      'Step 1 of 5: Select Profile',
+      'Step 1 of 5: Review Profile',
       'Step 2 of 5: Provide Data',
       'Step 3 of 5: Validate',
       'Step 4 of 5: Results',
@@ -1168,20 +1294,20 @@
 
     const state = {
       currentStep: 1,
-      selectedProfile: 'us-core-patient',
       inputData: SAMPLE_PATIENT,
       inputMethod: 'paste',
       uploadedFileName: null,
       results: null,
-      activeFilter: 'all'
+      activeFilter: 'all',
+      activeProfile: ACTIVE_PROFILE
     };
 
     // --- Init ---
     function init() {
       renderSteps();
-      updateProfileInfo();
       document.getElementById('jsonInput').value = SAMPLE_PATIENT;
       updateLineNumbers();
+      refreshActiveProfile();
       bindEvents();
     }
 
@@ -1223,18 +1349,6 @@
     function nextStep() { goToStep(state.currentStep + 1); }
     function prevStep() { goToStep(state.currentStep - 1); }
 
-    function updateProfileInfo() {
-      const key = document.getElementById('profileSelect').value;
-      state.selectedProfile = key;
-      const p = PROFILES[key];
-      document.getElementById('profileInfo').innerHTML = `
-        <h4>${p.icon} ${p.name}</h4>
-        <p>${p.description}</p>
-        <p class="required"><strong>Required fields:</strong> ${p.required}</p>
-        <p style="font-size:0.8125rem;color:var(--text-muted);margin-top:0.35rem;"><strong>Profile URL:</strong> ${p.profile}</p>
-      `;
-    }
-
     function updateLineNumbers() {
       const ta = document.getElementById('jsonInput');
       const lines = ta.value.split('\n').length;
@@ -1268,12 +1382,13 @@
     }
 
     function renderValidateSummary() {
-      const profile = PROFILES[state.selectedProfile];
-      let resourceType = profile.resourceType;
       let size = new Blob([state.inputData]).size;
+      let resourceType = ACTIVE_PROFILE.resourceType;
+      let profile = getSelectedProfile();
       try {
         const parsed = JSON.parse(state.inputData);
         if (parsed.resourceType) resourceType = parsed.resourceType;
+        profile = resolveProfileForResource(parsed);
       } catch (_) {}
 
       document.getElementById('validateSummary').innerHTML = `
@@ -1284,7 +1399,7 @@
       `;
     }
 
-    function runValidation() {
+    async function runValidation() {
       const parsed = parseJsonInput();
       if (!parsed && state.currentStep >= 2) {
         goToStep(2);
@@ -1306,26 +1421,147 @@
       const statusEl = document.getElementById('loadingStatus');
 
       const interval = setInterval(() => {
-        progress += 20;
-        bar.style.width = Math.min(progress, 100) + '%';
+        progress = Math.min(progress + 12, 90);
+        bar.style.width = progress + '%';
         statusEl.textContent = statuses[Math.min(Math.floor(progress / 20), statuses.length - 1)];
       }, 500);
 
-      setTimeout(() => {
+      const startedAt = performance.now();
+      const profileUsed = resolveProfileForResource(parsed);
+      state.activeProfile = profileUsed;
+      renderProfileInfo(profileUsed);
+      const metaProfile = extractMetaProfile(parsed);
+      if (metaProfile && metaProfile !== profileUsed.profile) {
+        showToast(`Resource profile does not match ${parsed.resourceType}; validating against ${profileUsed.name}.`, 'info');
+      }
+      try {
+        const apiResult = await submitValidation(parsed, profileUsed);
+        state.results = normalizeValidationResult(apiResult, startedAt, profileUsed);
+        state.results.profile = profileUsed.name;
+
         clearInterval(interval);
         bar.style.width = '100%';
-        state.results = JSON.parse(JSON.stringify(SAMPLE_RESULTS));
-        state.results.timestamp = new Date().toISOString();
-        state.results.profile = PROFILES[state.selectedProfile].name;
 
         document.getElementById('validateIdle').style.display = 'block';
         document.getElementById('validateLoading').style.display = 'none';
         bar.style.width = '0%';
 
-        showToast('Validation complete!', 'success');
+        showToast(state.results.status === 'PASSED' ? 'Validation passed!' : 'Validation complete with issues', state.results.status === 'PASSED' ? 'success' : 'warning');
         goToStep(4);
         renderResults();
-      }, 2500);
+      } catch (error) {
+        clearInterval(interval);
+        bar.style.width = '0%';
+        document.getElementById('validateIdle').style.display = 'block';
+        document.getElementById('validateLoading').style.display = 'none';
+        showToast(error.message || 'Validation failed. Check backend service.', 'error');
+      }
+    }
+
+    async function submitValidation(parsed, profileUsed) {
+      const request = {
+        resource: state.inputData,
+        profiles: [profileUsed.profile],
+        resource_type: parsed.resourceType || profileUsed.resourceType
+      };
+
+      let lastError = null;
+      for (const endpoint of VALIDATION_ENDPOINTS) {
+        try {
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(request)
+          });
+
+          if (response.status === 404) {
+            lastError = new Error(`Endpoint not found: ${endpoint}`);
+            continue;
+          }
+
+          const payload = await response.json().catch(() => null);
+          if (!response.ok) {
+            throw new Error(payload?.detail || payload?.message || `Validation API returned HTTP ${response.status}`);
+          }
+          return payload;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      throw lastError || new Error('Validation API is unavailable');
+    }
+
+    function normalizeValidationResult(apiResult, startedAt, profileUsed) {
+      const issues = (apiResult.issues || []).map(normalizeIssue);
+      const errors = Number(apiResult.error_count ?? issues.filter(i => i.severity === 'error').length);
+      const warnings = Number(apiResult.warning_count ?? issues.filter(i => i.severity === 'warning').length);
+      const info = Number(apiResult.info_count ?? issues.filter(i => i.severity === 'info').length);
+      const score = calculateComplianceScore(errors, warnings);
+
+      return {
+        id: `VAL-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        executionTime: `${((performance.now() - startedAt) / 1000).toFixed(3)}s`,
+        profile: profileUsed.name,
+        profileUrl: profileUsed.profile,
+        profileResourceType: profileUsed.resourceType,
+        summary: { total: errors + warnings + info, errors, warnings, info },
+        status: apiResult.valid ? 'PASSED' : 'FAILED',
+        complianceScore: `${score}%`,
+        issues,
+        apiSummary: apiResult.summary || '',
+        operationOutcome: apiResult.operation_outcome || null
+      };
+    }
+
+    function normalizeIssue(issue) {
+      const severity = normalizeSeverity(issue.severity);
+      const location = issue.location || 'Resource';
+      const lineInfo = issue.line ? `Line ${issue.line}${issue.column ? ', column ' + issue.column : ''}` : '';
+      return {
+        severity,
+        code: escapeHtml(issue.code || 'unknown'),
+        location: escapeHtml(location),
+        jsonPath: escapeHtml(toJsonPath(location)),
+        message: issue.message || 'Validator returned an issue without diagnostics.',
+        suggestion: escapeHtml(suggestionForIssue(issue, severity)),
+        example: escapeHtml(lineInfo || 'Review the submitted FHIR JSON at the reported path.'),
+        documentation: 'Returned by the Inferno/HL7 FHIR validator using the selected IG profile.'
+      };
+    }
+
+    function normalizeSeverity(severity) {
+      if (severity === 'fatal') return 'error';
+      if (severity === 'information') return 'info';
+      return severity || 'info';
+    }
+
+    function toJsonPath(location) {
+      if (!location || location === 'Resource') return '$';
+      const path = String(location)
+        .replace(/^Patient\.?/, '')
+        .replace(/^\./, '')
+        .replace(/\[(\d+)\]/g, '[$1]');
+      return path ? '$.' + path : '$';
+    }
+
+    function suggestionForIssue(issue, severity) {
+      const message = `${issue.message || ''}`.toLowerCase();
+      if (message.includes('required') || message.includes('minimum')) {
+        return 'Add the required element or provide the allowed data-absent-reason extension.';
+      }
+      if (message.includes('binding') || message.includes('code') || message.includes('value set')) {
+        return 'Use a code from the value set required by the selected US Core profile.';
+      }
+      if (severity === 'warning') {
+        return 'Review the warning and align the element with US Core guidance when applicable.';
+      }
+      return 'Update the resource and re-run validation against the selected profile.';
+    }
+
+    function calculateComplianceScore(errors, warnings) {
+      return Math.max(0, Math.min(100, 100 - (errors * 25) - (warnings * 5)));
     }
 
     function renderResults() {
@@ -1391,13 +1627,29 @@
       const issues = state.results.issues.filter(i =>
         state.activeFilter === 'all' || i.severity === state.activeFilter
       );
+      if (!issues.length) {
+        list.innerHTML = `
+          <div class="issue-card info">
+            <div class="issue-header" aria-expanded="false">
+              <div class="issue-left">
+                <span class="severity-pill info">OK</span>
+                <div>
+                  <div class="issue-msg">No validator issues returned for this filter.</div>
+                  <div class="issue-location">${state.results.profile || 'Validation'} completed</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
       list.innerHTML = issues.map((issue, idx) => `
         <div class="issue-card ${issue.severity}" style="animation-delay:${idx * 0.06}s" data-idx="${idx}">
           <div class="issue-header" role="button" tabindex="0" aria-expanded="false">
             <div class="issue-left">
               <span class="severity-pill ${issue.severity}">${issue.severity === 'error' ? '⛔' : issue.severity === 'warning' ? '⚠️' : 'ℹ️'} ${issue.severity}</span>
               <div>
-                <div class="issue-msg">${issue.message}</div>
+                <div class="issue-msg">${escapeHtml(issue.message)}</div>
                 <div class="issue-location">${issue.location} · ${issue.code}</div>
               </div>
             </div>
@@ -1421,6 +1673,15 @@
       });
     }
 
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
     function showToast(message, type = 'info') {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
@@ -1429,6 +1690,234 @@
       toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span>${message}</span>`;
       container.appendChild(toast);
       setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(100%)'; setTimeout(() => toast.remove(), 300); }, 3500);
+    }
+
+    function decodeHtmlEntities(text) {
+      const el = document.createElement('textarea');
+      el.innerHTML = String(text ?? '');
+      return el.value;
+    }
+
+    function pdfPlainText(value) {
+      return decodeHtmlEntities(String(value ?? '')).replace(/\s+/g, ' ').trim();
+    }
+
+    function severityPdfColor(severity) {
+      const s = String(severity || '').toLowerCase();
+      if (s === 'error') return [239, 68, 68];
+      if (s === 'warning') return [245, 158, 11];
+      if (s === 'info') return [59, 130, 246];
+      return [30, 41, 59];
+    }
+
+    function addPdfFooter(doc, margin) {
+      const pageCount = doc.internal.getNumberOfPages();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      for (let i = 1; i <= pageCount; i += 1) {
+        doc.setPage(i);
+        doc.setDrawColor(226, 232, 240);
+        doc.line(margin, pageHeight - 14, pageWidth - margin, pageHeight - 14);
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`FHIR Conformance Validator · Page ${i} of ${pageCount}`, margin, pageHeight - 8);
+        doc.text(new Date().toLocaleString(), pageWidth - margin, pageHeight - 8, { align: 'right' });
+      }
+    }
+
+    function buildValidationPdf() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const r = state.results;
+      const profile = r?.profileUrl
+        ? { name: r.profile, profile: r.profileUrl, resourceType: r.profileResourceType || 'Patient' }
+        : getSelectedProfile();
+      const margin = 14;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      let y = margin;
+
+      doc.setFillColor(26, 86, 219);
+      doc.rect(0, 0, pageWidth, 30, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(18);
+      doc.text('FHIR Conformance Validator', margin, 13);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text('Interop Automation Platform — Validation Report', margin, 21);
+
+      y = 40;
+      doc.setTextColor(30, 41, 59);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text('Report Summary', margin, y);
+      y += 4;
+
+      const statusColor = r.status === 'PASSED' ? [16, 185, 129] : [239, 68, 68];
+      doc.autoTable({
+        startY: y + 2,
+        head: [['Field', 'Value']],
+        body: [
+          ['Report ID', pdfPlainText(r.id)],
+          ['Generated', new Date(r.timestamp).toLocaleString()],
+          ['Execution Time', pdfPlainText(r.executionTime)],
+          ['Validation Profile', pdfPlainText(r.profile || profile.name)],
+          ['Profile URL', pdfPlainText(profile.profile)],
+          ['Resource Type', pdfPlainText(profile.resourceType)],
+          ['Overall Status', pdfPlainText(r.status)],
+          ['Compliance Score', pdfPlainText(r.complianceScore)],
+          ...(r.apiSummary ? [['Validator Summary', pdfPlainText(r.apiSummary)]] : [])
+        ],
+        theme: 'grid',
+        styles: { fontSize: 9, cellPadding: 3, overflow: 'linebreak', textColor: [30, 41, 59] },
+        headStyles: { fillColor: [26, 86, 219], textColor: 255, fontStyle: 'bold' },
+        columnStyles: {
+          0: { cellWidth: 42, fontStyle: 'bold', fillColor: [248, 250, 252] },
+          1: { cellWidth: pageWidth - margin * 2 - 42 }
+        },
+        margin: { left: margin, right: margin },
+        didParseCell(data) {
+          if (data.section === 'body' && data.column.index === 1 && data.row.index === 6) {
+            data.cell.styles.textColor = statusColor;
+            data.cell.styles.fontStyle = 'bold';
+          }
+        }
+      });
+
+      y = doc.lastAutoTable.finalY + 10;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('Issue Counts', margin, y);
+
+      doc.autoTable({
+        startY: y + 4,
+        head: [['Total Issues', 'Errors', 'Warnings', 'Info']],
+        body: [[
+          String(r.summary.total),
+          String(r.summary.errors),
+          String(r.summary.warnings),
+          String(r.summary.info)
+        ]],
+        theme: 'grid',
+        styles: { fontSize: 10, halign: 'center', cellPadding: 4 },
+        headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: 'bold' },
+        margin: { left: margin, right: margin },
+        didParseCell(data) {
+          if (data.section !== 'body') return;
+          const colors = [
+            [30, 41, 59],
+            [239, 68, 68],
+            [245, 158, 11],
+            [59, 130, 246]
+          ];
+          data.cell.styles.textColor = colors[data.column.index];
+          data.cell.styles.fontStyle = 'bold';
+        }
+      });
+
+      y = doc.lastAutoTable.finalY + 12;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('Validation Issues', margin, y);
+      y += 4;
+
+      if (!r.issues.length) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(16, 185, 129);
+        doc.text('No validation issues were reported. The resource passed conformance checks.', margin, y + 6);
+      } else {
+        doc.autoTable({
+          startY: y + 2,
+          head: [['#', 'Severity', 'Code', 'Location', 'Message']],
+          body: r.issues.map((issue, index) => [
+            String(index + 1),
+            pdfPlainText(issue.severity).toUpperCase(),
+            pdfPlainText(issue.code),
+            pdfPlainText(issue.location),
+            pdfPlainText(issue.message)
+          ]),
+          theme: 'striped',
+          styles: { fontSize: 8, cellPadding: 2.5, overflow: 'linebreak', textColor: [30, 41, 59] },
+          headStyles: { fillColor: [26, 86, 219], textColor: 255, fontStyle: 'bold' },
+          alternateRowStyles: { fillColor: [248, 250, 252] },
+          columnStyles: {
+            0: { cellWidth: 8, halign: 'center' },
+            1: { cellWidth: 18, fontStyle: 'bold' },
+            2: { cellWidth: 22 },
+            3: { cellWidth: 32 },
+            4: { cellWidth: pageWidth - margin * 2 - 80 }
+          },
+          margin: { left: margin, right: margin },
+          didParseCell(data) {
+            if (data.section === 'body' && data.column.index === 1) {
+              data.cell.styles.textColor = severityPdfColor(data.cell.raw);
+            }
+          }
+        });
+
+        doc.addPage();
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(14);
+        doc.setTextColor(30, 41, 59);
+        doc.text('Issue Details', margin, 18);
+
+        doc.autoTable({
+          startY: 24,
+          head: [['Issue', 'Details']],
+          body: r.issues.map((issue, index) => {
+            const details = [
+              `Severity: ${pdfPlainText(issue.severity).toUpperCase()}`,
+              `Code: ${pdfPlainText(issue.code)}`,
+              `Location: ${pdfPlainText(issue.location)}`,
+              `JSON Path: ${pdfPlainText(issue.jsonPath)}`,
+              `Message: ${pdfPlainText(issue.message)}`,
+              `Suggestion: ${pdfPlainText(issue.suggestion)}`,
+              `Reference: ${pdfPlainText(issue.example)}`,
+              `Documentation: ${pdfPlainText(issue.documentation)}`
+            ].join('\n');
+            return [`Issue ${index + 1}`, details];
+          }),
+          theme: 'grid',
+          styles: { fontSize: 8, cellPadding: 3, overflow: 'linebreak', valign: 'top', textColor: [30, 41, 59] },
+          headStyles: { fillColor: [26, 86, 219], textColor: 255, fontStyle: 'bold' },
+          columnStyles: {
+            0: { cellWidth: 22, fontStyle: 'bold', fillColor: [248, 250, 252] },
+            1: { cellWidth: pageWidth - margin * 2 - 22 }
+          },
+          margin: { left: margin, right: margin }
+        });
+      }
+
+      addPdfFooter(doc, margin);
+      return doc;
+    }
+
+    function exportPdf() {
+      if (!state.results) {
+        showToast('Run a validation before exporting a PDF report.', 'warning');
+        return;
+      }
+      if (!window.jspdf || typeof window.jspdf.jsPDF !== 'function') {
+        showToast('PDF library failed to load. Check your network connection and refresh.', 'error');
+        return;
+      }
+      if (typeof window.jspdf.jsPDF.prototype.autoTable !== 'function') {
+        showToast('PDF table plugin failed to load. Refresh the page and try again.', 'error');
+        return;
+      }
+
+      try {
+        showToast('Generating PDF report…', 'info');
+        const doc = buildValidationPdf();
+        const filename = `fhir-validation-${state.results.id}.pdf`;
+        doc.save(filename);
+        showToast('PDF report downloaded successfully!', 'success');
+      } catch (error) {
+        console.error('PDF export failed:', error);
+        showToast('Failed to generate PDF: ' + (error.message || 'Unknown error'), 'error');
+      }
     }
 
     function exportJson() {
@@ -1442,10 +1931,6 @@
       showToast('JSON report downloaded!', 'success');
     }
 
-    function exportPdf() {
-      showToast('PDF export is mocked — JSON export is available.', 'warning');
-    }
-
     function copyResults() {
       if (!state.results) return;
       navigator.clipboard.writeText(JSON.stringify(state.results, null, 2))
@@ -1456,21 +1941,17 @@
     function resetValidation() {
       state.results = null;
       state.activeFilter = 'all';
-      state.selectedProfile = 'us-core-patient';
       state.inputData = SAMPLE_PATIENT;
       state.inputMethod = 'paste';
       state.uploadedFileName = null;
-      document.getElementById('profileSelect').value = 'us-core-patient';
       document.getElementById('jsonInput').value = SAMPLE_PATIENT;
       document.getElementById('fileName').classList.remove('show');
-      updateProfileInfo();
       updateLineNumbers();
       goToStep(1);
       showToast('Ready for new validation', 'info');
     }
 
     function bindEvents() {
-      document.getElementById('profileSelect').addEventListener('change', updateProfileInfo);
       document.getElementById('step1Next').addEventListener('click', nextStep);
 
       document.getElementById('step2Back').addEventListener('click', prevStep);
@@ -1499,6 +1980,7 @@
       document.getElementById('jsonInput').addEventListener('input', () => {
         updateLineNumbers();
         state.inputData = document.getElementById('jsonInput').value;
+        refreshActiveProfile();
       });
 
       document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1549,6 +2031,7 @@
           updateLineNumbers();
           document.querySelector('[data-tab="paste"]').click();
         }
+        refreshActiveProfile();
         showToast('File loaded: ' + file.name, 'success');
       };
       reader.readAsText(file);

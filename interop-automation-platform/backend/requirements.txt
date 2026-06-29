@@ -8,3 +8,4 @@ alembic==1.12.1
 psycopg2-binary==2.9.9
 redis==5.0.1
 httpx==0.25.1
+python-multipart==0.0.6
