@@ -71,6 +71,7 @@ services:
     volumes:
       - ./backend:/app
       - ./data:/app/data:ro
+      - ../../test-history:/test-history
     depends_on:
       postgres:
         condition: service_healthy
