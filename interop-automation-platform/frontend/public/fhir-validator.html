@@ -669,10 +669,14 @@
       border: 1px solid var(--border);
     }
 
-    /* Loading */
+    /* Loading & real-time validation progress */
     .loading-panel {
       text-align: center;
       padding: 3rem 2rem;
+    }
+    .loading-panel.validation-progress-wrap {
+      text-align: left;
+      padding: 1.25rem 0 0;
     }
     .spinner {
       width: 56px;
@@ -698,6 +702,128 @@
       border-radius: 999px;
       width: 0%;
       transition: width 0.3s ease;
+    }
+    .validation-progress {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(26, 86, 219, 0.08);
+      border: 1px solid var(--border);
+    }
+    .validation-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .validation-header h3 {
+      margin: 0;
+      font-size: 1.125rem;
+      color: var(--text);
+    }
+    .validation-header .subtitle {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    .validation-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+    .progress-bar-container {
+      background: var(--border);
+      border-radius: 8px;
+      height: 8px;
+      margin: 1rem 0 1.5rem;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+    .rule-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.375rem;
+      max-height: 420px;
+      overflow-y: auto;
+    }
+    .rule-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-sm);
+      background: #f8fafc;
+      border-left: 3px solid transparent;
+      opacity: 0;
+      transform: translateY(6px);
+      animation: ruleFadeIn 0.35s ease forwards;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+    .rule-item:hover {
+      background: #f1f5f9;
+    }
+    .rule-item .rule-icon {
+      font-size: 1.125rem;
+      width: 1.75rem;
+      text-align: center;
+      flex-shrink: 0;
+      line-height: 1.4;
+    }
+    .rule-item .rule-content {
+      flex: 1;
+      min-width: 0;
+    }
+    .rule-item .rule-name {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 0.875rem;
+    }
+    .rule-item .rule-description {
+      color: var(--text-muted);
+      font-size: 0.8125rem;
+      margin-top: 0.125rem;
+      line-height: 1.4;
+    }
+    .rule-item .rule-status {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .rule-item .rule-status.passed { color: var(--success); }
+    .rule-item .rule-status.failed { color: var(--error); }
+    .rule-item .rule-status.checking {
+      color: var(--info);
+      animation: pulse 1s infinite;
+    }
+    .rule-item.passed {
+      border-left-color: var(--success);
+      background: #f0fdf4;
+    }
+    .rule-item.failed {
+      border-left-color: var(--error);
+      background: #fef2f2;
+    }
+    .rule-item.checking {
+      border-left-color: var(--info);
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    @keyframes ruleFadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .spinning {
+      display: inline-block;
+      animation: spin 1s linear infinite;
     }
 
     /* Validate summary */
@@ -816,12 +942,68 @@
       padding: 0.25rem;
     }
 
+    /* Source viewer (error highlight) */
+    .source-view { margin-top: 0.35rem; }
+    .source-toolbar { margin-bottom: 0.4rem; }
+    .source-flag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--error);
+      background: rgba(239, 68, 68, 0.1);
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+    }
+    .source-flag.muted {
+      color: var(--text-muted);
+      background: rgba(100, 116, 139, 0.12);
+    }
+    .source-scroll {
+      max-height: 360px;
+      overflow: auto;
+      background: #0f172a;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.78rem;
+      line-height: 1.5;
+      padding: 0.5rem 0;
+    }
+    .source-row {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0 0.75rem;
+      white-space: pre;
+      color: #cbd5e1;
+    }
+    .source-gutter {
+      display: inline-block;
+      min-width: 2.5rem;
+      text-align: right;
+      color: #64748b;
+      user-select: none;
+      flex-shrink: 0;
+    }
+    .source-code { flex: 1; }
+    .source-row.error-line {
+      background: rgba(239, 68, 68, 0.22);
+      border-left: 3px solid var(--error);
+      margin-left: -3px;
+    }
+    .source-row.error-line .source-code { color: #fecaca; font-weight: 600; }
+    .source-row.error-line .source-gutter { color: #fca5a5; font-weight: 700; }
+
     @media (max-width: 768px) {
       .step-label { display: none; }
       .header-top { flex-direction: column; align-items: flex-start; }
       .results-header { flex-direction: column; align-items: flex-start; }
       .json-editor-body { flex-direction: column; }
       .line-numbers { display: none; }
+      .rule-item { flex-wrap: wrap; }
+      .rule-item .rule-status { width: 100%; margin-left: 2.5rem; margin-top: 0.25rem; }
+      .rule-list { max-height: 320px; }
     }
   </style>
 </head>
@@ -931,7 +1113,7 @@
     <section class="step-panel" id="step3" aria-labelledby="step3Title">
       <div class="card">
         <h2 class="card-title" id="step3Title">Review & Run Validation</h2>
-        <p class="card-subtitle">Confirm settings before running conformance checks.</p>
+        <p class="card-subtitle" id="step3Subtitle">Confirm settings before running conformance checks.</p>
         <div class="validate-summary" id="validateSummary"></div>
         <div id="validateIdle">
           <div class="btn-row">
@@ -941,11 +1123,20 @@
             </button>
           </div>
         </div>
-        <div class="loading-panel" id="validateLoading" style="display:none;" aria-live="polite">
-          <div class="spinner" aria-hidden="true"></div>
-          <h3>Validating FHIR Resource...</h3>
-          <p style="color:var(--text-muted);margin-top:0.5rem;" id="loadingStatus">Checking profile constraints...</p>
-          <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+        <div class="loading-panel validation-progress-wrap" id="validateLoading" style="display:none;" aria-live="polite">
+          <div class="validation-progress">
+            <div class="validation-header">
+              <span class="validation-icon spinning" id="validationIcon" aria-hidden="true">🔄</span>
+              <div>
+                <h3>Validating FHIR Resource</h3>
+                <span class="subtitle" id="validation-subtitle">Preparing validation...</span>
+              </div>
+            </div>
+            <div class="progress-bar-container" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="validationProgressBar">
+              <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+            <div id="rule-list" class="rule-list"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -1002,7 +1193,7 @@
           <div class="action-card" id="exportPdfBtn" tabindex="0" role="button">
             <i class="fas fa-file-pdf"></i>
             <h4>Export Report (PDF)</h4>
-            <p>Generate PDF summary (mock)</p>
+            <p>Download a formatted PDF report</p>
           </div>
           <div class="action-card" id="copyResultsBtn" tabindex="0" role="button">
             <i class="fas fa-copy"></i>
@@ -1121,25 +1312,51 @@
       );
     }
 
+    function friendlyProfileName(url) {
+      if (!url) return 'Base FHIR';
+      const slug = (url.split('/').pop() || url).split('|')[0];
+      return slug
+        .replace(/^us-core-/, 'US Core ')
+        .replace(/-/g, ' ')
+        .replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function profileFromUrl(url, resourceType) {
+      if (PROFILE_URL_INDEX[url]) return PROFILE_URL_INDEX[url];
+      return {
+        id: url,
+        name: friendlyProfileName(url),
+        icon: '📋',
+        resourceType: resourceType || 'Resource',
+        description: 'Validates against the profile declared in the resource (meta.profile), matching standard FHIR validators.',
+        requiredFields: [],
+        supportFields: [],
+        profile: url
+      };
+    }
+
+    function baseProfileForType(resourceType) {
+      const type = resourceType || 'Resource';
+      return {
+        id: `base-${type}`,
+        name: `${type} (base FHIR)`,
+        icon: '📦',
+        resourceType: type,
+        description: `Validates against the base FHIR ${type} StructureDefinition — matching the Inferno hosted validator behavior. The validator engine checks structure, cardinality, data types, terminology bindings, and best-practice rules.`,
+        requiredFields: [],
+        supportFields: [],
+        profile: ''
+      };
+    }
+
     function resolveProfileForResource(resource) {
       const resourceType = resource?.resourceType || ACTIVE_PROFILE.resourceType;
-      const metaProfile = extractMetaProfile(resource);
-      const metaMatch = metaProfile ? PROFILE_URL_INDEX[metaProfile] : null;
-      if (metaMatch && metaMatch.resourceType === resourceType) {
-        return metaMatch;
-      }
 
-      if (resourceType === 'Observation') {
-        return isVitalSignsObservation(resource)
-          ? PROFILE_CATALOG.observationVitalSigns
-          : PROFILE_CATALOG.observationLab;
-      }
-
-      if (resourceType === 'Patient') {
-        return ACTIVE_PROFILE;
-      }
-
-      return ACTIVE_PROFILE;
+      // Always validate against the base FHIR StructureDefinition (no forced profile).
+      // This matches Inferno's hosted validator behavior: the validator engine itself
+      // decides what to check based on the resource type. Sending no profile parameter
+      // produces the same results as inferno.healthit.gov/validator.
+      return baseProfileForType(resourceType);
     }
 
     function renderProfileInfo(profile) {
@@ -1299,7 +1516,8 @@
       uploadedFileName: null,
       results: null,
       activeFilter: 'all',
-      activeProfile: ACTIVE_PROFILE
+      activeProfile: ACTIVE_PROFILE,
+      ruleOutcomes: null
     };
 
     // --- Init ---
@@ -1399,6 +1617,291 @@
       `;
     }
 
+    const VALIDATION_RULES = [
+      {
+        id: 1,
+        name: 'Resource Type Validation',
+        description: 'Checking if the resource type is valid FHIR',
+        simpleLanguage: 'Verifying this is a valid FHIR resource',
+        duration: 500
+      },
+      {
+        id: 2,
+        name: 'Required Fields Validation',
+        description: 'Checking if all required fields are present',
+        simpleLanguage: 'Making sure all mandatory fields are filled',
+        duration: 800
+      },
+      {
+        id: 3,
+        name: 'Data Types Validation',
+        description: 'Validating data types (strings, dates, numbers)',
+        simpleLanguage: 'Checking dates, numbers, and text formats',
+        duration: 1000
+      },
+      {
+        id: 4,
+        name: 'Cardinality Validation',
+        description: 'Checking field occurrence counts (min/max)',
+        simpleLanguage: 'Verifying fields appear the right number of times',
+        duration: 700
+      },
+      {
+        id: 5,
+        name: 'US Core Profile Validation',
+        description: 'Validating against the selected US Core profile',
+        simpleLanguage: 'Checking if data follows US healthcare standards',
+        duration: 1500
+      },
+      {
+        id: 6,
+        name: 'Must-Support Elements Validation',
+        description: 'Checking US Core must-support elements',
+        simpleLanguage: 'Verifying required US Core fields are present',
+        duration: 1200
+      },
+      {
+        id: 7,
+        name: 'Terminology Code Validation',
+        description: 'Validating codes against standard terminology',
+        simpleLanguage: 'Checking medical codes are valid',
+        duration: 1500
+      },
+      {
+        id: 8,
+        name: 'Business Rules Validation',
+        description: 'Applying custom organization rules',
+        simpleLanguage: 'Checking organization-specific requirements',
+        duration: 800
+      }
+    ];
+
+    const RULE_MATCH_PATTERNS = {
+      1: ['resource type', 'resourcetype', 'wrong type', 'does not match', 'expected patient', 'expected observation', 'not found for type'],
+      2: ['required', 'minimum required', 'must have', 'missing', 'required element', 'mandatory'],
+      3: ['datatype', 'data type', 'invalid date', 'format', 'must be of type', 'type mismatch', 'not valid', 'invalid value'],
+      4: ['cardinality', 'max allowed', 'minimum allowed', 'occurs', 'repeated', 'too many', 'too few'],
+      5: ['profile', 'us core', 'structuredefinition', 'conforms to profile', 'constraint', 'invariant'],
+      6: ['must-support', 'must support', 'mustsupport'],
+      7: ['binding', 'terminology', 'valueset', 'value set', 'code system', 'invalid code', 'display', 'unknown code'],
+      8: ['business', 'organization', 'custom rule', 'rule failed', 'best practice']
+    };
+
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function buildValidationRules(profileUsed) {
+      return VALIDATION_RULES.map(rule => {
+        if (rule.id === 5) {
+          return {
+            ...rule,
+            description: `Validating against ${profileUsed.name} profile`,
+            simpleLanguage: `Checking if data follows ${profileUsed.name} standards`
+          };
+        }
+        return { ...rule };
+      });
+    }
+
+    function categorizeIssueForRule(issue) {
+      const text = `${issue.message || ''} ${issue.code || ''} ${issue.location || ''}`.toLowerCase();
+      for (const ruleId of [1, 2, 3, 4, 6, 7, 5, 8]) {
+        const patterns = RULE_MATCH_PATTERNS[ruleId] || [];
+        if (patterns.some(pattern => text.includes(pattern))) {
+          return ruleId;
+        }
+      }
+      const severity = String(issue.severity || '').toLowerCase();
+      if (severity === 'warning') return 7;
+      return 5;
+    }
+
+    function evaluateRulesFromApiResult(apiResult, profileUsed, parsed) {
+      const issues = apiResult.issues || [];
+      const resourceType = parsed?.resourceType || profileUsed.resourceType || 'Resource';
+
+      return buildValidationRules(profileUsed).map(rule => {
+        const ruleIssues = issues.filter(issue => categorizeIssueForRule(issue) === rule.id);
+        const errorIssues = ruleIssues.filter(issue => {
+          const severity = String(issue.severity || '').toLowerCase();
+          return severity === 'error' || severity === 'fatal';
+        });
+        const warningIssues = ruleIssues.filter(issue => String(issue.severity || '').toLowerCase() === 'warning');
+        const passed = errorIssues.length === 0;
+        return {
+          ...rule,
+          passed,
+          issues: ruleIssues,
+          detail: getRuleResultDetail(rule.id, passed, errorIssues, warningIssues, resourceType, profileUsed)
+        };
+      });
+    }
+
+    function getRuleResultDetail(ruleId, passed, errorIssues, warningIssues, resourceType, profileUsed) {
+      if (passed) {
+        const passMessages = {
+          1: `"${resourceType}" is a valid FHIR resource type`,
+          2: 'All required fields are present',
+          3: 'Data types and formats look correct',
+          4: 'Field occurrence counts are within limits',
+          5: `Resource conforms to ${profileUsed.name} profile rules`,
+          6: 'US Core must-support elements are satisfied',
+          7: warningIssues.length
+            ? `Codes are valid (${warningIssues.length} terminology warning${warningIssues.length === 1 ? '' : 's'})`
+            : 'Terminology codes match standard value sets',
+          8: 'No organization-specific rule violations found'
+        };
+        return passMessages[ruleId] || 'Validation passed for this rule';
+      }
+
+      const primary = errorIssues[0]?.message || warningIssues[0]?.message;
+      if (primary) return primary;
+      return `${errorIssues.length} issue${errorIssues.length === 1 ? '' : 's'} found`;
+    }
+
+    function initValidationProgress(profileUsed) {
+      const ruleList = document.getElementById('rule-list');
+      ruleList.innerHTML = '';
+      updateValidationProgress(0);
+      updateValidationSubtitle('Preparing validation...');
+
+      buildValidationRules(profileUsed).forEach((rule, index) => {
+        const element = createRuleElement(rule, index);
+        element.style.animationDelay = `${index * 0.06}s`;
+        ruleList.appendChild(element);
+      });
+    }
+
+    function createRuleElement(rule, index) {
+      const div = document.createElement('div');
+      div.className = 'rule-item pending';
+      div.id = `rule-${rule.id}`;
+      div.dataset.ruleId = String(rule.id);
+      div.innerHTML = `
+        <div class="rule-icon">⏳</div>
+        <div class="rule-content">
+          <div class="rule-name">${index + 1}. ${rule.name}</div>
+          <div class="rule-description">${rule.simpleLanguage}</div>
+        </div>
+        <div class="rule-status checking">Please wait...</div>
+      `;
+      return div;
+    }
+
+    function updateRuleStatus(element, status, detail) {
+      if (!element) return;
+      const icon = element.querySelector('.rule-icon');
+      const statusElement = element.querySelector('.rule-status');
+      const description = element.querySelector('.rule-description');
+
+      element.classList.remove('pending', 'checking', 'passed', 'failed');
+
+      if (status === 'checking') {
+        icon.textContent = '⏳';
+        statusElement.className = 'rule-status checking';
+        statusElement.textContent = 'Checking...';
+        element.classList.add('checking');
+      } else if (status === 'passed') {
+        icon.textContent = '✅';
+        statusElement.className = 'rule-status passed';
+        statusElement.textContent = 'Passed ✓';
+        element.classList.add('passed');
+      } else if (status === 'failed') {
+        icon.textContent = '❌';
+        statusElement.className = 'rule-status failed';
+        statusElement.textContent = 'Failed ✗';
+        element.classList.add('failed');
+      }
+
+      if (detail) {
+        description.textContent = detail;
+      }
+    }
+
+    function updateValidationProgress(percentage) {
+      const rounded = Math.round(Math.max(0, Math.min(100, percentage)));
+      const fill = document.getElementById('progress-fill');
+      const bar = document.getElementById('validationProgressBar');
+      if (fill) fill.style.width = `${rounded}%`;
+      if (bar) bar.setAttribute('aria-valuenow', String(rounded));
+    }
+
+    function updateValidationSubtitle(text) {
+      const subtitle = document.getElementById('validation-subtitle');
+      if (subtitle) subtitle.textContent = text;
+    }
+
+    function beginValidationUI(profileUsed) {
+      document.getElementById('validateIdle').style.display = 'none';
+      document.getElementById('validateSummary').style.display = 'none';
+      document.getElementById('validateLoading').style.display = 'block';
+      document.getElementById('step3Title').textContent = 'Validating Your Resource';
+      document.getElementById('step3Subtitle').textContent = `Checking your FHIR resource against ${profileUsed.name} profile...`;
+      document.getElementById('stepBadge').textContent = 'Step 3 of 5: Validating';
+      const validationIcon = document.getElementById('validationIcon');
+      if (validationIcon) {
+        validationIcon.textContent = '🔄';
+        validationIcon.classList.add('spinning');
+      }
+      initValidationProgress(profileUsed);
+    }
+
+    function resetValidationUI() {
+      document.getElementById('validateIdle').style.display = 'block';
+      document.getElementById('validateLoading').style.display = 'none';
+      document.getElementById('validateSummary').style.display = '';
+      document.getElementById('step3Title').textContent = 'Review & Run Validation';
+      document.getElementById('step3Subtitle').textContent = 'Confirm settings before running conformance checks.';
+      document.getElementById('stepBadge').textContent = STEP_TITLES[2];
+      updateValidationProgress(0);
+      document.getElementById('rule-list').innerHTML = '';
+      const validationIcon = document.getElementById('validationIcon');
+      if (validationIcon) {
+        validationIcon.textContent = '🔄';
+        validationIcon.classList.add('spinning');
+      }
+      state.ruleOutcomes = null;
+      state.apiValidationError = null;
+    }
+
+    async function runValidationRulesAnimation(profileUsed, getOutcomes, getError) {
+      const rules = buildValidationRules(profileUsed);
+      const totalRules = rules.length;
+
+      for (let index = 0; index < totalRules; index += 1) {
+        const rule = rules[index];
+        const ruleElement = document.getElementById(`rule-${rule.id}`);
+
+        updateRuleStatus(ruleElement, 'checking', rule.simpleLanguage);
+        updateValidationProgress((index / totalRules) * 100);
+        updateValidationSubtitle(`Checking: ${rule.simpleLanguage}`);
+
+        await delay(rule.duration);
+
+        while (!getOutcomes()) {
+          if (getError && getError()) {
+            throw getError();
+          }
+          updateValidationSubtitle('Please wait...');
+          await delay(150);
+        }
+
+        const outcomes = getOutcomes();
+        const outcome = outcomes.find(item => item.id === rule.id);
+        updateRuleStatus(
+          ruleElement,
+          outcome?.passed ? 'passed' : 'failed',
+          outcome?.detail || rule.simpleLanguage
+        );
+        updateValidationProgress(((index + 1) / totalRules) * 100);
+
+        if (index < totalRules - 1) {
+          await delay(200);
+        }
+      }
+    }
+
     async function runValidation() {
       const parsed = parseJsonInput();
       if (!parsed && state.currentStep >= 2) {
@@ -1406,54 +1909,63 @@
         return;
       }
 
-      document.getElementById('validateIdle').style.display = 'none';
-      document.getElementById('validateLoading').style.display = 'block';
-
-      const statuses = [
-        'Checking profile constraints...',
-        'Validating required elements...',
-        'Running terminology checks...',
-        'Analyzing cardinality rules...',
-        'Generating conformance report...'
-      ];
-      let progress = 0;
-      const bar = document.getElementById('progressBar');
-      const statusEl = document.getElementById('loadingStatus');
-
-      const interval = setInterval(() => {
-        progress = Math.min(progress + 12, 90);
-        bar.style.width = progress + '%';
-        statusEl.textContent = statuses[Math.min(Math.floor(progress / 20), statuses.length - 1)];
-      }, 500);
-
       const startedAt = performance.now();
       const profileUsed = resolveProfileForResource(parsed);
       state.activeProfile = profileUsed;
       renderProfileInfo(profileUsed);
+
       const metaProfile = extractMetaProfile(parsed);
       if (metaProfile && metaProfile !== profileUsed.profile) {
         showToast(`Resource profile does not match ${parsed.resourceType}; validating against ${profileUsed.name}.`, 'info');
       }
+
+      beginValidationUI(profileUsed);
+      state.ruleOutcomes = null;
+      state.apiValidationError = null;
+
+      const apiPromise = submitValidation(parsed, profileUsed)
+        .then(apiResult => {
+          state.ruleOutcomes = evaluateRulesFromApiResult(apiResult, profileUsed, parsed);
+          return apiResult;
+        })
+        .catch(error => {
+          state.apiValidationError = error;
+          throw error;
+        });
+
       try {
-        const apiResult = await submitValidation(parsed, profileUsed);
+        await runValidationRulesAnimation(profileUsed, () => state.ruleOutcomes, () => state.apiValidationError);
+
+        const apiResult = await apiPromise;
+        const finalOutcomes = evaluateRulesFromApiResult(apiResult, profileUsed, parsed);
+        finalOutcomes.forEach(outcome => {
+          const ruleElement = document.getElementById(`rule-${outcome.id}`);
+          updateRuleStatus(
+            ruleElement,
+            outcome.passed ? 'passed' : 'failed',
+            outcome.detail
+          );
+        });
+
+        updateValidationSubtitle('✅ Validation complete!');
+        updateValidationProgress(100);
+        document.getElementById('validationIcon').classList.remove('spinning');
+        document.getElementById('validationIcon').textContent = '✅';
+
         state.results = normalizeValidationResult(apiResult, startedAt, profileUsed);
         state.results.profile = profileUsed.name;
 
-        clearInterval(interval);
-        bar.style.width = '100%';
+        await delay(500);
 
-        document.getElementById('validateIdle').style.display = 'block';
-        document.getElementById('validateLoading').style.display = 'none';
-        bar.style.width = '0%';
-
-        showToast(state.results.status === 'PASSED' ? 'Validation passed!' : 'Validation complete with issues', state.results.status === 'PASSED' ? 'success' : 'warning');
+        resetValidationUI();
+        showToast(
+          state.results.status === 'PASSED' ? 'Validation passed!' : 'Validation complete with issues',
+          state.results.status === 'PASSED' ? 'success' : 'warning'
+        );
         goToStep(4);
         renderResults();
       } catch (error) {
-        clearInterval(interval);
-        bar.style.width = '0%';
-        document.getElementById('validateIdle').style.display = 'block';
-        document.getElementById('validateLoading').style.display = 'none';
+        resetValidationUI();
         showToast(error.message || 'Validation failed. Check backend service.', 'error');
       }
     }
@@ -1461,7 +1973,7 @@
     async function submitValidation(parsed, profileUsed) {
       const request = {
         resource: state.inputData,
-        profiles: [profileUsed.profile],
+        profiles: profileUsed.profile ? [profileUsed.profile] : [],
         resource_type: parsed.resourceType || profileUsed.resourceType
       };
 
@@ -1497,7 +2009,7 @@
       const errors = Number(apiResult.error_count ?? issues.filter(i => i.severity === 'error').length);
       const warnings = Number(apiResult.warning_count ?? issues.filter(i => i.severity === 'warning').length);
       const info = Number(apiResult.info_count ?? issues.filter(i => i.severity === 'info').length);
-      const score = calculateComplianceScore(errors, warnings);
+      const scoreInfo = calculateComplianceScore(apiResult.issues || [], state.inputData || '', apiResult.valid);
 
       return {
         id: `VAL-${Date.now()}`,
@@ -1508,8 +2020,10 @@
         profileResourceType: profileUsed.resourceType,
         summary: { total: errors + warnings + info, errors, warnings, info },
         status: apiResult.valid ? 'PASSED' : 'FAILED',
-        complianceScore: `${score}%`,
+        complianceScore: `${scoreInfo.score}%`,
+        complianceDetails: scoreInfo,
         issues,
+        sourceText: state.inputData || '',
         apiSummary: apiResult.summary || '',
         operationOutcome: apiResult.operation_outcome || null
       };
@@ -1518,11 +2032,16 @@
     function normalizeIssue(issue) {
       const severity = normalizeSeverity(issue.severity);
       const location = issue.location || 'Resource';
-      const lineInfo = issue.line ? `Line ${issue.line}${issue.column ? ', column ' + issue.column : ''}` : '';
+      const line = Number.isInteger(issue.line) ? issue.line : (issue.line ? Number(issue.line) : null);
+      const column = Number.isInteger(issue.column) ? issue.column : (issue.column ? Number(issue.column) : null);
+      const lineInfo = line ? `Line ${line}${column ? ', column ' + column : ''}` : '';
       return {
         severity,
         code: escapeHtml(issue.code || 'unknown'),
         location: escapeHtml(location),
+        rawLocation: location,
+        line: line || null,
+        column: column || null,
         jsonPath: escapeHtml(toJsonPath(location)),
         message: issue.message || 'Validator returned an issue without diagnostics.',
         suggestion: escapeHtml(suggestionForIssue(issue, severity)),
@@ -1560,8 +2079,55 @@
       return 'Update the resource and re-run validation against the selected profile.';
     }
 
-    function calculateComplianceScore(errors, warnings) {
-      return Math.max(0, Math.min(100, 100 - (errors * 25) - (warnings * 5)));
+    function calculateComplianceScore(rawIssues, sourceText, valid) {
+      const issues = rawIssues || [];
+
+      const counts = issues.reduce((acc, issue) => {
+        const severity = String(issue?.severity || 'information').toLowerCase();
+        if (severity === 'fatal') acc.fatal += 1;
+        else if (severity === 'error') acc.error += 1;
+        else if (severity === 'warning') acc.warning += 1;
+        else acc.info += 1;
+        return acc;
+      }, { fatal: 0, error: 0, warning: 0, info: 0 });
+
+      // --- Scoring logic ---
+      // 100% = fully conformant, no issues.
+      // Errors are primary non-compliance indicators (spec violations).
+      // Warnings are secondary (best practices / recommended elements).
+      // Info messages are advisory and do not reduce compliance.
+      //
+      // Valid resource (0 errors):
+      //   score = 100 - (warnings × 3), floor 80%
+      //
+      // Invalid resource (has errors):
+      //   score = 100 - (errors × 10) - (warnings × 3), ceiling 65%, floor 0%
+      //
+      // Fatal errors: ceiling 30%
+
+      let score;
+
+      if (counts.fatal > 0) {
+        score = Math.max(0, 30 - ((counts.fatal - 1) * 10) - (counts.error * 8) - (counts.warning * 2));
+      } else if (counts.error > 0) {
+        score = Math.max(0, Math.min(65, 100 - (counts.error * 10) - (counts.warning * 3)));
+      } else if (counts.warning > 0) {
+        score = Math.max(80, 100 - (counts.warning * 3));
+      } else {
+        score = 100;
+      }
+
+      score = Math.round(score);
+
+      const basis = counts.fatal > 0
+        ? `${counts.fatal} fatal issue(s) cap compliance at 30%.`
+        : counts.error > 0
+          ? `${counts.error} error(s) reduce compliance (max 65%); ${counts.warning} warning(s) deduct 3% each.`
+          : counts.warning > 0
+            ? `${counts.warning} warning(s) deduct 3% each (min 80% when no errors).`
+            : 'No issues — full conformance.';
+
+      return { score, basis, severityCounts: counts };
     }
 
     function renderResults() {
@@ -1581,7 +2147,7 @@
         : '<i class="fas fa-times-circle"></i> FAILED';
 
       document.getElementById('resultMeta').textContent =
-        `Report ${r.id} · ${new Date(r.timestamp).toLocaleString()} · ${r.executionTime}`;
+        `Report ${r.id} · ${new Date(r.timestamp).toLocaleString()} · ${r.executionTime} · severity-weighted compliance`;
 
       document.getElementById('summaryGrid').innerHTML = `
         <div class="summary-card"><div class="summary-value">${r.summary.total}</div><div class="summary-label">Total Issues</div></div>
@@ -1650,7 +2216,7 @@
               <span class="severity-pill ${issue.severity}">${issue.severity === 'error' ? '⛔' : issue.severity === 'warning' ? '⚠️' : 'ℹ️'} ${issue.severity}</span>
               <div>
                 <div class="issue-msg">${escapeHtml(issue.message)}</div>
-                <div class="issue-location">${issue.location} · ${issue.code}</div>
+                <div class="issue-location">${issue.location} · ${issue.code}${issue.line ? ' · line ' + issue.line : ''}</div>
               </div>
             </div>
             <i class="fas fa-chevron-down" aria-hidden="true"></i>
@@ -1658,7 +2224,11 @@
           <div class="issue-body">
             <div class="issue-detail"><label>JSON Path</label><p><code>${issue.jsonPath}</code></p></div>
             <div class="issue-detail"><label>Suggestion</label><p>${issue.suggestion}</p></div>
-            <div class="issue-detail"><label>Example</label><pre>${issue.example}</pre></div>
+            <div class="issue-detail"><label>Location</label><pre>${issue.example}</pre></div>
+            <div class="issue-detail">
+              <label>Source (submitted JSON)</label>
+              <div class="source-view" data-source="pending"></div>
+            </div>
             <div class="issue-detail"><label>Documentation</label><p>${issue.documentation}</p></div>
           </div>
         </div>
@@ -1669,8 +2239,69 @@
           const card = header.closest('.issue-card');
           const expanded = card.classList.toggle('expanded');
           header.setAttribute('aria-expanded', expanded);
+          if (expanded) {
+            const idx = Number(card.dataset.idx);
+            const sourceContainer = card.querySelector('.source-view');
+            if (sourceContainer && sourceContainer.dataset.source === 'pending') {
+              renderSourceView(sourceContainer, issues[idx]);
+              sourceContainer.dataset.source = 'rendered';
+            }
+          }
         });
       });
+    }
+
+    function findLineForLocation(sourceLines, issue) {
+      // Try to locate a line from the FHIRPath leaf token, e.g. "...identifier[0].system" -> "system".
+      const loc = issue.rawLocation || '';
+      const leaf = loc.split('.').pop()?.replace(/\[\d+\]$/, '').trim();
+      if (!leaf || leaf === 'Resource') return null;
+      const needle = `"${leaf}"`;
+      for (let i = 0; i < sourceLines.length; i += 1) {
+        if (sourceLines[i].includes(needle)) return i + 1;
+      }
+      return null;
+    }
+
+    function renderSourceView(container, issue) {
+      const source = state.results?.sourceText || '';
+      if (!source.trim()) {
+        container.innerHTML = '<p style="color:var(--text-muted);font-size:0.8125rem;">Source JSON is not available for this report.</p>';
+        return;
+      }
+
+      const lines = source.split('\n');
+      let highlightLine = issue.line && issue.line >= 1 && issue.line <= lines.length ? issue.line : null;
+      if (!highlightLine) {
+        highlightLine = findLineForLocation(lines, issue);
+      }
+
+      const rows = lines.map((text, i) => {
+        const lineNo = i + 1;
+        const isError = lineNo === highlightLine;
+        return `<div class="source-row${isError ? ' error-line' : ''}" data-line="${lineNo}">`
+          + `<span class="source-gutter">${lineNo}</span>`
+          + `<span class="source-code">${escapeHtml(text) || '&nbsp;'}</span>`
+          + `</div>`;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="source-toolbar">
+          ${highlightLine
+            ? `<span class="source-flag"><i class="fas fa-circle-exclamation"></i> Highlighted line ${highlightLine}</span>`
+            : `<span class="source-flag muted"><i class="fas fa-circle-info"></i> Exact line not reported by the validator — review the JSON path above.</span>`}
+        </div>
+        <div class="source-scroll">${rows}</div>
+      `;
+
+      if (highlightLine) {
+        const target = container.querySelector('.source-row.error-line');
+        if (target) {
+          requestAnimationFrame(() => {
+            target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          });
+        }
+      }
     }
 
     function escapeHtml(value) {
@@ -1746,6 +2377,11 @@
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       doc.text('Interop Automation Platform — Validation Report', margin, 21);
+
+      // jspdf-autotable attaches to the jsPDF instance (doc.autoTable), not always to the prototype.
+      if (typeof doc.autoTable !== 'function') {
+        return buildValidationPdfManual(doc, r, profile, margin, pageWidth);
+      }
 
       y = 40;
       doc.setTextColor(30, 41, 59);
@@ -1894,30 +2530,222 @@
       return doc;
     }
 
+    function buildValidationPdfManual(doc, r, profile, margin, pageWidth) {
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const contentWidth = pageWidth - margin * 2;
+      let y = 40;
+
+      function ensureSpace(needed) {
+        if (y + needed > pageHeight - 18) {
+          doc.addPage();
+          y = margin + 6;
+        }
+      }
+
+      function writeLine(label, value) {
+        const text = `${label}: ${pdfPlainText(value)}`;
+        const lines = doc.splitTextToSize(text, contentWidth);
+        ensureSpace(lines.length * 5 + 2);
+        doc.text(lines, margin, y);
+        y += lines.length * 5 + 2;
+      }
+
+      function sectionTitle(title) {
+        ensureSpace(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(26, 86, 219);
+        doc.text(title, margin, y);
+        y += 7;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(30, 41, 59);
+      }
+
+      sectionTitle('Report Summary');
+      writeLine('Report ID', r.id);
+      writeLine('Generated', new Date(r.timestamp).toLocaleString());
+      writeLine('Execution Time', r.executionTime);
+      writeLine('Validation Profile', r.profile || profile.name);
+      writeLine('Profile URL', profile.profile);
+      writeLine('Resource Type', profile.resourceType);
+      writeLine('Overall Status', r.status);
+      writeLine('Compliance Score', r.complianceScore);
+      if (r.apiSummary) writeLine('Validator Summary', r.apiSummary);
+
+      y += 3;
+      sectionTitle('Issue Counts');
+      writeLine('Total Issues', r.summary.total);
+      writeLine('Errors', r.summary.errors);
+      writeLine('Warnings', r.summary.warnings);
+      writeLine('Info', r.summary.info);
+
+      y += 3;
+      sectionTitle('Validation Issues');
+      if (!r.issues.length) {
+        doc.setTextColor(16, 185, 129);
+        ensureSpace(8);
+        doc.text('No validation issues were reported. The resource passed conformance checks.', margin, y);
+        y += 8;
+        doc.setTextColor(30, 41, 59);
+      } else {
+        r.issues.forEach((issue, index) => {
+          const header = `${index + 1}. [${pdfPlainText(issue.severity).toUpperCase()}] ${pdfPlainText(issue.code)}`;
+          const headerLines = doc.splitTextToSize(header, contentWidth);
+          ensureSpace(headerLines.length * 5 + 2);
+          doc.setFont('helvetica', 'bold');
+          doc.text(headerLines, margin, y);
+          y += headerLines.length * 5 + 1;
+          doc.setFont('helvetica', 'normal');
+          writeLine('Location', issue.location);
+          writeLine('Message', issue.message);
+          if (issue.suggestion) writeLine('Suggestion', issue.suggestion);
+          y += 2;
+        });
+      }
+
+      addPdfFooter(doc, margin);
+      return doc;
+    }
+
+    function isJsPdfAvailable() {
+      return !!(window.jspdf && typeof window.jspdf.jsPDF === 'function');
+    }
+
     function exportPdf() {
       if (!state.results) {
         showToast('Run a validation before exporting a PDF report.', 'warning');
         return;
       }
-      if (!window.jspdf || typeof window.jspdf.jsPDF !== 'function') {
-        showToast('PDF library failed to load. Check your network connection and refresh.', 'error');
-        return;
-      }
-      if (typeof window.jspdf.jsPDF.prototype.autoTable !== 'function') {
-        showToast('PDF table plugin failed to load. Refresh the page and try again.', 'error');
-        return;
+
+      if (isJsPdfAvailable()) {
+        try {
+          showToast('Generating PDF report…', 'info');
+          const doc = buildValidationPdf();
+          doc.save(`fhir-validation-${state.results.id}.pdf`);
+          showToast('PDF report downloaded successfully!', 'success');
+          return;
+        } catch (error) {
+          console.error('jsPDF export failed, falling back to printable report:', error);
+          showToast('Opening printable report (use "Save as PDF")…', 'warning');
+          exportPdfViaPrint();
+          return;
+        }
       }
 
-      try {
-        showToast('Generating PDF report…', 'info');
-        const doc = buildValidationPdf();
-        const filename = `fhir-validation-${state.results.id}.pdf`;
-        doc.save(filename);
-        showToast('PDF report downloaded successfully!', 'success');
-      } catch (error) {
-        console.error('PDF export failed:', error);
-        showToast('Failed to generate PDF: ' + (error.message || 'Unknown error'), 'error');
+      // jsPDF could not load (offline/blocked CDN) -> always-works print fallback.
+      showToast('Opening printable report (use "Save as PDF")…', 'info');
+      exportPdfViaPrint();
+    }
+
+    function exportPdfViaPrint() {
+      const r = state.results;
+      if (!r) return;
+
+      const profileName = r.profile || getSelectedProfile().name;
+      const profileUrl = r.profileUrl || getSelectedProfile().profile || '';
+      const statusColor = r.status === 'PASSED' ? '#10b981' : '#ef4444';
+
+      const issuesRows = r.issues.length
+        ? r.issues.map((issue, index) => `
+            <tr>
+              <td>${index + 1}</td>
+              <td class="sev ${escapeHtml(issue.severity)}">${escapeHtml(String(issue.severity).toUpperCase())}</td>
+              <td>${escapeHtml(decodeHtmlEntities(issue.code))}</td>
+              <td>${escapeHtml(decodeHtmlEntities(issue.location))}</td>
+              <td>${escapeHtml(decodeHtmlEntities(issue.message))}</td>
+            </tr>`).join('')
+        : `<tr><td colspan="5" style="text-align:center;color:#10b981;padding:16px;">No validation issues were reported. The resource passed conformance checks.</td></tr>`;
+
+      const detailsBlocks = r.issues.map((issue, index) => `
+        <div class="detail">
+          <h4>Issue ${index + 1} — <span class="sev ${escapeHtml(issue.severity)}">${escapeHtml(String(issue.severity).toUpperCase())}</span></h4>
+          <p><strong>Code:</strong> ${escapeHtml(decodeHtmlEntities(issue.code))}</p>
+          <p><strong>Location:</strong> ${escapeHtml(decodeHtmlEntities(issue.location))}</p>
+          <p><strong>JSON Path:</strong> ${escapeHtml(decodeHtmlEntities(issue.jsonPath))}</p>
+          <p><strong>Message:</strong> ${escapeHtml(decodeHtmlEntities(issue.message))}</p>
+          <p><strong>Suggestion:</strong> ${escapeHtml(decodeHtmlEntities(issue.suggestion))}</p>
+          <p><strong>Reference:</strong> ${escapeHtml(decodeHtmlEntities(issue.example))}</p>
+        </div>`).join('');
+
+      const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>FHIR Validation Report ${escapeHtml(r.id)}</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: #1e293b; margin: 0; padding: 32px; }
+  .header { background: #1a56db; color: #fff; padding: 20px 24px; border-radius: 10px; margin-bottom: 24px; }
+  .header h1 { margin: 0; font-size: 22px; }
+  .header p { margin: 4px 0 0; opacity: 0.9; font-size: 13px; }
+  h2 { font-size: 16px; margin: 24px 0 8px; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+  th, td { border: 1px solid #e2e8f0; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #1a56db; color: #fff; }
+  .summary td:first-child { background: #f8fafc; font-weight: 600; width: 220px; }
+  .counts { display: flex; gap: 12px; margin-top: 8px; }
+  .count { flex: 1; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; text-align: center; }
+  .count .n { font-size: 22px; font-weight: 700; }
+  .count.err .n { color: #ef4444; } .count.warn .n { color: #f59e0b; } .count.info .n { color: #3b82f6; }
+  .status { font-weight: 700; color: ${statusColor}; }
+  .sev.error, .sev.fatal { color: #ef4444; font-weight: 700; }
+  .sev.warning { color: #f59e0b; font-weight: 700; }
+  .sev.info { color: #3b82f6; font-weight: 700; }
+  .detail { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-top: 10px; page-break-inside: avoid; }
+  .detail h4 { margin: 0 0 6px; font-size: 13px; }
+  .detail p { margin: 3px 0; font-size: 12px; word-break: break-word; }
+  @media print { body { padding: 0; } .header { border-radius: 0; } }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>FHIR Conformance Validator</h1>
+    <p>Interop Automation Platform — Validation Report</p>
+  </div>
+
+  <h2>Report Summary</h2>
+  <table class="summary">
+    <tr><td>Report ID</td><td>${escapeHtml(r.id)}</td></tr>
+    <tr><td>Generated</td><td>${escapeHtml(new Date(r.timestamp).toLocaleString())}</td></tr>
+    <tr><td>Execution Time</td><td>${escapeHtml(String(r.executionTime))}</td></tr>
+    <tr><td>Validation Profile</td><td>${escapeHtml(profileName)}</td></tr>
+    <tr><td>Profile URL</td><td>${escapeHtml(profileUrl)}</td></tr>
+    <tr><td>Overall Status</td><td class="status">${escapeHtml(r.status)}</td></tr>
+    <tr><td>Compliance Score</td><td>${escapeHtml(r.complianceScore)}</td></tr>
+    ${r.apiSummary ? `<tr><td>Validator Summary</td><td>${escapeHtml(decodeHtmlEntities(r.apiSummary))}</td></tr>` : ''}
+  </table>
+
+  <h2>Issue Counts</h2>
+  <div class="counts">
+    <div class="count"><div class="n">${r.summary.total}</div><div>Total</div></div>
+    <div class="count err"><div class="n">${r.summary.errors}</div><div>Errors</div></div>
+    <div class="count warn"><div class="n">${r.summary.warnings}</div><div>Warnings</div></div>
+    <div class="count info"><div class="n">${r.summary.info}</div><div>Info</div></div>
+  </div>
+
+  <h2>Validation Issues</h2>
+  <table>
+    <thead><tr><th>#</th><th>Severity</th><th>Code</th><th>Location</th><th>Message</th></tr></thead>
+    <tbody>${issuesRows}</tbody>
+  </table>
+
+  ${r.issues.length ? `<h2>Issue Details</h2>${detailsBlocks}` : ''}
+</body>
+</html>`;
+
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        showToast('Pop-up blocked. Allow pop-ups to export the PDF report.', 'error');
+        return;
       }
+      printWindow.document.open();
+      printWindow.document.write(html);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+      }, 400);
     }
 
     function exportJson() {

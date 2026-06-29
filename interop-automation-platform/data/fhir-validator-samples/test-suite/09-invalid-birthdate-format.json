@@ -1,0 +1,21 @@
+{
+  "resourceType": "Patient",
+  "id": "invalid-birthdate-format",
+  "meta": {
+    "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]
+  },
+  "identifier": [
+    {
+      "system": "http://hospital.example.org/mrn",
+      "value": "MRN-BadDate"
+    }
+  ],
+  "name": [
+    {
+      "family": "BadDate",
+      "given": ["Test"]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "15-03-1986"
+}

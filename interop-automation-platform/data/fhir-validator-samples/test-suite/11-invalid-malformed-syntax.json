@@ -1,0 +1,20 @@
+{
+  "resourceType": "Patient",
+  "id": "invalid-malformed-syntax",
+  "meta": {
+    "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]
+  },
+  "identifier": [
+    {
+      "system": "http://hospital.example.org/mrn",
+      "value": "MRN-Malformed"
+    }
+  ],
+  "name": [
+    {
+      "family": "Malformed",
+      "given": ["Test"]
+    }
+  ],
+  "gender": "male",
+}
