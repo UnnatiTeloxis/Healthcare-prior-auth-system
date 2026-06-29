@@ -2,16 +2,12 @@
   "resourceType": "Patient",
   "id": "sample-invalid-missing-identifier",
   "meta": {
-    "profile": [
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
-    ]
+    "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]
   },
   "name": [
     {
       "family": "Rivera",
-      "given": [
-        "Jordan"
-      ]
+      "given": ["Jordan"]
     }
   ],
   "gender": "male",

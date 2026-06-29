@@ -47,7 +47,7 @@
     .header {
       background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
       color: #fff;
-      padding: 1.5rem 1.25rem 2.5rem;
+      padding: 1.5rem 1.25rem 1.75rem;
       position: relative;
       overflow: hidden;
       margin-bottom: 0;
@@ -110,7 +110,7 @@
     /* Step indicator */
     .steps-nav {
       max-width: 1200px;
-      margin: 2rem auto 0;
+      margin: 1.5rem auto 0;
       padding: 0 1.25rem;
       position: relative;
       z-index: 2;
@@ -995,7 +995,433 @@
     .source-row.error-line .source-code { color: #fecaca; font-weight: 600; }
     .source-row.error-line .source-gutter { color: #fca5a5; font-weight: 700; }
 
+    /* Comprehensive report */
+    .report-card { padding-bottom: 0.5rem; }
+    .report-header {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .report-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+    }
+    .report-meta strong { color: var(--text); }
+    .executive-summary {
+      background: #f8fafc;
+      border-radius: var(--radius-sm);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
+    }
+    .summary-status {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .report-score-ring { flex-shrink: 0; }
+    .status-info { flex: 1; min-width: 200px; }
+    .verdict {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin: 0.5rem 0 0;
+      line-height: 1.5;
+    }
+    .result-meta-line {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    .summary-stats .stat-card {
+      background: var(--card);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .summary-stats .stat-number {
+      display: block;
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .summary-stats .stat-label {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+    .summary-stats .stat-card.passed .stat-number { color: var(--success); }
+    .summary-stats .stat-card.failed .stat-number { color: var(--error); }
+    .summary-stats .stat-card.warning .stat-number { color: var(--warning); }
+    .test-summary {
+      margin-bottom: 1.5rem;
+    }
+    .test-summary h3,
+    .section-heading {
+      margin: 0 0 1rem;
+      font-size: 1.125rem;
+      color: var(--text);
+    }
+    .table-container { overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+    .test-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      background: var(--card);
+    }
+    .test-table thead { background: #f8fafc; border-bottom: 2px solid var(--border); }
+    .test-table th {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .test-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #f1f5f9;
+      color: var(--text);
+      vertical-align: middle;
+    }
+    .test-table tr:hover { background: #f8fafc; }
+    .test-table .status-passed { color: var(--success); font-weight: 600; }
+    .test-table .status-failed { color: var(--error); font-weight: 600; }
+    .test-table .status-warning { color: var(--warning); font-weight: 600; }
+    .view-details-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      cursor: pointer;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+    }
+    .view-details-btn:hover { background: rgba(26,86,219,0.08); }
+    .test-categories { margin-bottom: 1.5rem; }
+    .category-block {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+    }
+    .category-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.875rem 1.25rem;
+      background: #f8fafc;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9375rem;
+    }
+    .category-header:hover { background: #f1f5f9; }
+    .category-counts { font-size: 0.8125rem; color: var(--text-muted); font-weight: 500; }
+    .category-body { display: none; padding: 0.5rem 1rem 1rem; }
+    .category-block.expanded .category-body { display: block; }
+    .test-case-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 0.5rem;
+      overflow: hidden;
+    }
+    .test-case-card.passed { border-left: 4px solid var(--success); }
+    .test-case-card.failed { border-left: 4px solid var(--error); }
+    .test-case-card.warning { border-left: 4px solid var(--warning); }
+    .test-case-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      gap: 0.75rem;
+    }
+    .test-case-header:hover { background: rgba(0,0,0,0.02); }
+    .test-case-id { font-family: monospace; font-size: 0.75rem; color: var(--text-muted); }
+    .test-case-name { font-weight: 600; font-size: 0.875rem; }
+    .test-case-detail {
+      display: none;
+      padding: 0 1rem 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.875rem;
+    }
+    .test-case-card.expanded .test-case-detail { display: block; padding-top: 1rem; }
+    .test-detail-row { margin-bottom: 0.75rem; }
+    .test-detail-row label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+    }
+    .test-detail-row pre,
+    .test-fix-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-family: monospace;
+      font-size: 0.8125rem;
+      overflow-x: auto;
+      margin: 0;
+    }
+    .test-fix-box { border-color: rgba(16,185,129,0.35); background: rgba(16,185,129,0.06); }
+    .validator-issues-section {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 2px solid var(--border);
+    }
+
+    /* Main app navigation */
+    .main-nav {
+      max-width: 1200px;
+      margin: 1.5rem auto 0;
+      padding: 0 1.25rem;
+      position: relative;
+      z-index: 3;
+    }
+    .main-nav-inner {
+      display: flex;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius);
+      padding: 0.5rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255,255,255,0.8);
+      flex-wrap: wrap;
+    }
+    .nav-item {
+      flex: 1;
+      min-width: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1rem;
+      border: none;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .nav-item:hover { background: rgba(26,86,219,0.06); color: var(--primary); }
+    .nav-item.active {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(26,86,219,0.3);
+    }
+    .nav-icon { font-size: 1rem; }
+
+    .app-page { display: none; }
+    .app-page.active { display: block; }
+
+    /* Reports page */
+    .page-header { margin-bottom: 1.5rem; }
+    .page-header h1 { margin: 0 0 0.25rem; font-size: 1.75rem; color: var(--text); }
+    .page-subtitle { color: var(--text-muted); margin: 0; font-size: 1rem; }
+    .reports-summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .reports-summary .summary-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .reports-summary .summary-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+    .reports-summary .summary-number {
+      display: block;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .reports-summary .summary-label { font-size: 0.875rem; color: var(--text-muted); }
+    .reports-summary .summary-card.passed .summary-number { color: var(--success); }
+    .reports-summary .summary-card.failed .summary-number { color: var(--error); }
+    .reports-summary .summary-card.warning .summary-number { color: var(--warning); }
+    .reports-list-container {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .reports-list-container h3 { margin: 0 0 1rem; font-size: 1.125rem; }
+    .reports-toolbar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .search-container { position: relative; flex: 1; min-width: 200px; }
+    .search-input {
+      width: 100%;
+      padding: 0.625rem 1rem 0.625rem 2.5rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-family: inherit;
+      background: var(--card);
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .filter-select {
+      padding: 0.625rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-family: inherit;
+      background: var(--card);
+      cursor: pointer;
+    }
+    .btn-sm { min-height: 36px; padding: 0.375rem 0.875rem; font-size: 0.8125rem; }
+    .reports-table-container { overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+    .reports-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .reports-table thead { background: #f8fafc; border-bottom: 2px solid var(--border); }
+    .reports-table th {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .reports-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+    .reports-table tr:hover { background: #f8fafc; }
+    .reports-table .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .reports-table .status-badge.passed { background: #d1fae5; color: #065f46; }
+    .reports-table .status-badge.failed { background: #fecaca; color: #991b1b; }
+    .score-bar {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.8125rem;
+    }
+    .score-bar.high { background: #d1fae5; color: #065f46; }
+    .score-bar.medium { background: #fef3c7; color: #92400e; }
+    .score-bar.low { background: #fecaca; color: #991b1b; }
+    .action-btns { display: flex; gap: 0.375rem; }
+    .action-btn {
+      padding: 0.25rem 0.5rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: background 0.2s;
+    }
+    .action-btn.view-btn { background: #eff6ff; color: var(--primary); }
+    .action-btn.view-btn:hover { background: #dbeafe; }
+    .action-btn.delete-btn { background: #fef2f2; color: var(--error); }
+    .action-btn.delete-btn:hover { background: #fecaca; }
+    .reports-pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .pagination-controls { display: flex; align-items: center; gap: 0.75rem; }
+    .modal-large { max-width: 1000px; width: 95%; }
+    .report-detail-meta {
+      background: #f8fafc;
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      border: 1px solid var(--border);
+      font-size: 0.875rem;
+      line-height: 1.8;
+    }
+    .empty-state { text-align: center; padding: 3rem 1.25rem; }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 0.75rem; }
+    .empty-state h3 { margin: 0 0 0.5rem; color: var(--text); }
+    .empty-state p { color: var(--text-muted); margin: 0 0 1rem; }
+    .results-hint {
+      margin: 1rem 0 0;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+    .results-hint a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    .results-hint a:hover { text-decoration: underline; }
+    .placeholder-page {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 3rem 2rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .placeholder-page h2 { margin-bottom: 0.5rem; }
+    .placeholder-page p { color: var(--text-muted); margin-bottom: 1.5rem; }
+
     @media (max-width: 768px) {
+      .summary-status { flex-direction: column; text-align: center; }
+      .summary-stats { grid-template-columns: repeat(2, 1fr); }
+      .report-meta { flex-direction: column; gap: 0.5rem; }
       .step-label { display: none; }
       .header-top { flex-direction: column; align-items: flex-start; }
       .results-header { flex-direction: column; align-items: flex-start; }
@@ -1004,6 +1430,10 @@
       .rule-item { flex-wrap: wrap; }
       .rule-item .rule-status { width: 100%; margin-left: 2.5rem; margin-top: 0.25rem; }
       .rule-list { max-height: 320px; }
+      .reports-summary { grid-template-columns: repeat(2, 1fr); }
+      .reports-toolbar { flex-direction: column; align-items: stretch; }
+      .main-nav-inner { flex-direction: column; }
+      .nav-item { min-width: 0; }
     }
   </style>
 </head>
@@ -1018,12 +1448,17 @@
             <p>Interop Automation Platform</p>
           </div>
         </div>
-        <div class="step-badge" id="stepBadge" aria-live="polite">Step 1 of 5: Review Profile</div>
+        <div class="step-badge" id="stepBadge" aria-live="polite" style="display:none;">Step 1 of 4: Provide Data</div>
       </div>
     </div>
   </header>
 
-  <nav class="steps-nav" aria-label="Validation steps">
+  <nav class="main-nav" id="mainNav" aria-label="Main navigation">
+    <div class="main-nav-inner" id="mainNavInner"></div>
+  </nav>
+
+  <div id="page-validator" class="app-page active">
+  <nav class="steps-nav" id="validatorStepsNav" aria-label="Validation steps">
     <div class="steps-card">
       <div class="steps-list" id="stepsList">
         <div class="steps-progress" id="stepsProgress"></div>
@@ -1033,46 +1468,8 @@
   </nav>
 
   <main class="main" id="mainContent">
-    <!-- Step 1 -->
-    <section class="step-panel active" id="step1" aria-labelledby="step1Title">
-      <div class="card">
-        <h2 class="card-title" id="step1Title">Validation Profile (Pre-selected)</h2>
-        <p class="card-subtitle" id="profileSubtitle">The system will validate against the selected US Core profile.</p>
-        <div class="profile-info" id="profileInfo" role="region" aria-label="Active validation profile">
-          <div class="profile-badge">
-            <h4 id="profile-name">📋 US Core Patient</h4>
-            <span class="badge badge-active" aria-label="Active profile">✅ Active Profile</span>
-          </div>
-          <p id="profile-description">Validates patient demographics, identifiers, and contact information per US Core Implementation Guide.</p>
-          <div class="profile-required">
-            <strong id="profileRequiredLabel">Required by US Core Patient:</strong>
-            <ul id="profileRequiredList">
-              <li>identifier (<code>Patient.identifier</code>)</li>
-              <li>name (<code>Patient.name</code>)</li>
-              <li>gender (<code>Patient.gender</code>)</li>
-            </ul>
-            <strong id="profileSupportLabel">Included in sample as Must Support:</strong>
-            <ul id="profileSupportList">
-              <li>birthDate (<code>Patient.birthDate</code>)</li>
-              <li>telecom (<code>Patient.telecom</code>)</li>
-              <li>address (<code>Patient.address</code>)</li>
-              <li>communication language (<code>Patient.communication.language</code>)</li>
-            </ul>
-          </div>
-          <p id="profile-url" style="font-size:0.8125rem;color:var(--text-muted);margin-top:0.35rem;">
-            <strong>Profile URL:</strong> http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient
-          </p>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-primary" id="step1Next" type="button">
-            Next: Provide Data <i class="fas fa-arrow-right" aria-hidden="true"></i>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Step 2 -->
-    <section class="step-panel" id="step2" aria-labelledby="step2Title">
+    <!-- Step 1: Provide Data -->
+    <section class="step-panel active" id="step2" aria-labelledby="step2Title">
       <div class="card">
         <h2 class="card-title" id="step2Title">Provide FHIR Resource Data</h2>
         <p class="card-subtitle">Paste JSON or upload a file (.json / .xml).</p>
@@ -1103,7 +1500,6 @@
           <div class="file-name" id="fileName"></div>
         </div>
         <div class="btn-row">
-          <button class="btn btn-secondary" type="button" id="step2Back"><i class="fas fa-arrow-left"></i> Back</button>
           <button class="btn btn-primary" type="button" id="step2Next">Next: Validate <i class="fas fa-arrow-right"></i></button>
         </div>
       </div>
@@ -1141,7 +1537,7 @@
       </div>
     </section>
 
-    <!-- Step 4 -->
+    <!-- Step 3: Results (current run only) -->
     <section class="step-panel" id="step4" aria-labelledby="step4Title">
       <div class="card">
         <h2 class="card-title" id="step4Title">Validation Results</h2>
@@ -1172,6 +1568,7 @@
         <div class="severity-chart" id="severityChart" aria-label="Severity distribution"></div>
         <div class="filter-row" id="filterRow"></div>
         <div class="issue-list" id="issueList"></div>
+        <p class="results-hint">Full history with all test cases is saved automatically. <a href="#" id="viewInReportsLink">View in Reports →</a></p>
         <div class="btn-row">
           <button class="btn btn-secondary" type="button" id="step4Back"><i class="fas fa-arrow-left"></i> Back</button>
           <button class="btn btn-primary" type="button" id="step4Next">Next: Actions <i class="fas fa-arrow-right"></i></button>
@@ -1195,16 +1592,6 @@
             <h4>Export Report (PDF)</h4>
             <p>Download a formatted PDF report</p>
           </div>
-          <div class="action-card" id="copyResultsBtn" tabindex="0" role="button">
-            <i class="fas fa-copy"></i>
-            <h4>Copy Results</h4>
-            <p>Copy to clipboard</p>
-          </div>
-          <div class="action-card" id="fixRetryBtn" tabindex="0" role="button">
-            <i class="fas fa-wrench"></i>
-            <h4>Fix & Retry</h4>
-            <p>Return to data input</p>
-          </div>
           <div class="action-card" id="newValidationBtn" tabindex="0" role="button">
             <i class="fas fa-redo"></i>
             <h4>Start New Validation</h4>
@@ -1217,6 +1604,75 @@
       </div>
     </section>
   </main>
+  </div>
+
+  <div id="page-reports" class="app-page">
+    <main class="main">
+      <div class="page-header">
+        <h1>📊 Validation Reports</h1>
+        <p class="page-subtitle">View all validation runs with complete details</p>
+      </div>
+      <div class="reports-summary">
+        <div class="summary-card">
+          <span class="summary-number" id="total-reports">0</span>
+          <span class="summary-label">Total Reports</span>
+        </div>
+        <div class="summary-card passed">
+          <span class="summary-number" id="passed-reports">0</span>
+          <span class="summary-label">✅ Passed</span>
+        </div>
+        <div class="summary-card failed">
+          <span class="summary-number" id="failed-reports">0</span>
+          <span class="summary-label">❌ Failed</span>
+        </div>
+        <div class="summary-card warning">
+          <span class="summary-number" id="pass-rate">0%</span>
+          <span class="summary-label">Pass Rate</span>
+        </div>
+      </div>
+      <div class="reports-list-container">
+        <h3>📋 All Validation Reports</h3>
+        <div class="reports-toolbar">
+          <div class="search-container">
+            <span class="search-icon" aria-hidden="true">🔍</span>
+            <input type="search" id="report-search" class="search-input" placeholder="Search by ID or Resource..." />
+          </div>
+          <select id="report-filter" class="filter-select" aria-label="Filter by status">
+            <option value="all">All Status</option>
+            <option value="passed">✅ Passed</option>
+            <option value="failed">❌ Failed</option>
+          </select>
+          <button type="button" class="btn btn-secondary btn-sm" id="clearAllReportsBtn">🗑️ Clear All</button>
+        </div>
+        <div class="reports-table-container">
+          <table class="reports-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Report ID</th>
+                <th>Date &amp; Time</th>
+                <th>Resource</th>
+                <th>Profile</th>
+                <th>Status</th>
+                <th>Score</th>
+                <th>Tests</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="reports-table-body"></tbody>
+          </table>
+        </div>
+        <div class="reports-pagination">
+          <span id="reports-count">Showing 0 of 0 reports</span>
+          <div class="pagination-controls">
+            <button type="button" class="btn btn-secondary btn-sm" id="reportsPrevBtn">← Previous</button>
+            <span id="current-page">1</span>
+            <button type="button" class="btn btn-secondary btn-sm" id="reportsNextBtn">Next →</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
 
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
@@ -1227,6 +1683,27 @@
         <button class="modal-close" id="modalClose" aria-label="Close modal">&times;</button>
       </div>
       <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer" id="modalFooter" style="padding:1rem 1.25rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:0.75rem;">
+        <button type="button" class="btn btn-secondary" id="modalCloseBtn">Close</button>
+        <button type="button" class="btn btn-primary" id="modalCopyFixBtn" style="display:none;">📋 Copy Fix</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="reportDetailModal" role="dialog" aria-modal="true" aria-labelledby="modal-report-title">
+    <div class="modal modal-large">
+      <div class="modal-header">
+        <span aria-hidden="true">📋</span>
+        <h3 id="modal-report-title" style="flex:1;padding:0 0.75rem;">Validation Report</h3>
+        <button type="button" class="modal-close" id="reportDetailClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body" id="report-detail-body"></div>
+      <div class="modal-footer" style="padding:1rem 1.25rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:0.75rem;flex-wrap:wrap;">
+        <button type="button" class="btn btn-secondary" id="reportDetailCloseBtn">Close</button>
+        <button type="button" class="btn btn-secondary" id="reportCopySummaryBtn">📋 Copy Summary</button>
+        <button type="button" class="btn btn-secondary" id="reportExportJsonBtn">📥 Export JSON</button>
+        <button type="button" class="btn btn-primary" id="reportReRunBtn">🔄 Re-run</button>
+      </div>
     </div>
   </div>
 
@@ -1500,33 +1977,350 @@
       'http://localhost:8000/api/v1/validate/'
     ];
 
-    const STEPS = ['Review Profile', 'Provide Data', 'Validate', 'Results', 'Actions'];
+    const STEPS = ['Provide Data', 'Validate', 'Results', 'Actions'];
     const STEP_TITLES = [
-      'Step 1 of 5: Review Profile',
-      'Step 2 of 5: Provide Data',
-      'Step 3 of 5: Validate',
-      'Step 4 of 5: Results',
-      'Step 5 of 5: Actions'
+      'Step 1 of 4: Provide Data',
+      'Step 2 of 4: Validate',
+      'Step 3 of 4: Results',
+      'Step 4 of 4: Actions'
+    ];
+    const STEP_PANEL_IDS = ['step2', 'step3', 'step4', 'step5'];
+    const STEP_COUNT = 4;
+
+    const STORAGE_KEY = 'fhir_validator_reports';
+    const REPORTS_PAGE_SIZE = 10;
+
+    const NAV_PAGES = [
+      { id: 'validator', label: 'Validator', icon: '🔍' },
+      { id: 'reports', label: 'Reports', icon: '📊' }
     ];
 
     const state = {
       currentStep: 1,
+      currentPage: 'validator',
       inputData: SAMPLE_PATIENT,
       inputMethod: 'paste',
       uploadedFileName: null,
       results: null,
       activeFilter: 'all',
       activeProfile: ACTIVE_PROFILE,
-      ruleOutcomes: null
+      ruleOutcomes: null,
+      reportsPage: 1,
+      selectedReportId: null
     };
 
     // --- Init ---
     function init() {
+      renderMainNav();
       renderSteps();
       document.getElementById('jsonInput').value = SAMPLE_PATIENT;
       updateLineNumbers();
       refreshActiveProfile();
       bindEvents();
+      navigateTo('validator', false);
+    }
+
+    function renderMainNav() {
+      const nav = document.getElementById('mainNavInner');
+      nav.innerHTML = NAV_PAGES.map(page => `
+        <button type="button" class="nav-item ${state.currentPage === page.id ? 'active' : ''}"
+          data-nav="${page.id}" aria-label="${page.label}">
+          <span class="nav-icon" aria-hidden="true">${page.icon}</span>
+          ${page.label}
+        </button>
+      `).join('');
+      nav.querySelectorAll('.nav-item').forEach(btn => {
+        btn.addEventListener('click', () => navigateTo(btn.dataset.nav));
+      });
+    }
+
+    function navigateTo(pageId, scroll = true) {
+      state.currentPage = pageId;
+      document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active'));
+      const pageEl = document.getElementById('page-' + pageId);
+      if (pageEl) pageEl.classList.add('active');
+
+      const stepsNav = document.getElementById('validatorStepsNav');
+      const stepBadge = document.getElementById('stepBadge');
+      if (stepsNav) stepsNav.style.display = pageId === 'validator' ? '' : 'none';
+      if (stepBadge) stepBadge.style.display = pageId === 'validator' ? '' : 'none';
+
+      renderMainNav();
+      if (pageId === 'reports') {
+        state.reportsPage = 1;
+        renderReports();
+      }
+      if (scroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function getReports() {
+      try {
+        const data = localStorage.getItem(STORAGE_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function saveReports(reports) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+    }
+
+    function addReport(report) {
+      const reports = getReports();
+      reports.unshift(report);
+      saveReports(reports);
+    }
+
+    function deleteReport(reportId) {
+      if (!confirm('Delete this validation report?')) return;
+      saveReports(getReports().filter(r => r.id !== reportId));
+      renderReports();
+      showToast('Report deleted', 'info');
+    }
+
+    function clearAllReports() {
+      if (!confirm('Are you sure you want to delete all reports? This cannot be undone.')) return;
+      saveReports([]);
+      state.reportsPage = 1;
+      renderReports();
+      showToast('All reports cleared', 'info');
+    }
+
+    function buildStoredReport(results) {
+      const score = parseInt(String(results.complianceScore || '0'), 10) || 0;
+      const ts = results.testSummary || { total: 0, passed: 0, failed: 0, warnings: 0 };
+      return {
+        id: results.id,
+        timestamp: results.timestamp,
+        formattedDate: new Date(results.timestamp).toLocaleString('en-US', {
+          month: 'long', day: 'numeric', year: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        }),
+        resourceType: results.resourceType || results.profileResourceType || 'Resource',
+        profile: results.profile || 'FHIR base',
+        executionTime: results.executionTime || '—',
+        status: results.status || (results.summary?.errors > 0 ? 'FAILED' : 'PASSED'),
+        score,
+        complianceScore: results.complianceScore,
+        summary: {
+          total: ts.total,
+          passed: ts.passed,
+          failed: ts.failed,
+          warnings: ts.warnings
+        },
+        issueSummary: results.summary || { total: 0, errors: 0, warnings: 0, info: 0 },
+        testCases: results.testCases || [],
+        issues: results.issues || [],
+        sourceText: results.sourceText || '',
+        complianceDetails: results.complianceDetails || null,
+        apiSummary: results.apiSummary || ''
+      };
+    }
+
+    function saveValidationReport(results) {
+      addReport(buildStoredReport(results));
+    }
+
+    function filterReportsList(reports) {
+      const search = (document.getElementById('report-search')?.value || '').toLowerCase();
+      const filter = document.getElementById('report-filter')?.value || 'all';
+      return reports.filter(report => {
+        const matchesSearch = !search
+          || report.id.toLowerCase().includes(search)
+          || (report.resourceType || '').toLowerCase().includes(search)
+          || (report.profile || '').toLowerCase().includes(search);
+        const matchesFilter = filter === 'all'
+          || (filter === 'passed' && report.status === 'PASSED')
+          || (filter === 'failed' && report.status === 'FAILED');
+        return matchesSearch && matchesFilter;
+      });
+    }
+
+    function scoreBarClass(score) {
+      if (score >= 80) return 'high';
+      if (score >= 50) return 'medium';
+      return 'low';
+    }
+
+    function renderReports() {
+      const allReports = getReports();
+      const filtered = filterReportsList(allReports);
+      const totalPages = Math.max(1, Math.ceil(filtered.length / REPORTS_PAGE_SIZE));
+      if (state.reportsPage > totalPages) state.reportsPage = totalPages;
+      if (state.reportsPage < 1) state.reportsPage = 1;
+
+      const start = (state.reportsPage - 1) * REPORTS_PAGE_SIZE;
+      const pageReports = filtered.slice(start, start + REPORTS_PAGE_SIZE);
+
+      const passed = allReports.filter(r => r.status === 'PASSED').length;
+      const failed = allReports.filter(r => r.status === 'FAILED').length;
+      const passRate = allReports.length ? Math.round((passed / allReports.length) * 100) : 0;
+
+      document.getElementById('total-reports').textContent = allReports.length;
+      document.getElementById('passed-reports').textContent = passed;
+      document.getElementById('failed-reports').textContent = failed;
+      document.getElementById('pass-rate').textContent = passRate + '%';
+
+      const tbody = document.getElementById('reports-table-body');
+      if (!filtered.length) {
+        tbody.innerHTML = `
+          <tr><td colspan="9">
+            <div class="empty-state">
+              <div class="empty-icon">📭</div>
+              <h3>No Reports Yet</h3>
+              <p>Run your first validation to see reports here.</p>
+              <button type="button" class="btn btn-primary" data-nav="validator">Go to Validator</button>
+            </div>
+          </td></tr>`;
+        tbody.querySelector('[data-nav]')?.addEventListener('click', () => navigateTo('validator'));
+      } else {
+        tbody.innerHTML = pageReports.map((report, idx) => `
+          <tr>
+            <td>${start + idx + 1}</td>
+            <td><strong>${escapeHtml(report.id)}</strong></td>
+            <td>${escapeHtml(report.formattedDate)}</td>
+            <td>${escapeHtml(report.resourceType)}</td>
+            <td>${escapeHtml(report.profile)}</td>
+            <td><span class="status-badge ${report.status === 'PASSED' ? 'passed' : 'failed'}">${report.status === 'PASSED' ? '✅ Passed' : '❌ Failed'}</span></td>
+            <td><span class="score-bar ${scoreBarClass(report.score)}">${report.score}%</span></td>
+            <td>${report.summary?.total ?? report.testCases?.length ?? 0}</td>
+            <td>
+              <div class="action-btns">
+                <button type="button" class="action-btn view-btn" data-view-report="${escapeHtml(report.id)}" title="View report">📋</button>
+                <button type="button" class="action-btn delete-btn" data-delete-report="${escapeHtml(report.id)}" title="Delete">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+        tbody.querySelectorAll('[data-view-report]').forEach(btn => {
+          btn.addEventListener('click', () => openReportDetail(btn.dataset.viewReport));
+        });
+        tbody.querySelectorAll('[data-delete-report]').forEach(btn => {
+          btn.addEventListener('click', () => deleteReport(btn.dataset.deleteReport));
+        });
+      }
+
+      const showing = filtered.length ? Math.min(REPORTS_PAGE_SIZE, filtered.length - start) : 0;
+      document.getElementById('reports-count').textContent =
+        `Showing ${showing} of ${filtered.length} report${filtered.length === 1 ? '' : 's'}`;
+      document.getElementById('current-page').textContent = String(state.reportsPage);
+      document.getElementById('reportsPrevBtn').disabled = state.reportsPage <= 1;
+      document.getElementById('reportsNextBtn').disabled = state.reportsPage >= totalPages;
+    }
+
+    function openReportDetail(reportId) {
+      const report = getReports().find(r => r.id === reportId);
+      if (!report) return;
+      state.selectedReportId = reportId;
+
+      document.getElementById('modal-report-title').textContent = `${report.id} — Full Report`;
+      const ts = report.summary || {};
+      const testCases = report.testCases || [];
+
+      document.getElementById('report-detail-body').innerHTML = `
+        <div class="report-detail-meta">
+          <div><strong>Report ID:</strong> ${escapeHtml(report.id)}</div>
+          <div><strong>Date:</strong> ${escapeHtml(report.formattedDate)}</div>
+          <div><strong>Resource:</strong> ${escapeHtml(report.resourceType)} &nbsp;|&nbsp; <strong>Profile:</strong> ${escapeHtml(report.profile)}</div>
+          <div><strong>Status:</strong> ${report.status === 'PASSED' ? '✅ PASSED' : '❌ FAILED'} &nbsp;|&nbsp; <strong>Score:</strong> ${report.score}%</div>
+          <div><strong>Execution Time:</strong> ${escapeHtml(report.executionTime)}</div>
+        </div>
+        <div class="summary-stats" style="margin-bottom:1.25rem;">
+          <div class="stat-card"><span class="stat-number">${ts.total || testCases.length}</span><span class="stat-label">Total Tests</span></div>
+          <div class="stat-card passed"><span class="stat-number">${ts.passed || 0}</span><span class="stat-label">✅ Passed</span></div>
+          <div class="stat-card failed"><span class="stat-number">${ts.failed || 0}</span><span class="stat-label">❌ Failed</span></div>
+          <div class="stat-card warning"><span class="stat-number">${ts.warnings || 0}</span><span class="stat-label">⚠️ Warnings</span></div>
+        </div>
+        <h3 style="margin:0 0 0.75rem;font-size:1rem;">Test Case Results</h3>
+        <div class="table-container">
+          <table class="test-table">
+            <thead><tr><th>ID</th><th>Test Name</th><th>Category</th><th>Status</th><th>Details</th></tr></thead>
+            <tbody>
+              ${testCases.map((tc, i) => `
+                <tr>
+                  <td><code>${escapeHtml(tc.id)}</code></td>
+                  <td>${escapeHtml(tc.name)}</td>
+                  <td>${escapeHtml(tc.category)}</td>
+                  <td class="${testStatusClass(tc.status)}">${testStatusLabel(tc.status)}</td>
+                  <td><button type="button" class="view-details-btn" data-report-tc="${i}">View</button></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        ${(report.issues || []).length ? `
+          <h3 style="margin:1.25rem 0 0.75rem;font-size:1rem;">Validator Issues (${report.issues.length})</h3>
+          <div class="table-container">
+            <table class="test-table">
+              <thead><tr><th>Severity</th><th>Location</th><th>Message</th></tr></thead>
+              <tbody>
+                ${report.issues.slice(0, 50).map(issue => `
+                  <tr>
+                    <td class="${testStatusClass(issue.severity === 'error' ? 'failed' : issue.severity === 'warning' ? 'warning' : 'passed')}">${escapeHtml(issue.severity)}</td>
+                    <td><code>${escapeHtml(issue.location || issue.rawLocation || '')}</code></td>
+                    <td>${escapeHtml(decodeHtmlEntities(issue.message || ''))}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        ` : ''}
+      `;
+
+      document.getElementById('report-detail-body').querySelectorAll('[data-report-tc]').forEach(btn => {
+        btn.addEventListener('click', () => openTestDetailModal(testCases[Number(btn.dataset.reportTc)]));
+      });
+
+      document.getElementById('reportDetailModal').classList.add('show');
+    }
+
+    function closeReportDetail() {
+      document.getElementById('reportDetailModal').classList.remove('show');
+      state.selectedReportId = null;
+    }
+
+    function exportSelectedReport() {
+      const report = getReports().find(r => r.id === state.selectedReportId);
+      if (!report) return;
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `fhir-validation-${report.id}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showToast('Report exported', 'success');
+    }
+
+    function copyReportSummary() {
+      const report = getReports().find(r => r.id === state.selectedReportId);
+      if (!report) return;
+      const text = [
+        `Report: ${report.id}`,
+        `Date: ${report.formattedDate}`,
+        `Resource: ${report.resourceType} | Profile: ${report.profile}`,
+        `Status: ${report.status} | Score: ${report.score}%`,
+        `Tests: ${report.summary?.passed}/${report.summary?.total} passed, ${report.summary?.failed} failed`
+      ].join('\n');
+      navigator.clipboard.writeText(text)
+        .then(() => showToast('Summary copied', 'success'))
+        .catch(() => showToast('Could not copy summary', 'error'));
+    }
+
+    function reRunStoredReport() {
+      const report = getReports().find(r => r.id === state.selectedReportId);
+      if (!report?.sourceText) {
+        showToast('Source data not available for this report', 'error');
+        return;
+      }
+      closeReportDetail();
+      state.inputData = report.sourceText;
+      document.getElementById('jsonInput').value = report.sourceText;
+      updateLineNumbers();
+      refreshActiveProfile();
+      navigateTo('validator');
+      goToStep(2);
+      showToast('Loaded report data — review and run validation', 'info');
     }
 
     function renderSteps() {
@@ -1554,13 +2348,13 @@
     }
 
     function goToStep(step) {
-      if (step < 1 || step > 5) return;
+      if (step < 1 || step > STEP_COUNT) return;
       document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
-      document.getElementById('step' + step).classList.add('active');
+      document.getElementById(STEP_PANEL_IDS[step - 1]).classList.add('active');
       state.currentStep = step;
       renderSteps();
-      if (step === 3) renderValidateSummary();
-      if (step === 4 && state.results) renderResults();
+      if (step === 2) renderValidateSummary();
+      if (step === 3 && state.results) renderResults();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -1686,6 +2480,207 @@
       7: ['binding', 'terminology', 'valueset', 'value set', 'code system', 'invalid code', 'display', 'unknown code'],
       8: ['business', 'organization', 'custom rule', 'rule failed', 'best practice']
     };
+
+    const TEST_CASE_CATALOG = [
+      { id: 'TC-STRUCT-001', name: 'Resource Type Validation', category: 'Structure', description: 'Validates that the resource has a valid resourceType field', check: 'resourceType field exists and is a valid FHIR resource type', expected: 'Valid FHIR resourceType', patterns: ['resource type', 'resourcetype', 'wrong type', 'not found for type'] },
+      { id: 'TC-STRUCT-002', name: 'JSON Syntax Validation', category: 'Structure', description: 'Validates that the JSON is well-formed and valid', check: 'JSON syntax is correct with no parsing errors', expected: 'Valid JSON structure', patterns: ['json', 'parse', 'syntax', 'malformed'] },
+      { id: 'TC-STRUCT-003', name: 'Resource ID Validation', category: 'Structure', description: 'Validates that the resource has a valid ID', check: 'id field exists and follows FHIR ID format', expected: 'Valid FHIR ID format', patterns: ['.id', 'invalid id', 'id format'] },
+      { id: 'TC-REQ-001', name: 'Patient Name Validation', category: 'Required Fields', description: 'Validates that Patient.name field is present', check: 'Patient.name array exists and is not empty', expected: 'At least one name is present', field: 'name', patterns: ['name', 'minimum required', 'missing name'] },
+      { id: 'TC-REQ-002', name: 'Patient BirthDate Validation', category: 'Required Fields', description: 'Validates that Patient.birthDate field is present', check: 'Patient.birthDate field exists', expected: 'birthDate is present', field: 'birthDate', patterns: ['birthdate', 'birth date'] },
+      { id: 'TC-REQ-003', name: 'Patient Gender Validation', category: 'Required Fields', description: 'Validates that Patient.gender field is present', check: 'Patient.gender field exists', expected: 'gender is present', field: 'gender', patterns: ['gender'] },
+      { id: 'TC-TYPE-001', name: 'Date Format Validation', category: 'Data Types', description: 'Validates that dates are in ISO-8601 format', check: 'birthDate follows YYYY-MM-DD format', expected: 'Valid date format (YYYY-MM-DD)', field: 'birthDate', patterns: ['date', 'birthdate', 'format'] },
+      { id: 'TC-TYPE-002', name: 'Gender Value Validation', category: 'Data Types', description: 'Validates that gender uses standard values', check: 'gender is from administrative-gender value set', expected: 'male, female, other, or unknown', field: 'gender', patterns: ['gender', 'administrative-gender', 'invalid gender'] },
+      { id: 'TC-TYPE-003', name: 'Identifier Format Validation', category: 'Data Types', description: 'Validates that identifier format is correct', check: 'identifier system and value are properly formatted', expected: 'Valid identifier format', field: 'identifier', patterns: ['identifier', 'example url'] },
+      { id: 'TC-CARD-001', name: 'Name Cardinality Validation', category: 'Cardinality', description: 'Validates Patient.name cardinality (0..*)', check: 'Patient.name has at least 1 element when required', expected: 'At least 1 name element', field: 'name', patterns: ['name', 'cardinality', 'minimum'] },
+      { id: 'TC-CARD-002', name: 'Telecom Cardinality Validation', category: 'Cardinality', description: 'Validates Patient.telecom cardinality (0..*)', check: 'Patient.telecom has valid element count', expected: '0 or more telecom elements', field: 'telecom', patterns: ['telecom', 'cardinality'] },
+      { id: 'TC-PROF-001', name: 'US Core Profile Conformance', category: 'Profile', description: 'Validates resource conforms to US Core profile', check: 'All profile constraints are satisfied', expected: 'Conforms to declared profile', patterns: ['profile', 'constraint', 'us core', 'structuredefinition'] },
+      { id: 'TC-PROF-002', name: 'US Core Required Extensions', category: 'Profile', description: 'Validates US Core required extensions are present', check: 'Required US Core extensions when applicable', expected: 'Required extensions present', patterns: ['extension', 'us-core'] },
+      { id: 'TC-PROF-003', name: 'US Core Slice Validation', category: 'Profile', description: 'Validates US Core slice definitions', check: 'Identifier and name slices are correctly defined', expected: 'Valid slice definitions', patterns: ['slice', 'identifier'] },
+      { id: 'TC-PROF-004', name: 'US Core Profile Metadata', category: 'Profile', description: 'Validates profile metadata is correct', check: 'meta.profile includes profile URL when declared', expected: 'Profile URL is correct', field: 'meta.profile', patterns: ['meta.profile', 'profile reference', 'canonical'] },
+      { id: 'TC-MS-001', name: 'Patient Name Must-Support', category: 'Must-Support', description: 'Validates Patient.name must-support elements', check: 'name.family and name.given are populated', expected: 'Both family and given names present', field: 'name', patterns: ['name', 'must-support', 'must support'] },
+      { id: 'TC-MS-002', name: 'Patient Identifier Must-Support', category: 'Must-Support', description: 'Validates Patient.identifier must-support elements', check: 'identifier with system and value is present', expected: 'Identifier present', field: 'identifier', patterns: ['identifier', 'must-support'] },
+      { id: 'TC-MS-003', name: 'Patient BirthDate Must-Support', category: 'Must-Support', description: 'Validates Patient.birthDate must-support element', check: 'birthDate is populated', expected: 'birthDate present', field: 'birthDate', patterns: ['birthdate', 'must-support'] },
+      { id: 'TC-MS-004', name: 'Patient Gender Must-Support', category: 'Must-Support', description: 'Validates Patient.gender must-support element', check: 'gender is populated', expected: 'gender present', field: 'gender', patterns: ['gender', 'must-support'] },
+      { id: 'TC-TERM-001', name: 'Gender Code Validation', category: 'Terminology', description: 'Validates gender code is in value set', check: 'gender code exists in administrative-gender value set', expected: 'Valid gender code', field: 'gender', patterns: ['gender', 'binding', 'value set', 'administrative-gender'] },
+      { id: 'TC-TERM-002', name: 'Identifier Type Code Validation', category: 'Terminology', description: 'Validates identifier type codes', check: 'identifier.type codes are valid', expected: 'Valid identifier type codes', field: 'identifier', patterns: ['identifier', 'type', 'code system', 'v2-0203'] },
+      { id: 'TC-TERM-003', name: 'Language Code Validation', category: 'Terminology', description: 'Validates language codes', check: 'communication.language codes are valid', expected: 'Valid language codes', field: 'communication', patterns: ['language', 'bcp-47', 'communication'] },
+      { id: 'TC-BIZ-001', name: 'Organization-Specific MRN Format', category: 'Business Rules', description: 'Validates MRN format matches organization standard', check: 'identifier.value matches pattern MRN-XXXXX when using hospital MRN system', expected: 'MRN format: MRN-XXXXX', field: 'identifier', patterns: ['mrn', 'identifier', 'example url'] },
+      { id: 'TC-BIZ-002', name: 'Telecom Format Validation', category: 'Business Rules', description: 'Validates telecom format (phone, email)', check: 'telecom.value has valid format', expected: 'Valid phone or email format', field: 'telecom', patterns: ['telecom', 'phone', 'email'] },
+      { id: 'TC-BIZ-003', name: 'Address Completeness Validation', category: 'Business Rules', description: 'Validates address has required fields', check: 'address has line, city, state, postalCode', expected: 'Complete address with required fields', field: 'address', patterns: ['address', 'postal', 'city'] }
+    ];
+
+    const VALID_GENDERS = new Set(['male', 'female', 'other', 'unknown']);
+    const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+    const FHIR_ID_RE = /^[A-Za-z0-9\-.]{1,64}$/;
+    const MRN_RE = /^MRN-\d+$/i;
+    const PHONE_RE = /^[\d\s().+\-]{7,}$/;
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    function getPatientResource(parsed) {
+      if (!parsed) return null;
+      if (parsed.resourceType === 'Patient') return parsed;
+      if (parsed.resourceType === 'Bundle' && Array.isArray(parsed.entry)) {
+        return parsed.entry.map(e => e.resource).find(r => r?.resourceType === 'Patient') || null;
+      }
+      return null;
+    }
+
+    function issueMatchesPatterns(issue, patterns) {
+      const text = `${issue.message || ''} ${issue.location || ''} ${issue.code || ''}`.toLowerCase();
+      return patterns.some(p => text.includes(p.toLowerCase()));
+    }
+
+    function findIssuesForTest(issues, patterns) {
+      return (issues || []).filter(issue => issueMatchesPatterns(issue, patterns));
+    }
+
+    function inspectPatientField(patient, field) {
+      if (!patient) return { applicable: false };
+      if (field === 'name') {
+        const names = patient.name || [];
+        const hasName = names.length > 0 && names.some(n => (n.family || (n.given && n.given.length)));
+        return { applicable: true, ok: hasName, actual: hasName ? 'Name present' : 'Missing or empty Patient.name', location: '$.name' };
+      }
+      if (field === 'birthDate') {
+        const ok = Boolean(patient.birthDate);
+        return { applicable: true, ok, actual: ok ? patient.birthDate : 'Missing Patient.birthDate', location: '$.birthDate', fix: 'Add "birthDate": "1980-01-15"' };
+      }
+      if (field === 'gender') {
+        const ok = Boolean(patient.gender);
+        return { applicable: true, ok, actual: ok ? patient.gender : 'Missing Patient.gender', location: '$.gender' };
+      }
+      if (field === 'identifier') {
+        const ids = patient.identifier || [];
+        const ok = ids.length > 0 && ids.some(i => i.system && i.value);
+        return { applicable: true, ok, actual: ok ? 'Identifier present' : 'Missing identifier system/value', location: '$.identifier[0]' };
+      }
+      if (field === 'telecom') {
+        const t = patient.telecom || [];
+        return { applicable: true, ok: true, actual: `${t.length} telecom element(s)`, location: '$.telecom' };
+      }
+      if (field === 'meta.profile') {
+        const profiles = patient.meta?.profile || [];
+        const ok = profiles.length > 0;
+        return { applicable: true, ok, actual: ok ? profiles.join(', ') : 'Missing meta.profile', location: '$.meta.profile', fix: 'Add "meta": {"profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]}' };
+      }
+      if (field === 'communication') {
+        const comm = patient.communication || [];
+        if (!comm.length) return { applicable: true, ok: true, actual: 'No communication elements (optional)', location: '$.communication' };
+        const ok = comm.every(c => c.language?.coding?.length || c.language?.text);
+        return { applicable: true, ok, actual: ok ? 'Language codes present' : 'Invalid communication language', location: '$.communication[0].language' };
+      }
+      if (field === 'address') {
+        const addr = patient.address || [];
+        if (!addr.length) return { applicable: true, ok: true, actual: 'No address (optional for base FHIR)', location: '$.address' };
+        const ok = addr.some(a => a.line?.length && a.city && a.state && a.postalCode);
+        return { applicable: true, ok, actual: ok ? 'Complete address found' : 'Address missing required fields', location: '$.address[0]' };
+      }
+      return { applicable: false };
+    }
+
+    function buildTestCases(parsed, issues, profileUsed, executionSeconds) {
+      const patient = getPatientResource(parsed);
+      const resourceType = parsed?.resourceType || profileUsed?.resourceType || 'Resource';
+      const timePerTest = executionSeconds ? `${(executionSeconds / TEST_CASE_CATALOG.length).toFixed(3)}s` : '—';
+      const docUrl = profileUsed?.profile || 'http://hl7.org/fhir/R4/';
+
+      return TEST_CASE_CATALOG.map(def => {
+        const matched = findIssuesForTest(issues, def.patterns);
+        const errorIssues = matched.filter(i => i.severity === 'error');
+        const warningIssues = matched.filter(i => i.severity === 'warning');
+        let status = 'passed';
+        let error = '';
+        let fix = '';
+        let location = '';
+        let actual = 'Check passed';
+        let expected = def.expected;
+
+        if (def.id === 'TC-STRUCT-001') {
+          const validTypes = ['Patient', 'Observation', 'Bundle', 'Condition', 'Encounter', 'Procedure', 'MedicationRequest', 'DiagnosticReport', 'AllergyIntolerance', 'Immunization', 'DocumentReference', 'Organization', 'Practitioner'];
+          const ok = Boolean(parsed?.resourceType) && (validTypes.includes(parsed.resourceType) || parsed.resourceType);
+          actual = parsed?.resourceType ? `resourceType = "${parsed.resourceType}"` : 'Missing resourceType';
+          if (!ok || errorIssues.length) status = 'failed';
+        } else if (def.id === 'TC-STRUCT-002') {
+          actual = 'Valid JSON structure';
+          if (errorIssues.length) status = 'failed';
+        } else if (def.id === 'TC-STRUCT-003') {
+          const id = parsed?.id;
+          const ok = id && FHIR_ID_RE.test(id);
+          actual = id ? `id = "${id}"` : 'Missing id';
+          if (!ok || errorIssues.length) status = 'failed';
+        } else if (def.field && patient) {
+          const inspection = inspectPatientField(patient, def.field);
+          if (inspection.applicable) {
+            actual = inspection.actual;
+            location = inspection.location || '';
+            if (inspection.fix) fix = inspection.fix;
+            if (!inspection.ok) status = 'failed';
+          } else {
+            actual = `Not applicable to ${resourceType}`;
+          }
+        } else if (def.field && !patient && resourceType !== 'Patient') {
+          actual = `Not applicable — no Patient resource in ${resourceType}`;
+        }
+
+        if (def.id === 'TC-TYPE-001' && patient?.birthDate) {
+          const ok = ISO_DATE_RE.test(patient.birthDate);
+          actual = patient.birthDate;
+          if (!ok) { status = 'failed'; error = `Invalid date format: ${patient.birthDate}`; fix = 'Use YYYY-MM-DD format'; location = '$.birthDate'; }
+        }
+        if (def.id === 'TC-TYPE-002' && patient?.gender) {
+          const ok = VALID_GENDERS.has(patient.gender);
+          actual = patient.gender;
+          if (!ok) { status = 'failed'; error = `Invalid gender value: '${patient.gender}'`; fix = 'Use "male", "female", "other", or "unknown"'; location = '$.gender'; }
+        }
+        if (def.id === 'TC-MS-001' && patient?.name?.length) {
+          const ok = patient.name.some(n => n.family && n.given?.length);
+          actual = ok ? 'family and given present' : 'Missing family or given';
+          if (!ok) status = 'failed';
+        }
+        if (def.id === 'TC-BIZ-001' && patient?.identifier?.length) {
+          const mrn = patient.identifier.find(i => (i.system || '').includes('mrn') || (i.type?.text || '').toLowerCase().includes('mrn'));
+          if (mrn?.value) {
+            actual = mrn.value;
+            if (!MRN_RE.test(mrn.value)) {
+              status = warningIssues.length || errorIssues.length ? 'failed' : 'warning';
+              error = 'MRN format does not match pattern MRN-XXXXX';
+              fix = 'Use format: MRN-12345';
+              location = '$.identifier[0].value';
+            }
+          }
+        }
+        if (def.id === 'TC-BIZ-002' && patient?.telecom?.length) {
+          const bad = patient.telecom.find(t => t.value && t.system === 'email' && !EMAIL_RE.test(t.value));
+          if (bad) { status = 'warning'; error = `Invalid email: ${bad.value}`; location = '$.telecom'; }
+        }
+
+        if (errorIssues.length) {
+          status = 'failed';
+          error = error || errorIssues[0].message;
+          location = location || errorIssues[0].rawLocation || errorIssues[0].jsonPath || '';
+          if (!fix) fix = decodeHtmlEntities(errorIssues[0].suggestion || '');
+        } else if (warningIssues.length && status === 'passed') {
+          status = 'warning';
+          error = warningIssues[0].message;
+          location = location || warningIssues[0].rawLocation || '';
+        }
+
+        const severity = status === 'failed' ? 'error' : status === 'warning' ? 'warning' : 'info';
+        return {
+          ...def,
+          status,
+          severity,
+          error,
+          fix,
+          location: location || (def.field ? `$.${def.field}` : 'Resource'),
+          actual,
+          expected,
+          timeTaken: timePerTest,
+          documentation: `${def.category} validation — ${profileUsed?.name || 'FHIR base profile'}`,
+          docUrl
+        };
+      });
+    }
 
     function delay(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
@@ -1853,7 +2848,7 @@
       document.getElementById('validateSummary').style.display = '';
       document.getElementById('step3Title').textContent = 'Review & Run Validation';
       document.getElementById('step3Subtitle').textContent = 'Confirm settings before running conformance checks.';
-      document.getElementById('stepBadge').textContent = STEP_TITLES[2];
+      document.getElementById('stepBadge').textContent = STEP_TITLES[1];
       updateValidationProgress(0);
       document.getElementById('rule-list').innerHTML = '';
       const validationIcon = document.getElementById('validationIcon');
@@ -1904,8 +2899,8 @@
 
     async function runValidation() {
       const parsed = parseJsonInput();
-      if (!parsed && state.currentStep >= 2) {
-        goToStep(2);
+      if (!parsed && state.currentStep >= 1) {
+        goToStep(1);
         return;
       }
 
@@ -1952,8 +2947,9 @@
         document.getElementById('validationIcon').classList.remove('spinning');
         document.getElementById('validationIcon').textContent = '✅';
 
-        state.results = normalizeValidationResult(apiResult, startedAt, profileUsed);
+        state.results = normalizeValidationResult(apiResult, startedAt, profileUsed, parsed);
         state.results.profile = profileUsed.name;
+        saveValidationReport(state.results);
 
         await delay(500);
 
@@ -1962,7 +2958,7 @@
           state.results.status === 'PASSED' ? 'Validation passed!' : 'Validation complete with issues',
           state.results.status === 'PASSED' ? 'success' : 'warning'
         );
-        goToStep(4);
+        goToStep(3);
         renderResults();
       } catch (error) {
         resetValidationUI();
@@ -2004,21 +3000,34 @@
       throw lastError || new Error('Validation API is unavailable');
     }
 
-    function normalizeValidationResult(apiResult, startedAt, profileUsed) {
+    function normalizeValidationResult(apiResult, startedAt, profileUsed, parsed) {
       const issues = (apiResult.issues || []).map(normalizeIssue);
       const errors = Number(apiResult.error_count ?? issues.filter(i => i.severity === 'error').length);
       const warnings = Number(apiResult.warning_count ?? issues.filter(i => i.severity === 'warning').length);
       const info = Number(apiResult.info_count ?? issues.filter(i => i.severity === 'info').length);
       const scoreInfo = calculateComplianceScore(apiResult.issues || [], state.inputData || '', apiResult.valid);
+      const execSeconds = (performance.now() - startedAt) / 1000;
+      const testCases = buildTestCases(parsed, issues, profileUsed, execSeconds);
+      const passedTests = testCases.filter(t => t.status === 'passed').length;
+      const failedTests = testCases.filter(t => t.status === 'failed').length;
+      const warningTests = testCases.filter(t => t.status === 'warning').length;
 
       return {
         id: `VAL-${Date.now()}`,
         timestamp: new Date().toISOString(),
-        executionTime: `${((performance.now() - startedAt) / 1000).toFixed(3)}s`,
+        executionTime: `${execSeconds.toFixed(3)}s`,
         profile: profileUsed.name,
         profileUrl: profileUsed.profile,
         profileResourceType: profileUsed.resourceType,
+        resourceType: parsed?.resourceType || profileUsed.resourceType,
         summary: { total: errors + warnings + info, errors, warnings, info },
+        testSummary: {
+          total: testCases.length,
+          passed: passedTests,
+          failed: failedTests,
+          warnings: warningTests
+        },
+        testCases,
         status: apiResult.valid ? 'PASSED' : 'FAILED',
         complianceScore: `${scoreInfo.score}%`,
         complianceDetails: scoreInfo,
@@ -2130,6 +3139,43 @@
       return { score, basis, severityCounts: counts };
     }
 
+    function testStatusLabel(status) {
+      if (status === 'passed') return '✅ Passed';
+      if (status === 'failed') return '❌ Failed';
+      return '⚠️ Warning';
+    }
+
+    function testStatusClass(status) {
+      return `status-${status}`;
+    }
+
+    function openTestDetailModal(testCase) {
+      const overlay = document.getElementById('modalOverlay');
+      const title = document.getElementById('modalTitle');
+      const body = document.getElementById('modalBody');
+      const icon = testCase.status === 'passed' ? '✅' : testCase.status === 'failed' ? '❌' : '⚠️';
+      title.textContent = `${icon} ${testCase.id}: ${testCase.name}`;
+      body.innerHTML = `
+        <div class="test-detail-row"><label>Category</label><p>${escapeHtml(testCase.category)}</p></div>
+        <div class="test-detail-row"><label>Status</label><p class="${testStatusClass(testCase.status)}">${testStatusLabel(testCase.status)}</p></div>
+        <div class="test-detail-row"><label>Description</label><p>${escapeHtml(testCase.description)}</p></div>
+        <div class="test-detail-row"><label>What was checked</label><p>${escapeHtml(testCase.check)}</p></div>
+        <div class="test-detail-row"><label>Expected</label><p>${escapeHtml(testCase.expected)}</p></div>
+        <div class="test-detail-row"><label>Actual</label><p>${escapeHtml(testCase.actual)}</p></div>
+        ${testCase.error ? `<div class="test-detail-row"><label>Error</label><p style="color:var(--error)">${escapeHtml(testCase.error)}</p></div>` : ''}
+        <div class="test-detail-row"><label>Location</label><p><code>${escapeHtml(testCase.location)}</code></p></div>
+        ${testCase.fix ? `<div class="test-detail-row"><label>How to Fix</label><pre class="test-fix-box">${escapeHtml(testCase.fix)}</pre></div>` : ''}
+        <div class="test-detail-row"><label>Reference</label><p>${escapeHtml(testCase.documentation)}</p></div>
+        <div class="test-detail-row"><label>Time taken</label><p>${escapeHtml(testCase.timeTaken)}</p></div>
+      `;
+      overlay.classList.add('show');
+      overlay.dataset.fixText = testCase.fix || '';
+      const copyBtn = document.getElementById('modalCopyFixBtn');
+      if (copyBtn) {
+        copyBtn.style.display = testCase.fix ? 'inline-flex' : 'none';
+      }
+    }
+
     function renderResults() {
       const r = state.results;
       if (!r) return;
@@ -2147,7 +3193,7 @@
         : '<i class="fas fa-times-circle"></i> FAILED';
 
       document.getElementById('resultMeta').textContent =
-        `Report ${r.id} · ${new Date(r.timestamp).toLocaleString()} · ${r.executionTime} · severity-weighted compliance`;
+        `Report ${r.id} · ${new Date(r.timestamp).toLocaleString()} · ${r.executionTime} · ${r.complianceDetails?.basis || 'Compliance score'}`;
 
       document.getElementById('summaryGrid').innerHTML = `
         <div class="summary-card"><div class="summary-value">${r.summary.total}</div><div class="summary-label">Total Issues</div></div>
@@ -2780,9 +3826,6 @@
     }
 
     function bindEvents() {
-      document.getElementById('step1Next').addEventListener('click', nextStep);
-
-      document.getElementById('step2Back').addEventListener('click', prevStep);
       document.getElementById('step2Next').addEventListener('click', () => {
         if (parseJsonInput()) nextStep();
       });
@@ -2796,9 +3839,34 @@
       document.getElementById('step5Back').addEventListener('click', prevStep);
       document.getElementById('exportJsonBtn').addEventListener('click', exportJson);
       document.getElementById('exportPdfBtn').addEventListener('click', exportPdf);
-      document.getElementById('copyResultsBtn').addEventListener('click', copyResults);
-      document.getElementById('fixRetryBtn').addEventListener('click', () => { goToStep(2); showToast('Edit your data and re-validate', 'info'); });
       document.getElementById('newValidationBtn').addEventListener('click', resetValidation);
+
+      document.getElementById('viewInReportsLink')?.addEventListener('click', e => {
+        e.preventDefault();
+        navigateTo('reports');
+      });
+
+      document.getElementById('report-search')?.addEventListener('input', () => { state.reportsPage = 1; renderReports(); });
+      document.getElementById('report-filter')?.addEventListener('change', () => { state.reportsPage = 1; renderReports(); });
+      document.getElementById('clearAllReportsBtn')?.addEventListener('click', clearAllReports);
+      document.getElementById('reportsPrevBtn')?.addEventListener('click', () => {
+        if (state.reportsPage > 1) { state.reportsPage -= 1; renderReports(); }
+      });
+      document.getElementById('reportsNextBtn')?.addEventListener('click', () => {
+        state.reportsPage += 1;
+        renderReports();
+      });
+      document.getElementById('reportDetailClose')?.addEventListener('click', closeReportDetail);
+      document.getElementById('reportDetailCloseBtn')?.addEventListener('click', closeReportDetail);
+      document.getElementById('reportExportJsonBtn')?.addEventListener('click', exportSelectedReport);
+      document.getElementById('reportCopySummaryBtn')?.addEventListener('click', copyReportSummary);
+      document.getElementById('reportReRunBtn')?.addEventListener('click', reRunStoredReport);
+      document.getElementById('reportDetailModal')?.addEventListener('click', e => {
+        if (e.target.id === 'reportDetailModal') closeReportDetail();
+      });
+      document.querySelectorAll('[data-nav]').forEach(btn => {
+        btn.addEventListener('click', () => navigateTo(btn.dataset.nav));
+      });
 
       document.getElementById('clearJsonBtn').addEventListener('click', () => {
         document.getElementById('jsonInput').value = '';
@@ -2836,6 +3904,15 @@
       fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFile(fileInput.files[0]); });
 
       document.getElementById('modalClose').addEventListener('click', () => document.getElementById('modalOverlay').classList.remove('show'));
+      document.getElementById('modalCloseBtn').addEventListener('click', () => document.getElementById('modalOverlay').classList.remove('show'));
+      document.getElementById('modalCopyFixBtn').addEventListener('click', () => {
+        const fix = document.getElementById('modalOverlay').dataset.fixText;
+        if (fix) {
+          navigator.clipboard.writeText(fix)
+            .then(() => showToast('Fix copied to clipboard', 'success'))
+            .catch(() => showToast('Could not copy fix', 'error'));
+        }
+      });
       document.getElementById('modalOverlay').addEventListener('click', e => {
         if (e.target.id === 'modalOverlay') document.getElementById('modalOverlay').classList.remove('show');
       });

@@ -2,9 +2,7 @@
   "resourceType": "Patient",
   "id": "sample-valid-complete",
   "meta": {
-    "profile": [
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
-    ]
+    "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]
   },
   "identifier": [
     {
@@ -28,10 +26,7 @@
     {
       "use": "official",
       "family": "Baxter",
-      "given": [
-        "Amy",
-        "V."
-      ]
+      "given": ["Amy", "V."]
     }
   ],
   "telecom": [
@@ -50,9 +45,7 @@
   "address": [
     {
       "use": "home",
-      "line": [
-        "183 Mountain View St"
-      ],
+      "line": ["183 Mountain View St"],
       "city": "Mounds",
       "state": "OK",
       "postalCode": "74048",

@@ -5,11 +5,10 @@ services:
     ports:
       - "4567:4567"
     environment:
-      DISABLE_TX: "false"
-      TX_SERVER_URL: https://tx.fhir.org/r4
-      DISPLAY_ISSUES_ARE_WARNINGS: "false"
+      DISABLE_TX: "true"
+      DISPLAY_ISSUES_ARE_WARNINGS: "true"
     volumes:
-      - ./igs:/igs
+      - ./igs:/home/igs
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4567/version"]
       interval: 30s
