@@ -1,0 +1,12 @@
+{
+  "resourceType": "Patient",
+  "id": "parity-no-identifier",
+  "name": [
+    {
+      "family": "NoId",
+      "given": ["Patient"]
+    }
+  ],
+  "gender": "other",
+  "birthDate": "2000-12-31"
+}

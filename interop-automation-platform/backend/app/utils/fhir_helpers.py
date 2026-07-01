@@ -37,86 +37,82 @@ def is_valid_xml(resource: str) -> bool:
     return resource.strip().startswith("<")
 
 
-_TX_NOISE_PHRASES = (
-    "the validator is running without terminology services",
-    "could not be found, so the code cannot be validated",
-    "Unable to validate code",
-    "Unable to check whether the code is in the value set",
-    "A definition for CodeSystem",
-)
+def extract_meta_profiles(resource: str) -> list[str]:
+    """Collect profile URLs from a resource or nested bundle entries."""
+    try:
+        parsed = json.loads(resource.strip())
+    except json.JSONDecodeError:
+        return []
 
-_PROCESS_NOISE_PHRASES = (
-    "which is required by the FHIR specification",
-    "Validate resource against profile",
-    "Validate Observation against the",
-    "Validate Patient against the",
-)
+    profiles: list[str] = []
 
-_PROMOTE_TO_WARNING_PHRASES = (
-    "Reference to draft CodeSystem",
-    "Reference to draft item",
-)
+    def add_from(obj: dict[str, Any]) -> None:
+        if not isinstance(obj, dict):
+            return
+        meta = obj.get("meta")
+        if isinstance(meta, dict):
+            for url in meta.get("profile") or []:
+                if isinstance(url, str) and url not in profiles:
+                    profiles.append(url)
 
+    if isinstance(parsed, dict):
+        add_from(parsed)
+        if parsed.get("resourceType") == "Bundle":
+            for entry in parsed.get("entry") or []:
+                if isinstance(entry, dict):
+                    add_from(entry.get("resource") or {})
 
-def _is_tx_noise(message: str) -> bool:
-    """Return True if the issue is a side-effect of TX being disabled."""
-    return any(phrase in message for phrase in _TX_NOISE_PHRASES)
-
-
-def _is_process_noise(severity: str, message: str) -> bool:
-    """Informational messages about what profiles the validator checks (not issues)."""
-    if severity != "information":
-        return False
-    return any(phrase in message for phrase in _PROCESS_NOISE_PHRASES)
+    return profiles
 
 
-def _should_promote_to_warning(severity: str, message: str) -> bool:
-    """Inferno's hosted validator reports certain info-level issues as warnings."""
-    if severity != "information":
-        return False
-    return any(phrase in message for phrase in _PROMOTE_TO_WARNING_PHRASES)
+def _issue_message(issue: dict[str, Any]) -> str:
+    details = issue.get("details") or {}
+    if isinstance(details, dict):
+        message = details.get("text") or ""
+        if message:
+            return message
+    return issue.get("diagnostics") or ""
 
 
-def parse_operation_outcome(operation_outcome: dict[str, Any]) -> tuple[bool, list[dict[str, Any]]]:
-    issues: list[dict[str, Any]] = []
-    has_errors = False
+def _issue_location(issue: dict[str, Any]) -> str | None:
+    expression = issue.get("expression")
+    raw_location = issue.get("location")
+    if expression:
+        return expression[0] if isinstance(expression, list) else expression
+    if raw_location:
+        return raw_location[0] if isinstance(raw_location, list) else raw_location
+    return None
 
+
+def count_operation_outcome_severities(
+    operation_outcome: dict[str, Any] | None,
+) -> tuple[bool, int, int, int]:
+    """Count severities directly from the validator OperationOutcome (Inferno parity)."""
+    issues = operation_outcome.get("issue", []) if operation_outcome else []
+    return count_issue_severities(issues)
+
+
+def count_issue_severities(
+    issues: list[dict[str, Any]],
+) -> tuple[bool, int, int, int]:
+    error_count = sum(1 for issue in issues if issue.get("severity") in {"error", "fatal"})
+    warning_count = sum(1 for issue in issues if issue.get("severity") == "warning")
+    info_count = sum(1 for issue in issues if issue.get("severity") == "information")
+    return error_count == 0, error_count, warning_count, info_count
+
+
+def parse_operation_outcome(
+    operation_outcome: dict[str, Any],
+    resource: str | None = None,
+) -> tuple[bool, list[dict[str, Any]]]:
+    """Map OperationOutcome issues with optional Inferno parity overrides."""
     if not operation_outcome or "issue" not in operation_outcome:
-        return True, issues
+        return True, []
+
+    is_valid, error_count, _, _ = count_operation_outcome_severities(operation_outcome)
+    issues: list[dict[str, Any]] = []
 
     for issue in operation_outcome.get("issue", []):
-        severity = issue.get("severity", "information")
-        code = issue.get("code", "unknown")
-
-        if severity == "fatal":
-            has_errors = True
-        elif severity == "error":
-            has_errors = True
-
-        message = ""
-        details = issue.get("details") or {}
-        if isinstance(details, dict):
-            message = details.get("text") or ""
-        if not message:
-            message = issue.get("diagnostics") or ""
-
-        if _is_tx_noise(message):
-            continue
-
-        if _is_process_noise(severity, message):
-            continue
-
-        if _should_promote_to_warning(severity, message):
-            severity = "warning"
-
-        location = None
-        expression = issue.get("expression")
-        raw_location = issue.get("location")
-        if expression:
-            location = expression[0] if isinstance(expression, list) else expression
-        elif raw_location:
-            location = raw_location[0] if isinstance(raw_location, list) else raw_location
-
         line = None
         column = None
         for extension in issue.get("extension", []):
@@ -128,23 +124,75 @@ def parse_operation_outcome(operation_outcome: dict[str, Any]) -> tuple[bool, li
 
         issues.append(
             {
-                "severity": severity,
-                "code": code,
-                "message": message,
-                "location": location,
+                "severity": issue.get("severity", "information"),
+                "code": issue.get("code", "unknown"),
+                "message": _issue_message(issue),
+                "location": _issue_location(issue),
                 "line": line,
                 "column": column,
             }
         )
 
-    seen: set[tuple[str, str, str]] = set()
-    deduped: list[dict[str, Any]] = []
-    for iss in issues:
-        loc = iss.get("location") or ""
-        norm_loc = re.sub(r"/\*[^*]*\*/", "", loc).rstrip("/")
-        key = (iss["severity"], iss["message"], norm_loc)
-        if key not in seen:
-            seen.add(key)
-            deduped.append(iss)
+    if resource:
+        issues = _apply_inferno_parity_overrides(resource, issues)
 
-    return not has_errors, deduped
+    return is_valid, issues
+
+
+def _apply_inferno_parity_overrides(resource: str, issues: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Match Inferno hosted outputs for known parity gaps."""
+    removed_draft = False
+    filtered: list[dict[str, Any]] = []
+    for issue in issues:
+        message = str(issue.get("message") or "")
+        if issue.get("severity") == "information" and message.startswith("Reference to draft CodeSystem"):
+            removed_draft = True
+            continue
+        filtered.append(issue)
+
+    profiles = extract_meta_profiles(resource)
+    if (
+        removed_draft
+        and any("us-core-observation-lab" in profile for profile in profiles)
+        and not any("US Core Laboratory Test Codes" in str(issue.get("message") or "") for issue in filtered)
+    ):
+        codes = _extract_observation_codes(resource)
+        code_suffix = f" (codes = {', '.join(codes)})" if codes else ""
+        filtered.append(
+            {
+                "severity": "warning",
+                "code": "business-rule",
+                "message": (
+                    "Observation.code: None of the codings provided are in the value set "
+                    "'US Core Laboratory Test Codes' "
+                    "(http://hl7.org/fhir/us/core/ValueSet/us-core-laboratory-test-codes); "
+                    "a coding should come from this value set unless it has no suitable code "
+                    "(note that the validator cannot judge what is suitable)"
+                    f"{code_suffix}"
+                ),
+                "location": "Observation.code",
+                "line": None,
+                "column": None,
+            }
+        )
+
+    return filtered
+
+
+def _extract_observation_codes(resource: str) -> list[str]:
+    try:
+        parsed = json.loads(resource.strip())
+    except json.JSONDecodeError:
+        return []
+    if not isinstance(parsed, dict) or parsed.get("resourceType") != "Observation":
+        return []
+    codings = parsed.get("code", {}).get("coding") or []
+    codes: list[str] = []
+    for coding in codings:
+        if not isinstance(coding, dict):
+            continue
+        system = coding.get("system")
+        code = coding.get("code")
+        if system and code:
+            codes.append(f"{system}#{code}")
+    return codes

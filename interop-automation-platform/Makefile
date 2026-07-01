@@ -39,6 +39,10 @@ down:
 logs:
 	docker compose logs -f
 
+parity-check:
+	@echo "Running Inferno parity check on all JSON samples..."
+	cd backend && python scripts/parity_check_all_samples.py
+
 test:
 	@echo "Running tests..."
 	docker compose exec backend pytest tests/ -v

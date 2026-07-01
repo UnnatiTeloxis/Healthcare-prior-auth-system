@@ -1,0 +1,56 @@
+{
+  "resourceType": "Bundle",
+  "id": "complex-searchset-bundle",
+  "type": "searchset",
+  "total": 2,
+  "link": [
+    {
+      "relation": "self",
+      "url": "https://r4.smarthealthit.org/Patient?name=Smith&_count=2"
+    },
+    {
+      "relation": "next",
+      "url": "https://r4.smarthealthit.org/Patient?name=Smith&_count=2&_offset=2"
+    }
+  ],
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:c1d2e3f4-a5b6-4789-c012-3456789abcde",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "search-1",
+        "name": [
+          {
+            "family": "Smith",
+            "given": ["Alice"]
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1988-04-12"
+      },
+      "search": {
+        "mode": "match",
+        "score": 1.0
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d2e3f4a5-b6c7-4890-d123-456789abcdef",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "search-2",
+        "name": [
+          {
+            "family": "Smith",
+            "given": ["Bob"]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1991-09-03"
+      },
+      "search": {
+        "mode": "match",
+        "score": 0.85
+      }
+    }
+  ]
+}

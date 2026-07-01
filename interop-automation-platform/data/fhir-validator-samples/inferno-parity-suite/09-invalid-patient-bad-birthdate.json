@@ -1,0 +1,12 @@
+{
+  "resourceType": "Patient",
+  "id": "parity-invalid-birthdate",
+  "name": [
+    {
+      "family": "BadDate",
+      "given": ["Test"]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "15-06-1985"
+}

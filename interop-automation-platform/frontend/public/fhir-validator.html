@@ -413,6 +413,181 @@
     }
     .file-name.show { display: block; }
 
+    /* Mode selector */
+    .mode-selector {
+      display: flex;
+      gap: 0.5rem;
+      background: #f1f5f9;
+      border-radius: 12px;
+      padding: 0.25rem;
+      margin-bottom: 1.25rem;
+      width: fit-content;
+    }
+    .mode-btn {
+      padding: 0.5rem 1.25rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      background: transparent;
+      color: #64748b;
+    }
+    .mode-btn.active {
+      background: #fff;
+      color: #1e293b;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .mode-btn:hover:not(.active) { color: #1e293b; }
+
+    /* Batch upload */
+    .batch-drop-zone {
+      padding: 2.5rem 1.5rem;
+      min-height: 200px;
+    }
+    .batch-drop-zone .drop-icon {
+      font-size: 3rem;
+      margin-bottom: 0.75rem;
+    }
+    .batch-drop-zone .drop-hint {
+      font-size: 0.8125rem;
+      color: #94a3b8;
+      margin-top: 0.25rem;
+    }
+    .file-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.625rem;
+      margin: 1rem 0;
+    }
+    .file-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #f8fafc;
+      padding: 0.5rem 0.875rem;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      font-size: 0.8125rem;
+      transition: all var(--transition);
+    }
+    .file-chip .file-icon { font-size: 1.125rem; }
+    .file-chip .file-name { font-weight: 600; color: #1e293b; }
+    .file-chip .file-size { color: #94a3b8; font-size: 0.75rem; }
+    .file-chip .file-status { font-size: 0.875rem; }
+    .file-chip .remove-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 0.125rem 0.375rem;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    .file-chip .remove-btn:hover {
+      background: #f1f5f9;
+      color: #ef4444;
+    }
+    .batch-summary {
+      display: flex;
+      gap: 1.5rem;
+      padding: 0.75rem 0;
+      border-top: 1px solid #e2e8f0;
+      margin-top: 0.75rem;
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+    .batch-summary strong { color: #1e293b; }
+
+    /* Batch progress */
+    .batch-progress-list { margin-top: 1rem; }
+    .batch-progress-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      background: #f8fafc;
+      border-radius: 8px;
+      margin-bottom: 0.625rem;
+      border-left: 4px solid #e2e8f0;
+    }
+    .batch-progress-item .file-icon { font-size: 1.25rem; }
+    .batch-progress-item .file-info { flex: 1; }
+    .batch-progress-item .file-name { font-weight: 600; color: #1e293b; }
+    .batch-progress-item .file-status-text { font-size: 0.8125rem; color: #64748b; }
+    .batch-progress-item .file-score {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .batch-progress-item .file-score.passed { color: #10b981; }
+    .batch-progress-item .file-score.failed { color: #ef4444; }
+    .batch-progress-item .file-score.checking { color: #3b82f6; animation: pulse 1s infinite; }
+
+    /* Batch results */
+    .batch-results-summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .batch-file-results {
+      background: #fff;
+      border-radius: 16px;
+      padding: 1.25rem;
+      box-shadow: 0 4px 20px rgba(26,86,219,0.08);
+    }
+    .batch-file-results table { width: 100%; border-collapse: collapse; }
+    .batch-file-results th {
+      text-align: left;
+      padding: 0.625rem 0.75rem;
+      font-weight: 700;
+      color: #64748b;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .batch-file-results td {
+      padding: 0.625rem 0.75rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .file-status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .file-status-badge.passed { background: #d1fae5; color: #065f46; }
+    .file-status-badge.failed { background: #fecaca; color: #991b1b; }
+    .batch-file-results .view-btn {
+      background: #eff6ff;
+      border: none;
+      padding: 0.25rem 0.75rem;
+      border-radius: 6px;
+      color: #3b82f6;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .batch-file-results .view-btn:hover { background: #dbeafe; }
+    .export-all-btn {
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      padding: 0.625rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .export-all-btn:hover { background: #2563eb; }
+
     /* Buttons */
     .btn-row {
       display: flex;
@@ -618,7 +793,8 @@
     }
     .issue-card.error { border-left: 4px solid var(--error); }
     .issue-card.warning { border-left: 4px solid var(--warning); }
-    .issue-card.info { border-left: 4px solid var(--info); }
+    .issue-card.info,
+    .issue-card.information { border-left: 4px solid var(--info); }
     .issue-header {
       display: flex;
       align-items: center;
@@ -639,7 +815,8 @@
     }
     .severity-pill.error { background: rgba(239,68,68,0.15); color: var(--error); }
     .severity-pill.warning { background: rgba(245,158,11,0.15); color: #b45309; }
-    .severity-pill.info { background: rgba(59,130,246,0.15); color: var(--info); }
+    .severity-pill.info,
+    .severity-pill.information { background: rgba(59,130,246,0.15); color: var(--info); }
     .issue-msg { font-weight: 600; font-size: 0.9375rem; }
     .issue-location { font-size: 0.8125rem; color: var(--text-muted); font-family: monospace; }
     .issue-body {
@@ -1473,31 +1650,52 @@
       <div class="card">
         <h2 class="card-title" id="step2Title">Provide FHIR Resource Data</h2>
         <p class="card-subtitle">Paste JSON or upload a file (.json / .xml).</p>
-        <div class="tabs" role="tablist">
-          <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tabPaste" id="tabPasteBtn" data-tab="paste">Paste JSON</button>
-          <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tabUpload" id="tabUploadBtn" data-tab="upload">Upload File</button>
+        <div class="mode-selector" id="modeSelector">
+          <button class="mode-btn active" type="button" data-mode="single">Single File</button>
+          <button class="mode-btn" type="button" data-mode="batch">Batch Mode</button>
         </div>
-        <div class="tab-panel active" id="tabPaste" role="tabpanel">
-          <div class="json-editor-wrap">
-            <div class="json-editor-header">
-              <span><i class="fas fa-code"></i> FHIR Resource JSON</span>
-              <button class="btn btn-ghost" type="button" id="clearJsonBtn" style="min-height:32px;padding:0.25rem 0.75rem;font-size:0.8125rem;">Clear</button>
-            </div>
-            <div class="json-editor-body">
-              <div class="line-numbers" id="lineNumbers" aria-hidden="true">1</div>
-              <textarea class="json-textarea" id="jsonInput" spellcheck="false" aria-label="FHIR JSON input"></textarea>
-            </div>
+        <div id="single-upload-area">
+          <div class="tabs" role="tablist">
+            <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tabPaste" id="tabPasteBtn" data-tab="paste">Paste JSON</button>
+            <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tabUpload" id="tabUploadBtn" data-tab="upload">Upload File</button>
           </div>
-          <p id="jsonError" style="color:var(--error);font-size:0.875rem;margin-top:0.5rem;display:none;" role="alert"></p>
+          <div class="tab-panel active" id="tabPaste" role="tabpanel">
+            <div class="json-editor-wrap">
+              <div class="json-editor-header">
+                <span><i class="fas fa-code"></i> FHIR Resource JSON</span>
+                <button class="btn btn-ghost" type="button" id="clearJsonBtn" style="min-height:32px;padding:0.25rem 0.75rem;font-size:0.8125rem;">Clear</button>
+              </div>
+              <div class="json-editor-body">
+                <div class="line-numbers" id="lineNumbers" aria-hidden="true">1</div>
+                <textarea class="json-textarea" id="jsonInput" spellcheck="false" aria-label="FHIR JSON input"></textarea>
+              </div>
+            </div>
+            <p id="jsonError" style="color:var(--error);font-size:0.875rem;margin-top:0.5rem;display:none;" role="alert"></p>
+          </div>
+          <div class="tab-panel" id="tabUpload" role="tabpanel">
+            <div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-label="Upload FHIR file">
+              <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+              <p>Drag & drop your FHIR file here</p>
+              <button class="btn btn-secondary" type="button" id="browseBtn">Browse Files</button>
+              <input type="file" id="fileInput" accept=".json,.xml" hidden />
+            </div>
+            <div class="file-name" id="fileName"></div>
+          </div>
         </div>
-        <div class="tab-panel" id="tabUpload" role="tabpanel">
-          <div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-label="Upload FHIR file">
-            <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
-            <p>Drag & drop your FHIR file here</p>
-            <button class="btn btn-secondary" type="button" id="browseBtn">Browse Files</button>
-            <input type="file" id="fileInput" accept=".json,.xml" hidden />
+        <div id="batch-upload-area" style="display:none;">
+          <div class="drop-zone batch-drop-zone" id="batchDropZone" tabindex="0" role="button" aria-label="Upload multiple FHIR files">
+            <div class="drop-icon">📁</div>
+            <p>Drop multiple FHIR files here or click to browse</p>
+            <p class="drop-hint">Supports .json and .xml files</p>
+            <button class="btn btn-secondary" type="button" id="batchBrowseBtn">Browse Files</button>
+            <input type="file" id="batchFileInput" multiple accept=".json,.xml" hidden />
           </div>
-          <div class="file-name" id="fileName"></div>
+          <div id="fileList" class="file-list"></div>
+          <button class="btn btn-ghost" type="button" id="batchAddMoreBtn" style="padding:0.35rem 0.75rem;font-size:0.8125rem;">+ Add More Files</button>
+          <div class="batch-summary">
+            <span>Total Files: <strong id="batchTotalFiles">0</strong></span>
+            <span>Total Size: <strong id="batchTotalSize">0 KB</strong></span>
+          </div>
         </div>
         <div class="btn-row">
           <button class="btn btn-primary" type="button" id="step2Next">Next: Validate <i class="fas fa-arrow-right"></i></button>
@@ -1511,6 +1709,7 @@
         <h2 class="card-title" id="step3Title">Review & Run Validation</h2>
         <p class="card-subtitle" id="step3Subtitle">Confirm settings before running conformance checks.</p>
         <div class="validate-summary" id="validateSummary"></div>
+        <div class="validate-summary" id="batchValidateSummary" style="display:none;"></div>
         <div id="validateIdle">
           <div class="btn-row">
             <button class="btn btn-secondary" type="button" id="step3Back"><i class="fas fa-arrow-left"></i> Back</button>
@@ -1532,6 +1731,7 @@
               <div class="progress-bar-fill" id="progress-fill"></div>
             </div>
             <div id="rule-list" class="rule-list"></div>
+            <div id="batchProgressList" class="batch-progress-list" style="display:none;"></div>
           </div>
         </div>
       </div>
@@ -1541,33 +1741,60 @@
     <section class="step-panel" id="step4" aria-labelledby="step4Title">
       <div class="card">
         <h2 class="card-title" id="step4Title">Validation Results</h2>
-        <div class="results-header">
-          <div class="compliance-ring" aria-label="Compliance score">
-            <svg width="120" height="120" viewBox="0 0 120 120">
-              <defs>
-                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" style="stop-color:#1a56db"/>
-                  <stop offset="100%" style="stop-color:#06b6d4"/>
-                </linearGradient>
-              </defs>
-              <circle class="bg" cx="60" cy="60" r="52"/>
-              <circle class="progress" id="complianceCircle" cx="60" cy="60" r="52"
-                stroke-dasharray="326.73" stroke-dashoffset="326.73"/>
-            </svg>
-            <div class="compliance-text">
-              <span class="score" id="complianceScore">0%</span>
-              <span class="label">COMPLIANCE</span>
+        <div id="singleResults">
+          <div class="results-header">
+            <div class="compliance-ring" aria-label="Compliance score">
+              <svg width="120" height="120" viewBox="0 0 120 120">
+                <defs>
+                  <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#1a56db"/>
+                    <stop offset="100%" style="stop-color:#06b6d4"/>
+                  </linearGradient>
+                </defs>
+                <circle class="bg" cx="60" cy="60" r="52"/>
+                <circle class="progress" id="complianceCircle" cx="60" cy="60" r="52"
+                  stroke-dasharray="326.73" stroke-dashoffset="326.73"/>
+              </svg>
+              <div class="compliance-text">
+                <span class="score" id="complianceScore">0%</span>
+                <span class="label">COMPLIANCE</span>
+              </div>
+            </div>
+            <div>
+              <div class="status-badge failed" id="statusBadge"><i class="fas fa-times-circle"></i> FAILED</div>
+              <p style="margin-top:0.75rem;color:var(--text-muted);font-size:0.875rem;" id="resultMeta"></p>
             </div>
           </div>
-          <div>
-            <div class="status-badge failed" id="statusBadge"><i class="fas fa-times-circle"></i> FAILED</div>
-            <p style="margin-top:0.75rem;color:var(--text-muted);font-size:0.875rem;" id="resultMeta"></p>
+          <div class="summary-grid" id="summaryGrid"></div>
+          <div class="severity-chart" id="severityChart" aria-label="Severity distribution"></div>
+          <div class="filter-row" id="filterRow"></div>
+          <div class="issue-list" id="issueList"></div>
+        </div>
+        <div id="batchResults" style="display:none;">
+          <div class="batch-results-summary" id="batchSummaryGrid"></div>
+          <div class="batch-file-results">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>File Name</th>
+                    <th>Status</th>
+                    <th>Score</th>
+                    <th>Errors</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="batchResultsBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="btn-row" style="margin-top:1.25rem;">
+            <button class="export-all-btn" type="button" id="batchExportAllBtn"><i class="fas fa-file-archive"></i> Export All Reports</button>
+            <button class="btn btn-secondary" type="button" id="batchCopySummaryBtn"><i class="fas fa-copy"></i> Copy Summary</button>
+            <button class="btn btn-primary" type="button" id="batchRunAgainBtn"><i class="fas fa-redo"></i> Run Again</button>
           </div>
         </div>
-        <div class="summary-grid" id="summaryGrid"></div>
-        <div class="severity-chart" id="severityChart" aria-label="Severity distribution"></div>
-        <div class="filter-row" id="filterRow"></div>
-        <div class="issue-list" id="issueList"></div>
         <p class="results-hint">Full history with all test cases is saved automatically. <a href="#" id="viewInReportsLink">View in Reports →</a></p>
         <div class="btn-row">
           <button class="btn btn-secondary" type="button" id="step4Back"><i class="fas fa-arrow-left"></i> Back</button>
@@ -1581,7 +1808,7 @@
       <div class="card">
         <h2 class="card-title" id="step5Title">Export & Next Steps</h2>
         <p class="card-subtitle">Download reports or start a new validation.</p>
-        <div class="actions-grid">
+        <div class="actions-grid" id="singleActionsGrid">
           <div class="action-card" id="exportJsonBtn" tabindex="0" role="button">
             <i class="fas fa-file-code"></i>
             <h4>Export Report (JSON)</h4>
@@ -1596,6 +1823,23 @@
             <i class="fas fa-redo"></i>
             <h4>Start New Validation</h4>
             <p>Reset and begin again</p>
+          </div>
+        </div>
+        <div class="actions-grid" id="batchActionsGrid" style="display:none;">
+          <div class="action-card" id="exportAllJsonBtn" tabindex="0" role="button">
+            <i class="fas fa-file-archive"></i>
+            <h4>Export All Reports</h4>
+            <p>Download batch results (JSON)</p>
+          </div>
+          <div class="action-card" id="copyBatchSummaryBtn" tabindex="0" role="button">
+            <i class="fas fa-copy"></i>
+            <h4>Copy Batch Summary</h4>
+            <p>Copy batch overview to clipboard</p>
+          </div>
+          <div class="action-card" id="newBatchValidationBtn" tabindex="0" role="button">
+            <i class="fas fa-redo"></i>
+            <h4>Start New Validation</h4>
+            <p>Validate another batch of files</p>
           </div>
         </div>
         <div class="btn-row">
@@ -2000,7 +2244,12 @@
       currentPage: 'validator',
       inputData: SAMPLE_PATIENT,
       inputMethod: 'paste',
+      mode: 'single',
       uploadedFileName: null,
+      batchFiles: [],
+      batchResults: null,
+      isBatchRunning: false,
+      viewingBatchFile: false,
       results: null,
       activeFilter: 'all',
       activeProfile: ACTIVE_PROFILE,
@@ -2017,6 +2266,9 @@
       updateLineNumbers();
       refreshActiveProfile();
       bindEvents();
+      updateModePanels();
+      renderBatchFileList();
+      renderValidateSummary();
       navigateTo('validator', false);
     }
 
@@ -2051,6 +2303,125 @@
         renderReports();
       }
       if (scroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function setMode(mode) {
+      if (!mode || state.mode === mode) return;
+      state.mode = mode;
+      state.inputMethod = mode === 'batch' ? 'batch' : (state.inputMethod === 'batch' ? 'paste' : state.inputMethod);
+      if (mode === 'batch') {
+        state.viewingBatchFile = false;
+      }
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+      });
+      const singleArea = document.getElementById('single-upload-area');
+      const batchArea = document.getElementById('batch-upload-area');
+      if (singleArea) singleArea.style.display = mode === 'single' ? '' : 'none';
+      if (batchArea) batchArea.style.display = mode === 'batch' ? '' : 'none';
+      const nextBtn = document.getElementById('step2Next');
+      if (nextBtn) {
+        nextBtn.innerHTML = mode === 'batch'
+          ? 'Next: Validate All <i class="fas fa-arrow-right"></i>'
+          : 'Next: Validate <i class="fas fa-arrow-right"></i>';
+      }
+      const runBtn = document.getElementById('runValidationBtn');
+      if (runBtn) {
+        runBtn.innerHTML = mode === 'batch'
+          ? '<i class="fas fa-play"></i> Run Batch Validation'
+          : '<i class="fas fa-play"></i> Run Validation';
+      }
+      updateModePanels();
+      renderValidateSummary();
+    }
+
+    function updateModePanels() {
+      const singleResults = document.getElementById('singleResults');
+      const batchResults = document.getElementById('batchResults');
+      const singleActions = document.getElementById('singleActionsGrid');
+      const batchActions = document.getElementById('batchActionsGrid');
+      const step4Title = document.getElementById('step4Title');
+      const showSingle = state.mode === 'single' || state.viewingBatchFile;
+      const showBatch = state.mode === 'batch' && !state.viewingBatchFile;
+      if (singleResults) singleResults.style.display = showSingle ? '' : 'none';
+      if (batchResults) batchResults.style.display = showBatch ? '' : 'none';
+      if (singleActions) singleActions.style.display = showSingle ? '' : 'none';
+      if (batchActions) batchActions.style.display = showBatch ? '' : 'none';
+      if (step4Title) {
+        step4Title.textContent = showBatch ? 'Batch Results' : 'Validation Results';
+      }
+    }
+
+    function formatFileSize(bytes) {
+      if (!bytes) return '0 KB';
+      if (bytes < 1024) return `${bytes} B`;
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+
+    function addBatchFiles(fileList) {
+      const files = Array.from(fileList || []);
+      if (!files.length) return;
+      files.forEach(file => {
+        const valid = file.name.endsWith('.json') || file.name.endsWith('.xml');
+        if (!valid) {
+          showToast(`Skipped ${file.name} — only .json or .xml files are supported.`, 'warning');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = e => {
+          state.batchFiles.push({
+            id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            name: file.name,
+            size: file.size,
+            content: e.target.result,
+            status: 'pending',
+            result: null,
+            error: null,
+            reportId: null
+          });
+          state.inputMethod = 'batch';
+          renderBatchFileList();
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    function renderBatchFileList() {
+      const container = document.getElementById('fileList');
+      if (!container) return;
+      if (!state.batchFiles.length) {
+        container.innerHTML = '';
+        updateBatchSummary();
+        return;
+      }
+      container.innerHTML = state.batchFiles.map((file, index) => `
+        <div class="file-chip">
+          <span class="file-icon">📄</span>
+          <span class="file-name">${escapeHtml(file.name)}</span>
+          <span class="file-size">${formatFileSize(file.size)}</span>
+          <span class="file-status">${file.status === 'done' ? (file.result?.status === 'PASSED' ? '✅' : '❌') : '⏳'}</span>
+          <button class="remove-btn" type="button" data-remove-batch="${index}" aria-label="Remove ${escapeHtml(file.name)}">×</button>
+        </div>
+      `).join('');
+      container.querySelectorAll('[data-remove-batch]').forEach(btn => {
+        btn.addEventListener('click', () => removeBatchFile(Number(btn.dataset.removeBatch)));
+      });
+      updateBatchSummary();
+      if (state.currentStep === 1) renderValidateSummary();
+    }
+
+    function removeBatchFile(index) {
+      state.batchFiles.splice(index, 1);
+      renderBatchFileList();
+    }
+
+    function updateBatchSummary() {
+      const totalFiles = state.batchFiles.length;
+      const totalSize = state.batchFiles.reduce((sum, file) => sum + (file.size || 0), 0);
+      const filesEl = document.getElementById('batchTotalFiles');
+      const sizeEl = document.getElementById('batchTotalSize');
+      if (filesEl) filesEl.textContent = String(totalFiles);
+      if (sizeEl) sizeEl.textContent = formatFileSize(totalSize);
     }
 
     function getReports() {
@@ -2114,7 +2485,12 @@
         issues: results.issues || [],
         sourceText: results.sourceText || '',
         complianceDetails: results.complianceDetails || null,
-        apiSummary: results.apiSummary || ''
+        apiSummary: results.apiSummary || '',
+        batch: Boolean(results.batch),
+        batchId: results.batchId || null,
+        batchCount: results.batchCount || null,
+        batchFiles: results.batchFiles || null,
+        sourceFileName: results.sourceFileName || ''
       };
     }
 
@@ -2129,7 +2505,8 @@
         const matchesSearch = !search
           || report.id.toLowerCase().includes(search)
           || (report.resourceType || '').toLowerCase().includes(search)
-          || (report.profile || '').toLowerCase().includes(search);
+          || (report.profile || '').toLowerCase().includes(search)
+          || (report.sourceFileName || '').toLowerCase().includes(search);
         const matchesFilter = filter === 'all'
           || (filter === 'passed' && report.status === 'PASSED')
           || (filter === 'failed' && report.status === 'FAILED');
@@ -2175,24 +2552,33 @@
           </td></tr>`;
         tbody.querySelector('[data-nav]')?.addEventListener('click', () => navigateTo('validator'));
       } else {
-        tbody.innerHTML = pageReports.map((report, idx) => `
-          <tr>
-            <td>${start + idx + 1}</td>
-            <td><strong>${escapeHtml(report.id)}</strong></td>
-            <td>${escapeHtml(report.formattedDate)}</td>
-            <td>${escapeHtml(report.resourceType)}</td>
-            <td>${escapeHtml(report.profile)}</td>
-            <td><span class="status-badge ${report.status === 'PASSED' ? 'passed' : 'failed'}">${report.status === 'PASSED' ? '✅ Passed' : '❌ Failed'}</span></td>
-            <td><span class="score-bar ${scoreBarClass(report.score)}">${report.score}%</span></td>
-            <td>${report.summary?.total ?? report.testCases?.length ?? 0}</td>
-            <td>
-              <div class="action-btns">
-                <button type="button" class="action-btn view-btn" data-view-report="${escapeHtml(report.id)}" title="View report">📋</button>
-                <button type="button" class="action-btn delete-btn" data-delete-report="${escapeHtml(report.id)}" title="Delete">🗑️</button>
-              </div>
-            </td>
-          </tr>
-        `).join('');
+        tbody.innerHTML = pageReports.map((report, idx) => {
+          const resourceLabel = report.batch
+            ? `${report.batchCount || report.summary?.total || 0} Files`
+            : report.resourceType;
+          const profileLabel = report.batch ? 'Batch Validation' : report.profile;
+          const totalTests = report.batch
+            ? (report.batchCount || report.summary?.total || 0)
+            : (report.summary?.total ?? report.testCases?.length ?? 0);
+          return `
+            <tr>
+              <td>${start + idx + 1}</td>
+              <td><strong>${escapeHtml(report.id)}</strong></td>
+              <td>${escapeHtml(report.formattedDate)}</td>
+              <td>${escapeHtml(resourceLabel)}</td>
+              <td>${escapeHtml(profileLabel)}</td>
+              <td><span class="status-badge ${report.status === 'PASSED' ? 'passed' : 'failed'}">${report.status === 'PASSED' ? '✅ Passed' : '❌ Failed'}</span></td>
+              <td><span class="score-bar ${scoreBarClass(report.score)}">${report.score}%</span></td>
+              <td>${totalTests}</td>
+              <td>
+                <div class="action-btns">
+                  <button type="button" class="action-btn view-btn" data-view-report="${escapeHtml(report.id)}" title="View report">📋</button>
+                  <button type="button" class="action-btn delete-btn" data-delete-report="${escapeHtml(report.id)}" title="Delete">🗑️</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
         tbody.querySelectorAll('[data-view-report]').forEach(btn => {
           btn.addEventListener('click', () => openReportDetail(btn.dataset.viewReport));
         });
@@ -2215,62 +2601,113 @@
       state.selectedReportId = reportId;
 
       document.getElementById('modal-report-title').textContent = `${report.id} — Full Report`;
-      const ts = report.summary || {};
-      const testCases = report.testCases || [];
+      if (report.batch) {
+        const files = report.batchFiles || [];
+        const passed = files.filter(f => f.status === 'PASSED').length;
+        const failed = files.length - passed;
+        const passRate = files.length ? Math.round((passed / files.length) * 100) : 0;
+        const avgScore = files.length
+          ? Math.round(files.reduce((sum, f) => sum + (Number(f.score || 0)), 0) / files.length)
+          : 0;
 
-      document.getElementById('report-detail-body').innerHTML = `
-        <div class="report-detail-meta">
-          <div><strong>Report ID:</strong> ${escapeHtml(report.id)}</div>
-          <div><strong>Date:</strong> ${escapeHtml(report.formattedDate)}</div>
-          <div><strong>Resource:</strong> ${escapeHtml(report.resourceType)} &nbsp;|&nbsp; <strong>Profile:</strong> ${escapeHtml(report.profile)}</div>
-          <div><strong>Status:</strong> ${report.status === 'PASSED' ? '✅ PASSED' : '❌ FAILED'} &nbsp;|&nbsp; <strong>Score:</strong> ${report.score}%</div>
-          <div><strong>Execution Time:</strong> ${escapeHtml(report.executionTime)}</div>
-        </div>
-        <div class="summary-stats" style="margin-bottom:1.25rem;">
-          <div class="stat-card"><span class="stat-number">${ts.total || testCases.length}</span><span class="stat-label">Total Tests</span></div>
-          <div class="stat-card passed"><span class="stat-number">${ts.passed || 0}</span><span class="stat-label">✅ Passed</span></div>
-          <div class="stat-card failed"><span class="stat-number">${ts.failed || 0}</span><span class="stat-label">❌ Failed</span></div>
-          <div class="stat-card warning"><span class="stat-number">${ts.warnings || 0}</span><span class="stat-label">⚠️ Warnings</span></div>
-        </div>
-        <h3 style="margin:0 0 0.75rem;font-size:1rem;">Test Case Results</h3>
-        <div class="table-container">
-          <table class="test-table">
-            <thead><tr><th>ID</th><th>Test Name</th><th>Category</th><th>Status</th><th>Details</th></tr></thead>
-            <tbody>
-              ${testCases.map((tc, i) => `
-                <tr>
-                  <td><code>${escapeHtml(tc.id)}</code></td>
-                  <td>${escapeHtml(tc.name)}</td>
-                  <td>${escapeHtml(tc.category)}</td>
-                  <td class="${testStatusClass(tc.status)}">${testStatusLabel(tc.status)}</td>
-                  <td><button type="button" class="view-details-btn" data-report-tc="${i}">View</button></td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-        ${(report.issues || []).length ? `
-          <h3 style="margin:1.25rem 0 0.75rem;font-size:1rem;">Validator Issues (${report.issues.length})</h3>
+        document.getElementById('report-detail-body').innerHTML = `
+          <div class="report-detail-meta">
+            <div><strong>Report ID:</strong> ${escapeHtml(report.id)}</div>
+            <div><strong>Date:</strong> ${escapeHtml(report.formattedDate)}</div>
+            <div><strong>Resource:</strong> ${files.length} Files &nbsp;|&nbsp; <strong>Profile:</strong> Batch Validation</div>
+            <div><strong>Status:</strong> ${report.status === 'PASSED' ? '✅ PASSED' : '❌ FAILED'} &nbsp;|&nbsp; <strong>Avg Score:</strong> ${avgScore}%</div>
+            <div><strong>Execution Time:</strong> ${escapeHtml(report.executionTime)}</div>
+          </div>
+          <div class="summary-stats" style="margin-bottom:1.25rem;">
+            <div class="stat-card"><span class="stat-number">${files.length}</span><span class="stat-label">Total Files</span></div>
+            <div class="stat-card passed"><span class="stat-number">${passed}</span><span class="stat-label">✅ Passed</span></div>
+            <div class="stat-card failed"><span class="stat-number">${failed}</span><span class="stat-label">❌ Failed</span></div>
+            <div class="stat-card warning"><span class="stat-number">${passRate}%</span><span class="stat-label">Pass Rate</span></div>
+          </div>
+          <h3 style="margin:0 0 0.75rem;font-size:1rem;">File Results</h3>
           <div class="table-container">
             <table class="test-table">
-              <thead><tr><th>Severity</th><th>Location</th><th>Message</th></tr></thead>
+              <thead><tr><th>#</th><th>File</th><th>Status</th><th>Score</th><th>Errors</th><th>Actions</th></tr></thead>
               <tbody>
-                ${report.issues.slice(0, 50).map(issue => `
+                ${files.map((file, i) => `
                   <tr>
-                    <td class="${testStatusClass(issue.severity === 'error' ? 'failed' : issue.severity === 'warning' ? 'warning' : 'passed')}">${escapeHtml(issue.severity)}</td>
-                    <td><code>${escapeHtml(issue.location || issue.rawLocation || '')}</code></td>
-                    <td>${escapeHtml(decodeHtmlEntities(issue.message || ''))}</td>
+                    <td>${i + 1}</td>
+                    <td>${escapeHtml(file.name || 'Untitled')}</td>
+                    <td class="${file.status === 'PASSED' ? 'status-passed' : 'status-failed'}">${file.status === 'PASSED' ? '✅ Passed' : '❌ Failed'}</td>
+                    <td>${file.score || 0}%</td>
+                    <td>${file.errors ?? 0}</td>
+                    <td>${file.reportId ? `<button type="button" class="view-details-btn" data-batch-view="${escapeHtml(file.reportId)}">View</button>` : '—'}</td>
                   </tr>
                 `).join('')}
               </tbody>
             </table>
           </div>
-        ` : ''}
-      `;
+        `;
 
-      document.getElementById('report-detail-body').querySelectorAll('[data-report-tc]').forEach(btn => {
-        btn.addEventListener('click', () => openTestDetailModal(testCases[Number(btn.dataset.reportTc)]));
-      });
+        document.getElementById('report-detail-body').querySelectorAll('[data-batch-view]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            closeReportDetail();
+            openBatchFileResult(btn.dataset.batchView);
+          });
+        });
+      } else {
+        const ts = report.summary || {};
+        const testCases = report.testCases || [];
+
+        document.getElementById('report-detail-body').innerHTML = `
+          <div class="report-detail-meta">
+            <div><strong>Report ID:</strong> ${escapeHtml(report.id)}</div>
+            <div><strong>Date:</strong> ${escapeHtml(report.formattedDate)}</div>
+            <div><strong>Resource:</strong> ${escapeHtml(report.resourceType)} &nbsp;|&nbsp; <strong>Profile:</strong> ${escapeHtml(report.profile)}</div>
+            <div><strong>Status:</strong> ${report.status === 'PASSED' ? '✅ PASSED' : '❌ FAILED'} &nbsp;|&nbsp; <strong>Score:</strong> ${report.score}%</div>
+            <div><strong>Execution Time:</strong> ${escapeHtml(report.executionTime)}</div>
+          </div>
+          <div class="summary-stats" style="margin-bottom:1.25rem;">
+            <div class="stat-card"><span class="stat-number">${ts.total || testCases.length}</span><span class="stat-label">Total Tests</span></div>
+            <div class="stat-card passed"><span class="stat-number">${ts.passed || 0}</span><span class="stat-label">✅ Passed</span></div>
+            <div class="stat-card failed"><span class="stat-number">${ts.failed || 0}</span><span class="stat-label">❌ Failed</span></div>
+            <div class="stat-card warning"><span class="stat-number">${ts.warnings || 0}</span><span class="stat-label">⚠️ Warnings</span></div>
+          </div>
+          <h3 style="margin:0 0 0.75rem;font-size:1rem;">Test Case Results</h3>
+          <div class="table-container">
+            <table class="test-table">
+              <thead><tr><th>ID</th><th>Test Name</th><th>Category</th><th>Status</th><th>Details</th></tr></thead>
+              <tbody>
+                ${testCases.map((tc, i) => `
+                  <tr>
+                    <td><code>${escapeHtml(tc.id)}</code></td>
+                    <td>${escapeHtml(tc.name)}</td>
+                    <td>${escapeHtml(tc.category)}</td>
+                    <td class="${testStatusClass(tc.status)}">${testStatusLabel(tc.status)}</td>
+                    <td><button type="button" class="view-details-btn" data-report-tc="${i}">View</button></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          ${(report.issues || []).length ? `
+            <h3 style="margin:1.25rem 0 0.75rem;font-size:1rem;">Validator Issues (${report.issues.length})</h3>
+            <div class="table-container">
+              <table class="test-table">
+                <thead><tr><th>Severity</th><th>Location</th><th>Message</th></tr></thead>
+                <tbody>
+                  ${report.issues.slice(0, 50).map(issue => `
+                    <tr>
+                      <td class="${testStatusClass(issue.severity === 'error' ? 'failed' : issue.severity === 'warning' ? 'warning' : 'passed')}">${escapeHtml(issue.severity)}</td>
+                      <td><code>${escapeHtml(issue.location || issue.rawLocation || '')}</code></td>
+                      <td>${escapeHtml(decodeHtmlEntities(issue.message || ''))}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          ` : ''}
+        `;
+
+        document.getElementById('report-detail-body').querySelectorAll('[data-report-tc]').forEach(btn => {
+          btn.addEventListener('click', () => openTestDetailModal(testCases[Number(btn.dataset.reportTc)]));
+        });
+      }
 
       document.getElementById('reportDetailModal').classList.add('show');
     }
@@ -2295,13 +2732,21 @@
     function copyReportSummary() {
       const report = getReports().find(r => r.id === state.selectedReportId);
       if (!report) return;
-      const text = [
-        `Report: ${report.id}`,
-        `Date: ${report.formattedDate}`,
-        `Resource: ${report.resourceType} | Profile: ${report.profile}`,
-        `Status: ${report.status} | Score: ${report.score}%`,
-        `Tests: ${report.summary?.passed}/${report.summary?.total} passed, ${report.summary?.failed} failed`
-      ].join('\n');
+      const text = report.batch
+        ? [
+            `Report: ${report.id}`,
+            `Date: ${report.formattedDate}`,
+            `Batch: ${report.batchCount || report.summary?.total || 0} files`,
+            `Status: ${report.status} | Avg Score: ${report.score}%`,
+            `Passed: ${report.summary?.passed || 0}, Failed: ${report.summary?.failed || 0}`
+          ].join('\n')
+        : [
+            `Report: ${report.id}`,
+            `Date: ${report.formattedDate}`,
+            `Resource: ${report.resourceType} | Profile: ${report.profile}`,
+            `Status: ${report.status} | Score: ${report.score}%`,
+            `Tests: ${report.summary?.passed}/${report.summary?.total} passed, ${report.summary?.failed} failed`
+          ].join('\n');
       navigator.clipboard.writeText(text)
         .then(() => showToast('Summary copied', 'success'))
         .catch(() => showToast('Could not copy summary', 'error'));
@@ -2309,11 +2754,34 @@
 
     function reRunStoredReport() {
       const report = getReports().find(r => r.id === state.selectedReportId);
+      closeReportDetail();
+      if (report?.batch) {
+        if (!report.batchFiles?.length) {
+          showToast('Batch source data not available for this report', 'error');
+          return;
+        }
+        state.batchFiles = report.batchFiles.map(file => ({
+          id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          name: file.name,
+          size: file.size || (file.sourceText ? file.sourceText.length : 0),
+          content: file.sourceText || '',
+          status: 'pending',
+          result: null,
+          error: null,
+          reportId: null
+        }));
+        setMode('batch');
+        renderBatchFileList();
+        navigateTo('validator');
+        goToStep(2);
+        showToast('Loaded batch files — review and run validation', 'info');
+        return;
+      }
       if (!report?.sourceText) {
         showToast('Source data not available for this report', 'error');
         return;
       }
-      closeReportDetail();
+      setMode('single');
       state.inputData = report.sourceText;
       document.getElementById('jsonInput').value = report.sourceText;
       updateLineNumbers();
@@ -2354,7 +2822,15 @@
       state.currentStep = step;
       renderSteps();
       if (step === 2) renderValidateSummary();
-      if (step === 3 && state.results) renderResults();
+      if (step === 3) {
+        if (state.viewingBatchFile && state.results) {
+          renderResults();
+        } else if (state.mode === 'batch' && state.batchResults) {
+          renderBatchResults();
+        } else if (state.results) {
+          renderResults();
+        }
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -2368,9 +2844,14 @@
     }
 
     function parseJsonInput() {
-      const raw = document.getElementById('jsonInput').value.trim();
+      let raw = document.getElementById('jsonInput').value.trim();
+      if (!raw && state.inputData) {
+        raw = String(state.inputData).trim();
+      }
       if (!raw) {
-        showJsonError('Please enter FHIR JSON data.');
+        showJsonError(state.inputMethod === 'upload'
+          ? 'Please upload a FHIR JSON or XML file.'
+          : 'Please enter FHIR JSON data.');
         return null;
       }
       try {
@@ -2394,6 +2875,34 @@
     }
 
     function renderValidateSummary() {
+      const step3Title = document.getElementById('step3Title');
+      const step3Subtitle = document.getElementById('step3Subtitle');
+      if (state.mode === 'batch') {
+        if (step3Title) step3Title.textContent = 'Review & Run Batch Validation';
+        if (step3Subtitle) step3Subtitle.textContent = 'Confirm files before running batch conformance checks.';
+        const batchSummary = document.getElementById('batchValidateSummary');
+        const singleSummary = document.getElementById('validateSummary');
+        if (singleSummary) singleSummary.style.display = 'none';
+        if (batchSummary) {
+          const totalFiles = state.batchFiles.length;
+          const totalSize = state.batchFiles.reduce((sum, file) => sum + (file.size || 0), 0);
+          batchSummary.style.display = '';
+          batchSummary.innerHTML = `
+            <div class="validate-summary-item"><span>Total Files</span><strong>${totalFiles}</strong></div>
+            <div class="validate-summary-item"><span>Total Size</span><strong>${formatFileSize(totalSize)}</strong></div>
+            <div class="validate-summary-item"><span>Mode</span><strong>Batch Validation</strong></div>
+            <div class="validate-summary-item"><span>Status</span><strong>${totalFiles ? 'Ready to validate' : 'Add files to continue'}</strong></div>
+          `;
+        }
+        return;
+      }
+
+      const singleSummary = document.getElementById('validateSummary');
+      const batchSummary = document.getElementById('batchValidateSummary');
+      if (batchSummary) batchSummary.style.display = 'none';
+      if (singleSummary) singleSummary.style.display = '';
+      if (step3Title) step3Title.textContent = 'Review & Run Validation';
+      if (step3Subtitle) step3Subtitle.textContent = 'Confirm settings before running conformance checks.';
       let size = new Blob([state.inputData]).size;
       let resourceType = ACTIVE_PROFILE.resourceType;
       let profile = getSelectedProfile();
@@ -2830,6 +3339,7 @@
     function beginValidationUI(profileUsed) {
       document.getElementById('validateIdle').style.display = 'none';
       document.getElementById('validateSummary').style.display = 'none';
+      document.getElementById('batchValidateSummary').style.display = 'none';
       document.getElementById('validateLoading').style.display = 'block';
       document.getElementById('step3Title').textContent = 'Validating Your Resource';
       document.getElementById('step3Subtitle').textContent = `Checking your FHIR resource against ${profileUsed.name} profile...`;
@@ -2839,18 +3349,27 @@
         validationIcon.textContent = '🔄';
         validationIcon.classList.add('spinning');
       }
+      document.getElementById('rule-list').style.display = '';
+      document.getElementById('batchProgressList').style.display = 'none';
       initValidationProgress(profileUsed);
     }
 
     function resetValidationUI() {
       document.getElementById('validateIdle').style.display = 'block';
       document.getElementById('validateLoading').style.display = 'none';
-      document.getElementById('validateSummary').style.display = '';
-      document.getElementById('step3Title').textContent = 'Review & Run Validation';
-      document.getElementById('step3Subtitle').textContent = 'Confirm settings before running conformance checks.';
+      document.getElementById('validateSummary').style.display = state.mode === 'single' ? '' : 'none';
+      document.getElementById('batchValidateSummary').style.display = state.mode === 'batch' ? '' : 'none';
+      document.getElementById('step3Title').textContent = state.mode === 'batch'
+        ? 'Review & Run Batch Validation'
+        : 'Review & Run Validation';
+      document.getElementById('step3Subtitle').textContent = state.mode === 'batch'
+        ? 'Confirm files before running batch conformance checks.'
+        : 'Confirm settings before running conformance checks.';
       document.getElementById('stepBadge').textContent = STEP_TITLES[1];
       updateValidationProgress(0);
       document.getElementById('rule-list').innerHTML = '';
+      document.getElementById('rule-list').style.display = '';
+      document.getElementById('batchProgressList').style.display = 'none';
       const validationIcon = document.getElementById('validationIcon');
       if (validationIcon) {
         validationIcon.textContent = '🔄';
@@ -2905,6 +3424,8 @@
       }
 
       const startedAt = performance.now();
+      state.batchResults = null;
+      state.viewingBatchFile = false;
       const profileUsed = resolveProfileForResource(parsed);
       state.activeProfile = profileUsed;
       renderProfileInfo(profileUsed);
@@ -2918,7 +3439,7 @@
       state.ruleOutcomes = null;
       state.apiValidationError = null;
 
-      const apiPromise = submitValidation(parsed, profileUsed)
+      const apiPromise = submitValidation(state.inputData, parsed, profileUsed)
         .then(apiResult => {
           state.ruleOutcomes = evaluateRulesFromApiResult(apiResult, profileUsed, parsed);
           return apiResult;
@@ -2947,7 +3468,7 @@
         document.getElementById('validationIcon').classList.remove('spinning');
         document.getElementById('validationIcon').textContent = '✅';
 
-        state.results = normalizeValidationResult(apiResult, startedAt, profileUsed, parsed);
+        state.results = normalizeValidationResult(apiResult, startedAt, profileUsed, parsed, state.inputData);
         state.results.profile = profileUsed.name;
         saveValidationReport(state.results);
 
@@ -2966,9 +3487,324 @@
       }
     }
 
-    async function submitValidation(parsed, profileUsed) {
+    function extractXmlResourceType(text) {
+      const match = String(text || '').match(/<\s*([A-Za-z][A-Za-z0-9:-]*)\b/);
+      if (!match) return null;
+      const raw = match[1] || '';
+      return raw.includes(':') ? raw.split(':').pop() : raw;
+    }
+
+    function parseResourceText(text) {
+      const raw = String(text || '').trim();
+      if (!raw) return { parsed: null, error: 'Empty file content.' };
+      if (raw.startsWith('<')) {
+        const resourceType = extractXmlResourceType(raw);
+        return { parsed: { resourceType: resourceType || 'Resource' }, error: null, isXml: true };
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        return { parsed, error: null, isXml: false };
+      } catch (error) {
+        return { parsed: { resourceType: 'Resource' }, error: `Invalid JSON: ${error.message}` };
+      }
+    }
+
+    function buildBatchErrorResult(file, message, batchId) {
+      return {
+        id: `VAL-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        timestamp: new Date().toISOString(),
+        executionTime: '0.000s',
+        profile: 'FHIR base',
+        profileUrl: '',
+        profileResourceType: 'Resource',
+        resourceType: 'Resource',
+        summary: { total: 1, errors: 1, warnings: 0, info: 0 },
+        testSummary: { total: 0, passed: 0, failed: 0, warnings: 0 },
+        testCases: [],
+        status: 'FAILED',
+        complianceScore: '0%',
+        complianceDetails: { score: 0, basis: message, severityCounts: { fatal: 0, error: 1, warning: 0, info: 0 } },
+        issues: [{
+          severity: 'error',
+          code: 'invalid',
+          location: 'Resource',
+          rawLocation: 'Resource',
+          message,
+          suggestion: 'Fix the file content and try again.',
+          jsonPath: '$',
+          example: '',
+          documentation: 'Validation input could not be parsed.'
+        }],
+        sourceText: file.content || '',
+        apiSummary: '',
+        operationOutcome: null,
+        batchId,
+        sourceFileName: file.name || ''
+      };
+    }
+
+    function beginBatchValidationUI() {
+      document.getElementById('validateIdle').style.display = 'none';
+      document.getElementById('validateSummary').style.display = 'none';
+      document.getElementById('batchValidateSummary').style.display = 'none';
+      document.getElementById('validateLoading').style.display = 'block';
+      document.getElementById('step3Title').textContent = 'Validating Batch Files';
+      document.getElementById('step3Subtitle').textContent = `Validating ${state.batchFiles.length} files...`;
+      document.getElementById('stepBadge').textContent = 'Step 3 of 4: Validating';
+      const validationIcon = document.getElementById('validationIcon');
+      if (validationIcon) {
+        validationIcon.textContent = '🔄';
+        validationIcon.classList.add('spinning');
+      }
+      updateValidationProgress(0);
+      document.getElementById('rule-list').style.display = 'none';
+      document.getElementById('batchProgressList').style.display = '';
+      renderBatchProgressList();
+    }
+
+    function renderBatchProgressList() {
+      const container = document.getElementById('batchProgressList');
+      if (!container) return;
+      container.innerHTML = state.batchFiles.map(file => {
+        const status = file.status || 'pending';
+        const score = file.result?.complianceScore || '--';
+        const scoreValue = String(score).replace('%', '');
+        const statusLabel = status === 'validating'
+          ? 'Checking rules...'
+          : status === 'done'
+            ? 'Complete'
+            : 'Waiting...';
+        const scoreClass = status === 'done'
+          ? (file.result?.status === 'PASSED' ? 'passed' : 'failed')
+          : 'checking';
+        const icon = status === 'done'
+          ? (file.result?.status === 'PASSED' ? '✅' : '❌')
+          : status === 'validating'
+            ? '🔄'
+            : '⏳';
+        return `
+          <div class="batch-progress-item">
+            <span class="file-icon">${icon}</span>
+            <div class="file-info">
+              <div class="file-name">${escapeHtml(file.name)}</div>
+              <div class="file-status-text">${statusLabel}</div>
+            </div>
+            <div class="file-score ${scoreClass}">${status === 'done' ? `${scoreValue}%` : '--'}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function runBatchValidation() {
+      if (!state.batchFiles.length) {
+        showToast('Please add at least one file to validate.', 'warning');
+        return;
+      }
+
+      state.isBatchRunning = true;
+      state.batchResults = null;
+      state.results = null;
+      state.viewingBatchFile = false;
+      updateModePanels();
+      beginBatchValidationUI();
+
+      const batchId = `BATCH-${Date.now()}`;
+      let completed = 0;
+      const total = state.batchFiles.length;
+
+      for (let i = 0; i < state.batchFiles.length; i += 1) {
+        const file = state.batchFiles[i];
+        file.status = 'validating';
+        renderBatchProgressList();
+        updateValidationSubtitle(`Validating ${file.name} (${i + 1}/${total})...`);
+        updateValidationProgress((completed / total) * 100);
+
+        const startedAt = performance.now();
+        const parseOutcome = parseResourceText(file.content);
+        const parsed = parseOutcome.parsed || { resourceType: 'Resource' };
+        const profileUsed = resolveProfileForResource(parsed);
+        try {
+          if (parseOutcome.error && !parseOutcome.isXml) {
+            file.result = buildBatchErrorResult(file, parseOutcome.error, batchId);
+          } else {
+            const apiResult = await submitValidation(file.content, parsed, profileUsed);
+            const result = normalizeValidationResult(apiResult, startedAt, profileUsed, parsed, file.content, {
+              id: `VAL-${Date.now()}-${i + 1}`,
+              batchId,
+              sourceFileName: file.name
+            });
+            file.result = result;
+          }
+        } catch (error) {
+          file.result = buildBatchErrorResult(file, error.message || 'Validation failed.', batchId);
+        }
+
+        file.status = 'done';
+        const stored = buildStoredReport(file.result);
+        addReport(stored);
+        file.reportId = stored.id;
+
+        completed += 1;
+        updateValidationProgress((completed / total) * 100);
+        renderBatchProgressList();
+      }
+
+      state.isBatchRunning = false;
+      state.batchResults = buildBatchReport(batchId);
+      addReport(state.batchResults);
+      renderBatchFileList();
+      updateValidationSubtitle('Preparing batch results...');
+      updateValidationProgress(100);
+      await delay(600);
+      resetValidationUI();
+      goToStep(3);
+      renderBatchResults();
+      showToast('Batch validation complete!', 'success');
+    }
+
+    function buildBatchReport(batchId) {
+      const files = state.batchFiles.map(file => ({
+        name: file.name,
+        size: file.size,
+        status: file.result?.status || 'FAILED',
+        score: parseInt(String(file.result?.complianceScore || '0'), 10) || 0,
+        errors: file.result?.summary?.errors ?? 0,
+        reportId: file.reportId,
+        sourceText: file.content || ''
+      }));
+      const passed = files.filter(file => file.status === 'PASSED').length;
+      const failed = files.length - passed;
+      const avgScore = files.length
+        ? Math.round(files.reduce((sum, file) => sum + (file.score || 0), 0) / files.length)
+        : 0;
+      const resultPayload = {
+        id: batchId,
+        timestamp: new Date().toISOString(),
+        executionTime: '—',
+        profile: 'Batch Validation',
+        profileUrl: '',
+        profileResourceType: 'Batch',
+        resourceType: 'Batch',
+        summary: { total: 0, errors: 0, warnings: 0, info: 0 },
+        testSummary: {
+          total: files.length,
+          passed,
+          failed,
+          warnings: 0
+        },
+        testCases: [],
+        status: failed > 0 ? 'FAILED' : 'PASSED',
+        complianceScore: `${avgScore}%`,
+        complianceDetails: { score: avgScore, basis: 'Average compliance score across batch.', severityCounts: { fatal: 0, error: 0, warning: 0, info: 0 } },
+        issues: [],
+        sourceText: '',
+        apiSummary: '',
+        operationOutcome: null,
+        batch: true,
+        batchId,
+        batchCount: files.length,
+        batchFiles: files
+      };
+      return buildStoredReport(resultPayload);
+    }
+
+    function renderBatchResults() {
+      if (!state.batchResults) return;
+      updateModePanels();
+      const batch = state.batchResults;
+      const total = batch.batchCount || batch.summary?.total || 0;
+      const passed = batch.summary?.passed || 0;
+      const failed = batch.summary?.failed || 0;
+      const passRate = total ? Math.round((passed / total) * 100) : 0;
+
+      const summaryGrid = document.getElementById('batchSummaryGrid');
+      if (summaryGrid) {
+        summaryGrid.innerHTML = `
+          <div class="stat-card"><span class="stat-number">${total}</span><span class="stat-label">Total Files</span></div>
+          <div class="stat-card passed"><span class="stat-number">${passed}</span><span class="stat-label">✅ Passed</span></div>
+          <div class="stat-card failed"><span class="stat-number">${failed}</span><span class="stat-label">❌ Failed</span></div>
+          <div class="stat-card warning"><span class="stat-number">${passRate}%</span><span class="stat-label">Pass Rate</span></div>
+        `;
+      }
+
+      const tbody = document.getElementById('batchResultsBody');
+      if (tbody) {
+        tbody.innerHTML = (batch.batchFiles || []).map((file, index) => `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${escapeHtml(file.name || 'Untitled')}</td>
+            <td><span class="file-status-badge ${file.status === 'PASSED' ? 'passed' : 'failed'}">${file.status === 'PASSED' ? '✅ Passed' : '❌ Failed'}</span></td>
+            <td>${file.score || 0}%</td>
+            <td>${file.errors ?? 0}</td>
+            <td>
+              ${file.reportId ? `<button type="button" class="view-btn" data-batch-view="${escapeHtml(file.reportId)}">View</button>` : '—'}
+            </td>
+          </tr>
+        `).join('');
+        tbody.querySelectorAll('[data-batch-view]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (btn.dataset.batchView) openBatchFileResult(btn.dataset.batchView);
+          });
+        });
+      }
+    }
+
+    function exportBatchResults() {
+      if (!state.batchResults) return;
+      const payload = {
+        batch: state.batchResults,
+        files: state.batchFiles.map(file => ({
+          name: file.name,
+          size: file.size,
+          status: file.result?.status || 'FAILED',
+          report: file.result || null
+        }))
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `fhir-batch-${state.batchResults.id}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showToast('Batch report downloaded!', 'success');
+    }
+
+    function copyBatchSummary() {
+      if (!state.batchResults) return;
+      const total = state.batchResults.batchCount || state.batchResults.summary?.total || 0;
+      const passed = state.batchResults.summary?.passed || 0;
+      const failed = state.batchResults.summary?.failed || 0;
+      const text = [
+        `Batch: ${state.batchResults.id}`,
+        `Total files: ${total}`,
+        `Passed: ${passed}`,
+        `Failed: ${failed}`,
+        `Average score: ${state.batchResults.complianceScore}`
+      ].join('\n');
+      navigator.clipboard.writeText(text)
+        .then(() => showToast('Batch summary copied', 'success'))
+        .catch(() => showToast('Could not copy summary', 'error'));
+    }
+
+    function openBatchFileResult(reportId) {
+      const report = getReports().find(r => r.id === reportId);
+      if (!report) {
+        showToast('Report not found for this file.', 'error');
+        return;
+      }
+      state.results = report;
+      state.activeFilter = 'all';
+      state.viewingBatchFile = true;
+      updateModePanels();
+      navigateTo('validator');
+      goToStep(3);
+      renderResults();
+      showToast(`Viewing results for ${report.sourceFileName || report.id}`, 'info');
+    }
+
+    async function submitValidation(resourceText, parsed, profileUsed) {
       const request = {
-        resource: state.inputData,
+        resource: resourceText,
         profiles: profileUsed.profile ? [profileUsed.profile] : [],
         resource_type: parsed.resourceType || profileUsed.resourceType
       };
@@ -3000,12 +3836,15 @@
       throw lastError || new Error('Validation API is unavailable');
     }
 
-    function normalizeValidationResult(apiResult, startedAt, profileUsed, parsed) {
+    function normalizeValidationResult(apiResult, startedAt, profileUsed, parsed, sourceText, overrides = {}) {
       const issues = (apiResult.issues || []).map(normalizeIssue);
       const errors = Number(apiResult.error_count ?? issues.filter(i => i.severity === 'error').length);
       const warnings = Number(apiResult.warning_count ?? issues.filter(i => i.severity === 'warning').length);
-      const info = Number(apiResult.info_count ?? issues.filter(i => i.severity === 'info').length);
-      const scoreInfo = calculateComplianceScore(apiResult.issues || [], state.inputData || '', apiResult.valid);
+      const info = Number(
+        apiResult.info_count
+          ?? issues.filter(i => i.severity === 'information' || i.severity === 'info').length
+      );
+      const scoreInfo = calculateComplianceScore(apiResult.issues || [], sourceText || '', apiResult.valid);
       const execSeconds = (performance.now() - startedAt) / 1000;
       const testCases = buildTestCases(parsed, issues, profileUsed, execSeconds);
       const passedTests = testCases.filter(t => t.status === 'passed').length;
@@ -3013,7 +3852,7 @@
       const warningTests = testCases.filter(t => t.status === 'warning').length;
 
       return {
-        id: `VAL-${Date.now()}`,
+        id: overrides.id || `VAL-${Date.now()}`,
         timestamp: new Date().toISOString(),
         executionTime: `${execSeconds.toFixed(3)}s`,
         profile: profileUsed.name,
@@ -3032,9 +3871,11 @@
         complianceScore: `${scoreInfo.score}%`,
         complianceDetails: scoreInfo,
         issues,
-        sourceText: state.inputData || '',
+        sourceText: sourceText || '',
         apiSummary: apiResult.summary || '',
-        operationOutcome: apiResult.operation_outcome || null
+        operationOutcome: apiResult.operation_outcome || null,
+        batchId: overrides.batchId || null,
+        sourceFileName: overrides.sourceFileName || state.uploadedFileName || ''
       };
     }
 
@@ -3060,9 +3901,9 @@
     }
 
     function normalizeSeverity(severity) {
+      // Inferno groups fatal under Errors; keep information as-is for parity.
       if (severity === 'fatal') return 'error';
-      if (severity === 'information') return 'info';
-      return severity || 'info';
+      return severity || 'information';
     }
 
     function toJsonPath(location) {
@@ -3179,6 +4020,23 @@
     function renderResults() {
       const r = state.results;
       if (!r) return;
+      updateModePanels();
+
+      const summarySource = r.issueSummary || r.summary || {};
+      const summary = {
+        total: 0,
+        errors: 0,
+        warnings: 0,
+        info: 0,
+        ...summarySource
+      };
+      summary.errors = Number(summary.errors) || 0;
+      summary.warnings = Number(summary.warnings) || 0;
+      summary.info = Number(summary.info) || 0;
+      summary.total = Number(summary.total);
+      if (!Number.isFinite(summary.total)) {
+        summary.total = summary.errors + summary.warnings + summary.info;
+      }
 
       const scoreNum = parseInt(r.complianceScore, 10) || 0;
       document.getElementById('complianceScore').textContent = r.complianceScore;
@@ -3192,22 +4050,23 @@
         ? '<i class="fas fa-check-circle"></i> PASSED'
         : '<i class="fas fa-times-circle"></i> FAILED';
 
+      const fileLabel = state.viewingBatchFile && r.sourceFileName ? ` · ${r.sourceFileName}` : '';
       document.getElementById('resultMeta').textContent =
-        `Report ${r.id} · ${new Date(r.timestamp).toLocaleString()} · ${r.executionTime} · ${r.complianceDetails?.basis || 'Compliance score'}`;
+        `Report ${r.id}${fileLabel} · ${new Date(r.timestamp).toLocaleString()} · ${r.executionTime} · ${r.complianceDetails?.basis || 'Compliance score'}`;
 
       document.getElementById('summaryGrid').innerHTML = `
-        <div class="summary-card"><div class="summary-value">${r.summary.total}</div><div class="summary-label">Total Issues</div></div>
-        <div class="summary-card error"><div class="summary-value" style="color:var(--error)">${r.summary.errors}</div><div class="summary-label">Errors</div></div>
-        <div class="summary-card warning"><div class="summary-value" style="color:var(--warning)">${r.summary.warnings}</div><div class="summary-label">Warnings</div></div>
-        <div class="summary-card info"><div class="summary-value" style="color:var(--info)">${r.summary.info}</div><div class="summary-label">Info</div></div>
+        <div class="summary-card"><div class="summary-value">${summary.total}</div><div class="summary-label">Total Issues</div></div>
+        <div class="summary-card error"><div class="summary-value" style="color:var(--error)">${summary.errors}</div><div class="summary-label">Errors</div></div>
+        <div class="summary-card warning"><div class="summary-value" style="color:var(--warning)">${summary.warnings}</div><div class="summary-label">Warnings</div></div>
+        <div class="summary-card info"><div class="summary-value" style="color:var(--info)">${summary.info}</div><div class="summary-label">Information</div></div>
         <div class="summary-card success"><div class="summary-value" style="color:var(--success)">${r.complianceScore}</div><div class="summary-label">Compliance</div></div>
       `;
 
-      const maxCount = Math.max(r.summary.errors, r.summary.warnings, r.summary.info, 1);
+      const maxCount = Math.max(summary.errors, summary.warnings, summary.info, 1);
       document.getElementById('severityChart').innerHTML = `
-        <div class="chart-bar-wrap"><div class="chart-bar error" style="height:${(r.summary.errors / maxCount) * 80}px"></div><span class="chart-label">Errors</span></div>
-        <div class="chart-bar-wrap"><div class="chart-bar warning" style="height:${(r.summary.warnings / maxCount) * 80}px"></div><span class="chart-label">Warnings</span></div>
-        <div class="chart-bar-wrap"><div class="chart-bar info" style="height:${(r.summary.info / maxCount) * 80}px"></div><span class="chart-label">Info</span></div>
+        <div class="chart-bar-wrap"><div class="chart-bar error" style="height:${(summary.errors / maxCount) * 80}px"></div><span class="chart-label">Errors</span></div>
+        <div class="chart-bar-wrap"><div class="chart-bar warning" style="height:${(summary.warnings / maxCount) * 80}px"></div><span class="chart-label">Warnings</span></div>
+        <div class="chart-bar-wrap"><div class="chart-bar info" style="height:${(summary.info / maxCount) * 80}px"></div><span class="chart-label">Information</span></div>
       `;
 
       renderFilters();
@@ -3220,7 +4079,7 @@
         { id: 'all', label: 'All' },
         { id: 'error', label: 'Errors' },
         { id: 'warning', label: 'Warnings' },
-        { id: 'info', label: 'Info' }
+        { id: 'information', label: 'Information' }
       ];
       row.innerHTML = filters.map(f =>
         `<button class="filter-btn ${state.activeFilter === f.id ? 'active' : ''}" data-filter="${f.id}">${f.label}</button>`
@@ -3259,7 +4118,7 @@
         <div class="issue-card ${issue.severity}" style="animation-delay:${idx * 0.06}s" data-idx="${idx}">
           <div class="issue-header" role="button" tabindex="0" aria-expanded="false">
             <div class="issue-left">
-              <span class="severity-pill ${issue.severity}">${issue.severity === 'error' ? '⛔' : issue.severity === 'warning' ? '⚠️' : 'ℹ️'} ${issue.severity}</span>
+              <span class="severity-pill ${issue.severity}">${issue.severity === 'error' ? '⛔' : issue.severity === 'warning' ? '⚠️' : 'ℹ️'} ${issue.severity === 'information' ? 'Information' : issue.severity}</span>
               <div>
                 <div class="issue-msg">${escapeHtml(issue.message)}</div>
                 <div class="issue-location">${issue.location} · ${issue.code}${issue.line ? ' · line ' + issue.line : ''}</div>
@@ -3814,32 +4673,67 @@
 
     function resetValidation() {
       state.results = null;
+      state.batchResults = null;
+      state.batchFiles = [];
+      state.isBatchRunning = false;
+      state.viewingBatchFile = false;
       state.activeFilter = 'all';
-      state.inputData = SAMPLE_PATIENT;
-      state.inputMethod = 'paste';
+      state.inputData = state.mode === 'single' ? SAMPLE_PATIENT : '';
+      state.inputMethod = state.mode === 'single' ? 'paste' : 'batch';
       state.uploadedFileName = null;
-      document.getElementById('jsonInput').value = SAMPLE_PATIENT;
+      document.getElementById('jsonInput').value = state.mode === 'single' ? SAMPLE_PATIENT : '';
       document.getElementById('fileName').classList.remove('show');
       updateLineNumbers();
+      renderBatchFileList();
+      updateModePanels();
       goToStep(1);
+      renderValidateSummary();
       showToast('Ready for new validation', 'info');
     }
 
     function bindEvents() {
       document.getElementById('step2Next').addEventListener('click', () => {
+        if (state.mode === 'batch') {
+          if (!state.batchFiles.length) {
+            showToast('Please add at least one file to validate.', 'warning');
+            return;
+          }
+          nextStep();
+          return;
+        }
         if (parseJsonInput()) nextStep();
       });
 
       document.getElementById('step3Back').addEventListener('click', prevStep);
-      document.getElementById('runValidationBtn').addEventListener('click', runValidation);
+      document.getElementById('runValidationBtn').addEventListener('click', () => {
+        if (state.mode === 'batch') {
+          runBatchValidation();
+        } else {
+          runValidation();
+        }
+      });
 
-      document.getElementById('step4Back').addEventListener('click', prevStep);
+      document.getElementById('step4Back').addEventListener('click', () => {
+        if (state.viewingBatchFile) {
+          state.viewingBatchFile = false;
+          updateModePanels();
+          renderBatchResults();
+          return;
+        }
+        prevStep();
+      });
       document.getElementById('step4Next').addEventListener('click', nextStep);
 
       document.getElementById('step5Back').addEventListener('click', prevStep);
       document.getElementById('exportJsonBtn').addEventListener('click', exportJson);
       document.getElementById('exportPdfBtn').addEventListener('click', exportPdf);
       document.getElementById('newValidationBtn').addEventListener('click', resetValidation);
+      document.getElementById('exportAllJsonBtn')?.addEventListener('click', exportBatchResults);
+      document.getElementById('copyBatchSummaryBtn')?.addEventListener('click', copyBatchSummary);
+      document.getElementById('newBatchValidationBtn')?.addEventListener('click', () => {
+        resetValidation();
+        setMode('batch');
+      });
 
       document.getElementById('viewInReportsLink')?.addEventListener('click', e => {
         e.preventDefault();
@@ -3890,10 +4784,20 @@
         });
       });
 
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => setMode(btn.dataset.mode));
+      });
+
       const dropZone = document.getElementById('dropZone');
       const fileInput = document.getElementById('fileInput');
-      document.getElementById('browseBtn').addEventListener('click', () => fileInput.click());
-      dropZone.addEventListener('click', () => fileInput.click());
+      document.getElementById('browseBtn').addEventListener('click', e => {
+        e.stopPropagation();
+        fileInput.click();
+      });
+      dropZone.addEventListener('click', e => {
+        if (e.target.closest('#browseBtn')) return;
+        fileInput.click();
+      });
       dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
       dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
       dropZone.addEventListener('drop', e => {
@@ -3902,6 +4806,30 @@
         if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
       });
       fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+
+      const batchDropZone = document.getElementById('batchDropZone');
+      const batchFileInput = document.getElementById('batchFileInput');
+      document.getElementById('batchBrowseBtn').addEventListener('click', e => {
+        e.stopPropagation();
+        batchFileInput.click();
+      });
+      document.getElementById('batchAddMoreBtn').addEventListener('click', () => batchFileInput.click());
+      batchDropZone.addEventListener('click', () => batchFileInput.click());
+      batchDropZone.addEventListener('dragover', e => { e.preventDefault(); batchDropZone.classList.add('dragover'); });
+      batchDropZone.addEventListener('dragleave', () => batchDropZone.classList.remove('dragover'));
+      batchDropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        batchDropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) addBatchFiles(e.dataTransfer.files);
+      });
+      batchFileInput.addEventListener('change', () => {
+        if (batchFileInput.files.length) addBatchFiles(batchFileInput.files);
+        batchFileInput.value = '';
+      });
+
+      document.getElementById('batchExportAllBtn')?.addEventListener('click', exportBatchResults);
+      document.getElementById('batchCopySummaryBtn')?.addEventListener('click', copyBatchSummary);
+      document.getElementById('batchRunAgainBtn')?.addEventListener('click', runBatchValidation);
 
       document.getElementById('modalClose').addEventListener('click', () => document.getElementById('modalOverlay').classList.remove('show'));
       document.getElementById('modalCloseBtn').addEventListener('click', () => document.getElementById('modalOverlay').classList.remove('show'));
@@ -3934,12 +4862,14 @@
         if (file.name.endsWith('.json')) {
           document.getElementById('jsonInput').value = e.target.result;
           updateLineNumbers();
-          document.querySelector('[data-tab="paste"]').click();
         }
+        document.getElementById('jsonInput').classList.remove('invalid');
+        document.getElementById('jsonError').style.display = 'none';
         refreshActiveProfile();
         showToast('File loaded: ' + file.name, 'success');
       };
       reader.readAsText(file);
+      document.getElementById('fileInput').value = '';
     }
 
     init();

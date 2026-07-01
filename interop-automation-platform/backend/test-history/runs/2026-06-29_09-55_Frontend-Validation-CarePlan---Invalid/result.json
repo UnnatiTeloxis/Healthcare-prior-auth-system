@@ -1,0 +1,250 @@
+{
+  "meta": {
+    "id": "2026-06-29_09-55_Frontend-Validation-CarePlan---Invalid",
+    "name": "Frontend Validation: CarePlan - Invalid",
+    "timestamp": "2026-06-29T09:55:44"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "CarePlan",
+      "id": "complex-careplan-activities",
+      "status": "active",
+      "intent": "plan",
+      "category": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/careplan-category",
+              "code": "assess-plan",
+              "display": "Assessment and Plan of Treatment"
+            }
+          ],
+          "text": "Assessment and Plan of Treatment"
+        }
+      ],
+      "title": "Diabetes management plan",
+      "description": "Comprehensive care plan for type 2 diabetes including medication, diet, and monitoring.",
+      "subject": {
+        "reference": "Patient/parity-patient-minimal"
+      },
+      "period": {
+        "start": "2024-01-01",
+        "end": "2024-12-31"
+      },
+      "careTeam": [
+        {
+          "reference": "CareTeam/diabetes-team-1"
+        }
+      ],
+      "addresses": [
+        {
+          "reference": "Condition/parity-condition-diabetes"
+        }
+      ],
+      "goal": [
+        {
+          "reference": "Goal/hba1c-target"
+        }
+      ],
+      "activity": [
+        {
+          "detail": {
+            "kind": "MedicationRequest",
+            "status": "in-progress",
+            "doNotPerform": false,
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "860975",
+                  "display": "Metformin 500 MG"
+                }
+              ]
+            },
+            "scheduledTiming": {
+              "repeat": {
+                "frequency": 2,
+                "period": 1,
+                "periodUnit": "d"
+              }
+            },
+            "description": "Metformin 500mg twice daily"
+          }
+        },
+        {
+          "detail": {
+            "kind": "ServiceRequest",
+            "status": "scheduled",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "4548-4",
+                  "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+                }
+              ]
+            },
+            "scheduledPeriod": {
+              "start": "2024-06-01",
+              "end": "2024-06-30"
+            },
+            "description": "HbA1c lab every 3 months"
+          }
+        },
+        {
+          "detail": {
+            "kind": "Task",
+            "status": "in-progress",
+            "description": "Patient education: carbohydrate counting and glucose monitoring"
+          }
+        }
+      ]
+    },
+    "profiles": [],
+    "resource_type": null
+  },
+  "response": {
+    "valid": false,
+    "resource_type": "CarePlan",
+    "profiles": [],
+    "summary": "Validation failed with 1 error(s)",
+    "error_count": 1,
+    "warning_count": 2,
+    "info_count": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "code-invalid",
+        "message": "java.net.SocketTimeoutException: timeout",
+        "location": "CarePlan.category[0].coding[0]",
+        "line": 7,
+        "column": 6
+      },
+      {
+        "severity": "warning",
+        "code": "business-rule",
+        "message": "Reference to draft CodeSystem http://unitsofmeasure.org|2.1.1",
+        "location": "CarePlan.activity[0].detail.scheduled.ofType(Timing).repeat.periodUnit",
+        "line": 61,
+        "column": 30
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "CarePlan",
+        "line": 1,
+        "column": 2
+      }
+    ],
+    "operation_outcome": {
+      "resourceType": "OperationOutcome",
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>error</td><td>CarePlan.category[0].coding[0]</td><td>code-invalid</td><td>java.net.SocketTimeoutException: timeout</td><td/><td>TerminologyEngine</td></tr><tr><td>information</td><td>CarePlan.activity[0].detail.scheduled.ofType(Timing).repeat.periodUnit</td><td>business-rule</td><td>Reference to draft CodeSystem http://unitsofmeasure.org|2.1.1</td><td/><td>TerminologyEngine</td></tr><tr><td>warning</td><td>CarePlan.activity[0].detail.code.coding[0]</td><td>not-found</td><td>A definition for CodeSystem 'http://www.nlm.nih.gov/research/umls/rxnorm' could not be found, so the code cannot be validated</td><td/><td>TerminologyEngine</td></tr><tr><td>warning</td><td>CarePlan</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "issue": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 7
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 6
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            }
+          ],
+          "severity": "error",
+          "code": "code-invalid",
+          "details": {
+            "text": "java.net.SocketTimeoutException: timeout"
+          },
+          "expression": [
+            "CarePlan.category[0].coding[0]"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 61
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 30
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            }
+          ],
+          "severity": "information",
+          "code": "business-rule",
+          "details": {
+            "text": "Reference to draft CodeSystem http://unitsofmeasure.org|2.1.1"
+          },
+          "expression": [
+            "CarePlan.activity[0].detail.scheduled.ofType(Timing).repeat.periodUnit"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 48
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 10
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            }
+          ],
+          "severity": "warning",
+          "code": "not-found",
+          "details": {
+            "text": "A definition for CodeSystem 'http://www.nlm.nih.gov/research/umls/rxnorm' could not be found, so the code cannot be validated"
+          },
+          "expression": [
+            "CarePlan.activity[0].detail.code.coding[0]"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "CarePlan"
+          ]
+        }
+      ]
+    }
+  }
+}

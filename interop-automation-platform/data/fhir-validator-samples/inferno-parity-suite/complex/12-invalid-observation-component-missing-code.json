@@ -1,0 +1,55 @@
+{
+  "resourceType": "Observation",
+  "id": "complex-invalid-component-no-code",
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "vital-signs"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "85354-9",
+        "display": "Blood pressure panel"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/parity-patient-minimal"
+  },
+  "effectiveDateTime": "2024-06-01T09:15:00Z",
+  "component": [
+    {
+      "valueQuantity": {
+        "value": 120,
+        "unit": "mmHg",
+        "system": "http://unitsofmeasure.org",
+        "code": "mm[Hg]"
+      }
+    },
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "8462-4",
+            "display": "Diastolic blood pressure"
+          }
+        ]
+      },
+      "valueQuantity": {
+        "value": 80,
+        "unit": "mmHg",
+        "system": "http://unitsofmeasure.org",
+        "code": "mm[Hg]"
+      }
+    }
+  ]
+}

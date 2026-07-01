@@ -1,0 +1,213 @@
+{
+  "meta": {
+    "id": "2026-06-30_10-54_Frontend-Validation-Observation---Invalid",
+    "name": "Frontend Validation: Observation - Invalid",
+    "timestamp": "2026-06-30T10:54:37"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Observation",
+      "id": "parity-obs-no-code",
+      "status": "final",
+      "subject": {
+        "reference": "Patient/parity-patient-minimal"
+      },
+      "valueQuantity": {
+        "value": 98.6,
+        "unit": "F",
+        "system": "http://unitsofmeasure.org",
+        "code": "[degF]"
+      }
+    },
+    "profiles": [],
+    "resource_type": "Observation"
+  },
+  "response": {
+    "valid": false,
+    "resource_type": "Observation",
+    "profiles": [],
+    "summary": "Validation failed with 1 error(s) | Missing required: Observation",
+    "error_count": 1,
+    "warning_count": 3,
+    "info_count": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "message": "Observation.code: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Observation|4.0.1)",
+        "location": "Observation",
+        "line": 1,
+        "column": 2
+      },
+      {
+        "severity": "warning",
+        "code": "invalid",
+        "message": "Best Practice Recommendation: In general, all observations should have a performer",
+        "location": "Observation",
+        "line": 1,
+        "column": 2
+      },
+      {
+        "severity": "warning",
+        "code": "invalid",
+        "message": "Best Practice Recommendation: In general, all observations should have an effective[x] ()",
+        "location": "Observation",
+        "line": 1,
+        "column": 2
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Observation",
+        "line": 1,
+        "column": 2
+      }
+    ],
+    "operation_outcome": {
+      "resourceType": "OperationOutcome",
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>error</td><td>Observation</td><td>structure</td><td>Observation.code: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Observation|4.0.1)</td><td/><td>InstanceValidator</td></tr><tr><td>information</td><td>Observation.value.ofType(Quantity)</td><td>business-rule</td><td>Reference to draft CodeSystem http://unitsofmeasure.org|2.1.1</td><td/><td>TerminologyEngine</td></tr><tr><td>warning</td><td>Observation</td><td>invalid</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Observation</td><td>invalid</td><td>Best Practice Recommendation: In general, all observations should have an effective[x] ()</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Observation</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "issue": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Validation_VAL_Profile_Minimum"
+            }
+          ],
+          "severity": "error",
+          "code": "structure",
+          "details": {
+            "text": "Observation.code: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Observation|4.0.1)"
+          },
+          "expression": [
+            "Observation"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 4
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            }
+          ],
+          "severity": "information",
+          "code": "business-rule",
+          "details": {
+            "text": "Reference to draft CodeSystem http://unitsofmeasure.org|2.1.1"
+          },
+          "expression": [
+            "Observation.value.ofType(Quantity)"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "All_observations_should_have_a_performer"
+            }
+          ],
+          "severity": "warning",
+          "code": "invalid",
+          "details": {
+            "text": "Best Practice Recommendation: In general, all observations should have a performer"
+          },
+          "expression": [
+            "Observation"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "All_observations_should_have_an_effectiveDateTime_or_an_effectivePeriod"
+            }
+          ],
+          "severity": "warning",
+          "code": "invalid",
+          "details": {
+            "text": "Best Practice Recommendation: In general, all observations should have an effective[x] ()"
+          },
+          "expression": [
+            "Observation"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "Observation"
+          ]
+        }
+      ]
+    }
+  }
+}

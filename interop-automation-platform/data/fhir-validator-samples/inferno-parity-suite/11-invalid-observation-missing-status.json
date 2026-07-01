@@ -1,0 +1,22 @@
+{
+  "resourceType": "Observation",
+  "id": "parity-obs-no-status",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "8867-4",
+        "display": "Heart rate"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/parity-patient-minimal"
+  },
+  "valueQuantity": {
+    "value": 72,
+    "unit": "/min",
+    "system": "http://unitsofmeasure.org",
+    "code": "/min"
+  }
+}

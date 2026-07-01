@@ -1,0 +1,27 @@
+{
+  "resourceType": "Patient",
+  "id": "complex-invalid-extension-type",
+  "name": [
+    {
+      "family": "BadExtension",
+      "given": ["Test"]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1990-05-15",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/patient-birthPlace",
+      "valueBoolean": true
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/patient-nationality",
+      "extension": [
+        {
+          "url": "code",
+          "valueString": "US"
+        }
+      ]
+    }
+  ]
+}

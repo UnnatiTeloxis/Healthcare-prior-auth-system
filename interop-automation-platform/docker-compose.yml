@@ -5,7 +5,7 @@ services:
     ports:
       - "4567:4567"
     environment:
-      DISABLE_TX: "true"
+      TX_SERVER_URL: "https://tx.fhir.org/r4"
       DISPLAY_ISSUES_ARE_WARNINGS: "true"
     volumes:
       - ./igs:/home/igs

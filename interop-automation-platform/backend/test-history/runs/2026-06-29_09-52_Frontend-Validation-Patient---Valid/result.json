@@ -1,0 +1,281 @@
+{
+  "meta": {
+    "id": "2026-06-29_09-52_Frontend-Validation-Patient---Valid",
+    "name": "Frontend Validation: Patient - Valid",
+    "timestamp": "2026-06-29T09:52:36"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "complex-patient-extensions",
+      "name": [
+        {
+          "use": "official",
+          "family": "Extension",
+          "given": [
+            "Nested"
+          ]
+        }
+      ],
+      "gender": "male",
+      "birthDate": "1995-11-08",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/patient-nationality",
+          "extension": [
+            {
+              "url": "code",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "urn:iso:std:iso:3166",
+                    "code": "US",
+                    "display": "United States of America"
+                  }
+                ]
+              }
+            },
+            {
+              "url": "period",
+              "valuePeriod": {
+                "start": "1995-11-08"
+              }
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/patient-birthPlace",
+          "valueAddress": {
+            "city": "Boston",
+            "state": "MA",
+            "country": "US"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/patient-disability",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "228158008",
+                "display": "Visual impairment"
+              }
+            ],
+            "text": "Visual impairment"
+          }
+        }
+      ],
+      "communication": [
+        {
+          "language": {
+            "coding": [
+              {
+                "system": "urn:ietf:bcp:47",
+                "code": "en-US",
+                "display": "English (United States)"
+              }
+            ]
+          },
+          "preferred": true
+        },
+        {
+          "language": {
+            "coding": [
+              {
+                "system": "urn:ietf:bcp:47",
+                "code": "es",
+                "display": "Spanish"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "profiles": [],
+    "resource_type": null
+  },
+  "response": {
+    "valid": true,
+    "resource_type": "Patient",
+    "profiles": [],
+    "summary": "Validation successful with 5 warning(s) and 0 information message(s)",
+    "error_count": 0,
+    "warning_count": 5,
+    "info_count": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "business-rule",
+        "message": "Reference to draft CodeSystem urn:iso:std:iso:3166|1.0.0",
+        "location": "Patient.extension[0].extension[0].value.ofType(CodeableConcept)",
+        "line": 19,
+        "column": 12
+      },
+      {
+        "severity": "warning",
+        "code": "business-rule",
+        "message": "Reference to draft CodeSystem urn:ietf:bcp:47|",
+        "location": "Patient.communication[0].language",
+        "line": 61,
+        "column": 8
+      },
+      {
+        "severity": "warning",
+        "code": "business-rule",
+        "message": "Reference to draft CodeSystem urn:ietf:bcp:47|",
+        "location": "Patient.communication[1].language",
+        "line": 73,
+        "column": 8
+      },
+      {
+        "severity": "warning",
+        "code": "invalid",
+        "message": "Wrong Display Name 'Visual impairment' for http://snomed.info/sct#228158008. Valid display is 'Walking disability' (en) (for the language(s) 'en')",
+        "location": "Patient.extension[2].value.ofType(CodeableConcept).coding[0].display",
+        "line": 47,
+        "column": 8
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Patient",
+        "line": 1,
+        "column": 2
+      }
+    ],
+    "operation_outcome": {
+      "resourceType": "OperationOutcome",
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>information</td><td>Patient.extension[0].extension[0].value.ofType(CodeableConcept)</td><td>business-rule</td><td>Reference to draft CodeSystem urn:iso:std:iso:3166|1.0.0</td><td/><td>TerminologyEngine</td></tr><tr><td>information</td><td>Patient.communication[0].language</td><td>business-rule</td><td>Reference to draft CodeSystem urn:ietf:bcp:47|</td><td/><td>TerminologyEngine</td></tr><tr><td>information</td><td>Patient.communication[1].language</td><td>business-rule</td><td>Reference to draft CodeSystem urn:ietf:bcp:47|</td><td/><td>TerminologyEngine</td></tr><tr><td>warning</td><td>Patient.extension[2].value.ofType(CodeableConcept).coding[0].display</td><td>invalid</td><td>Wrong Display Name 'Visual impairment' for http://snomed.info/sct#228158008. Valid display is 'Walking disability' (en) (for the language(s) 'en')</td><td/><td>TerminologyEngine</td></tr><tr><td>warning</td><td>Patient</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "issue": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 19
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 12
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            }
+          ],
+          "severity": "information",
+          "code": "business-rule",
+          "details": {
+            "text": "Reference to draft CodeSystem urn:iso:std:iso:3166|1.0.0"
+          },
+          "expression": [
+            "Patient.extension[0].extension[0].value.ofType(CodeableConcept)"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 61
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            }
+          ],
+          "severity": "information",
+          "code": "business-rule",
+          "details": {
+            "text": "Reference to draft CodeSystem urn:ietf:bcp:47|"
+          },
+          "expression": [
+            "Patient.communication[0].language"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 73
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            }
+          ],
+          "severity": "information",
+          "code": "business-rule",
+          "details": {
+            "text": "Reference to draft CodeSystem urn:ietf:bcp:47|"
+          },
+          "expression": [
+            "Patient.communication[1].language"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 47
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            }
+          ],
+          "severity": "warning",
+          "code": "invalid",
+          "details": {
+            "text": "Wrong Display Name 'Visual impairment' for http://snomed.info/sct#228158008. Valid display is 'Walking disability' (en) (for the language(s) 'en')"
+          },
+          "expression": [
+            "Patient.extension[2].value.ofType(CodeableConcept).coding[0].display"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "Patient"
+          ]
+        }
+      ]
+    }
+  }
+}

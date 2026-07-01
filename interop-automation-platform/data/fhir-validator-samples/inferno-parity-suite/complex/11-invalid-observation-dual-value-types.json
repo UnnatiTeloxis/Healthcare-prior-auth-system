@@ -1,0 +1,25 @@
+{
+  "resourceType": "Observation",
+  "id": "complex-invalid-dual-value",
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "8310-5",
+        "display": "Body temperature"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/parity-patient-minimal"
+  },
+  "effectiveDateTime": "2024-01-10T12:00:00Z",
+  "valueQuantity": {
+    "value": 37.2,
+    "unit": "Cel",
+    "system": "http://unitsofmeasure.org",
+    "code": "Cel"
+  },
+  "valueString": "37.2 degrees Celsius"
+}

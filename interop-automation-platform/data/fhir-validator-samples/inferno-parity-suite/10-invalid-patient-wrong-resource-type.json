@@ -1,0 +1,11 @@
+{
+  "resourceType": "NotAPatient",
+  "id": "parity-wrong-type",
+  "name": [
+    {
+      "family": "WrongType",
+      "given": ["Test"]
+    }
+  ],
+  "gender": "male"
+}

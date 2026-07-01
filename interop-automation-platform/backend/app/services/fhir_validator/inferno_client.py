@@ -1,9 +1,12 @@
+import asyncio
+import json
 import logging
 from typing import Any
 
 import httpx
 
 from app.config import settings
+from app.utils.fhir_helpers import extract_meta_profiles
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +17,7 @@ class InfernoClient:
         self.client: httpx.AsyncClient | None = None
         self._loaded_igs: set[str] = set()
         self._attempted_default_load = False
+        self._igs_ready = asyncio.Event()
 
     async def _get_client(self) -> httpx.AsyncClient:
         if self.client is None:
@@ -26,10 +30,14 @@ class InfernoClient:
             self.client = None
 
     async def validate_resource(self, resource: str, profiles: list[str]) -> dict[str, Any]:
+        await self._wait_for_igs()
         await self.load_default_igs()
+        await self._ensure_igs_for_meta_profiles(resource)
 
         client = await self._get_client()
         headers = {"Content-Type": "application/json"}
+        # Match Inferno default: no profile query param unless user explicitly selects one.
+        # The engine still validates meta.profile URLs declared on the resource.
         params = {"profile": ",".join(profiles)} if profiles else None
 
         response = await client.post(
@@ -104,6 +112,7 @@ class InfernoClient:
 
     async def load_default_igs(self) -> None:
         if self._attempted_default_load:
+            self._igs_ready.set()
             return
 
         self._attempted_default_load = True
@@ -122,6 +131,31 @@ class InfernoClient:
 
         if not all_loaded:
             self._attempted_default_load = False
+        self._igs_ready.set()
+
+    async def _wait_for_igs(self, timeout: float = 600.0) -> None:
+        if self._igs_ready.is_set():
+            return
+        try:
+            await asyncio.wait_for(self._igs_ready.wait(), timeout=timeout)
+        except asyncio.TimeoutError:
+            logger.warning("Timed out waiting for default IGs; continuing validation")
+            self._igs_ready.set()
+
+    async def _ensure_igs_for_meta_profiles(self, resource: str) -> None:
+        """Load IGs referenced by meta.profile so validation matches Inferno hosted."""
+        for profile_url in extract_meta_profiles(resource):
+            ig_spec = _ig_spec_for_profile_url(profile_url)
+            if not ig_spec:
+                continue
+            package_id, version = _split_ig_spec(ig_spec)
+            key = _ig_key(package_id, version)
+            if key in self._loaded_igs:
+                continue
+            try:
+                await self.load_ig_by_id(package_id, version)
+            except Exception as exc:
+                logger.warning("Unable to load IG for profile %s: %s", profile_url, exc)
 
 
 def _split_ig_spec(ig_spec: str) -> tuple[str, str | None]:
@@ -130,6 +164,16 @@ def _split_ig_spec(ig_spec: str) -> tuple[str, str | None]:
 
     package_id, version = ig_spec.split("#", 1)
     return package_id.strip(), version.strip() or None
+
+
+def _ig_spec_for_profile_url(profile_url: str) -> str | None:
+    """Map a StructureDefinition URL to a loadable IG package when known."""
+    url = profile_url.lower()
+    if "/us/core/" in url or "hl7.org/fhir/us/core" in url:
+        for ig_spec in settings.default_igs_list:
+            if ig_spec.startswith("hl7.fhir.us.core"):
+                return ig_spec
+    return None
 
 
 def _ig_key(package_id: str, version: str | None) -> str:
