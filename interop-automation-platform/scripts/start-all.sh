@@ -6,7 +6,7 @@ export DISPLAY_ISSUES_ARE_WARNINGS="${DISPLAY_ISSUES_ARE_WARNINGS:-true}"
 export INFERNO_VALIDATOR_URL="${INFERNO_VALIDATOR_URL:-http://127.0.0.1:4567}"
 export FHIR_PACKAGES_PATH="${FHIR_PACKAGES_PATH:-/app/fhir_packages}"
 export PORT="${PORT:-8000}"
-export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:--Xms256m -Xmx384m}"
+export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:--Xms384m -Xmx512m -XX:+TieredCompilation -XX:TieredStopAtLevel=1}"
 
 echo "Starting Inferno FHIR validator wrapper (127.0.0.1 only)..."
 cd /home
@@ -16,13 +16,13 @@ INFERNO_PID=$!
 echo "Waiting for Inferno engine on 127.0.0.1:4567..."
 READY=0
 i=1
-while [ "$i" -le 120 ]; do
+while [ "$i" -le 180 ]; do
   if curl -sf "http://127.0.0.1:4567/profiles" >/dev/null 2>&1; then
     echo "Inferno validator engine ready"
     READY=1
     break
   fi
-  sleep 2
+  sleep 1
   i=$((i + 1))
 done
 

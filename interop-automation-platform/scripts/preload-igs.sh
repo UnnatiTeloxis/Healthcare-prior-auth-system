@@ -1,5 +1,5 @@
 #!/bin/sh
-# Upload bundled FHIR IGs to a running Inferno instance (127.0.0.1:4567).
+# Upload only default IGs needed at startup (fast). Other packages load on demand.
 set -e
 
 BASE_URL="${INFERNO_VALIDATOR_URL:-http://127.0.0.1:4567}"
@@ -10,17 +10,13 @@ if [ ! -d "$PACKAGES_DIR" ]; then
   exit 0
 fi
 
-for pkg in "$PACKAGES_DIR"/*.tgz; do
-  [ -f "$pkg" ] || continue
-  name=$(basename "$pkg")
-  echo "Preloading IG package $name..."
-  if curl -sf -X POST -H "Content-Encoding: gzip" \
-    --data-binary "@$pkg" \
-    "$BASE_URL/igs"; then
-    echo "  loaded $name"
-  else
-    echo "  warning: failed to load $name (may already be loaded)"
-  fi
-done
+# US Core is required for most validations; load first and skip if already present.
+if [ -f "$PACKAGES_DIR/us-core.tgz" ]; then
+  echo "Preloading default IG us-core.tgz..."
+  curl -sf -X POST -H "Content-Encoding: gzip" \
+    --data-binary "@$PACKAGES_DIR/us-core.tgz" \
+    "$BASE_URL/igs" >/dev/null \
+    || echo "  warning: us-core may already be loaded"
+fi
 
-echo "Bundled IG preload finished"
+echo "Default IG preload finished"

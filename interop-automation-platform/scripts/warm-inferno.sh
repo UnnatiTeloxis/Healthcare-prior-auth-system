@@ -1,10 +1,10 @@
 #!/bin/sh
-# Pre-download FHIR core packages and bundled IGs during docker build (has network).
+# Pre-download FHIR core packages and default IG during docker build (has network).
 set -e
 
 export TX_SERVER_URL="${TX_SERVER_URL:-https://tx.fhir.org/r4}"
 export DISPLAY_ISSUES_ARE_WARNINGS="${DISPLAY_ISSUES_ARE_WARNINGS:-true}"
-export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:--Xms256m -Xmx384m}"
+export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:--Xms384m -Xmx512m -XX:+TieredCompilation -XX:TieredStopAtLevel=1}"
 
 cd /home
 java -cp "/app/inferno-launcher:/home/lib/*" inferno.local.InfernoLocalLauncher &
@@ -19,13 +19,13 @@ trap cleanup EXIT
 echo "Waiting for Inferno engine (profiles endpoint)..."
 READY=0
 i=1
-while [ "$i" -le 120 ]; do
+while [ "$i" -le 180 ]; do
   if curl -sf "http://127.0.0.1:4567/profiles" >/dev/null 2>&1; then
     echo "Inferno engine ready"
     READY=1
     break
   fi
-  sleep 2
+  sleep 1
   i=$((i + 1))
 done
 

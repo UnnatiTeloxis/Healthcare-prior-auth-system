@@ -62,6 +62,9 @@ class FHIRPackageLoader:
             candidates.append("davinci-dtr.tgz")
         if pid == "hl7.fhir.us.davinci-pas":
             candidates.append("davinci-pas.tgz")
+        if pid.startswith("hl7.fhir.us.davinci-"):
+            short = pid.rsplit(".", 1)[-1]
+            candidates.append(f"davinci-{short}.tgz")
 
         return [base / name for name in candidates]
 

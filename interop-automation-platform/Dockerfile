@@ -46,7 +46,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     JAVA_HOME=/usr/local/openjdk-11 \
     INFERNO_VALIDATOR_URL=http://127.0.0.1:4567 \
     TX_SERVER_URL=https://tx.fhir.org/r4 \
-    DISPLAY_ISSUES_ARE_WARNINGS=true
+    DISPLAY_ISSUES_ARE_WARNINGS=true \
+    API_RELOAD=false
 
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
