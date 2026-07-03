@@ -61,3 +61,18 @@ contained resources, and multi-resource clinical documents. See
 | Valid complex | C01–C10 | BP components, contained refs, nested extensions, MedicationRequest dosage, DiagnosticReport, QuestionnaireResponse, searchset Bundle, Encounter, valueCodeableConcept, CarePlan |
 | Invalid complex | C11–C14 | Dual value[x], missing component code, broken transaction Bundle, wrong extension value type |
 | Stress | C15 | Document Bundle (Composition + 7 nested resources, one invalid entry) |
+
+## Performance suite (`performance/`)
+
+Five large, valid FHIR files (~72 KB – ~557 KB) for validation **speed and batch timing**
+tests. See [`performance/README.md`](performance/README.md) for sizes and usage.
+
+| File | Approx size | Purpose |
+|------|-------------|---------|
+| `perf-01-large-patient-rich.json` | 72 KB | Single resource with rich repeating elements |
+| `perf-02-bundle-100-patients.json` | 207 KB | 100-patient collection bundle |
+| `perf-03-bundle-250-observations.json` | 279 KB | 250 vital-sign observations |
+| `perf-04-bundle-75-mixed-clinical.json` | 342 KB | Mixed Patient / Observation / Condition / Encounter |
+| `perf-05-bundle-500-observations.json` | 557 KB | Heavy observation stress test |
+
+Regenerate with `python scripts/generate_performance_samples.py`.

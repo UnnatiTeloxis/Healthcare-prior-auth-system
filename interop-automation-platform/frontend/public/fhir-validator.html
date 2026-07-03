@@ -149,7 +149,7 @@
       background: linear-gradient(90deg, var(--primary), var(--accent));
       border-radius: 2px;
       z-index: 1;
-      transition: width var(--transition);
+      transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
       width: 0%;
     }
     .step-item {
@@ -201,11 +201,78 @@
       margin: 0 auto;
       padding: 2rem 1.25rem 4rem;
     }
-    .step-panel {
-      display: none;
-      animation: fadeSlideIn 0.35s ease;
+    .step-stage {
+      position: relative;
+      transition: min-height 0.45s ease;
     }
-    .step-panel.active { display: block; }
+    .step-stage > .step-panel {
+      position: absolute;
+      width: 100%;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(18px);
+      transition:
+        opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0.5s;
+      pointer-events: none;
+      will-change: opacity, transform;
+    }
+    .step-stage > .step-panel.active {
+      position: relative;
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
+      z-index: 2;
+    }
+    .step-stage > .step-panel.is-leaving {
+      position: absolute;
+      opacity: 0;
+      transform: translateY(-14px);
+      z-index: 1;
+    }
+    .step-stage > .step-panel.is-entering {
+      position: relative;
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      z-index: 3;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .step-stage > .step-panel {
+        transition: none;
+        transform: none;
+      }
+    }
+
+    .results-header {
+      animation: fadeSlideIn 0.45s ease;
+    }
+    .summary-grid.results-enter .summary-card {
+      animation: countUp 0.55s ease backwards;
+    }
+    .summary-grid.results-enter .summary-card:nth-child(1) { animation-delay: 0.08s; }
+    .summary-grid.results-enter .summary-card:nth-child(2) { animation-delay: 0.14s; }
+    .summary-grid.results-enter .summary-card:nth-child(3) { animation-delay: 0.2s; }
+    .summary-grid.results-enter .summary-card:nth-child(4) { animation-delay: 0.26s; }
+    .summary-grid.results-enter .summary-card:nth-child(5) { animation-delay: 0.32s; }
+    .batch-results-summary.results-enter .stat-card {
+      animation: countUp 0.55s ease backwards;
+    }
+    .batch-results-summary.results-enter .stat-card:nth-child(1) { animation-delay: 0.08s; }
+    .batch-results-summary.results-enter .stat-card:nth-child(2) { animation-delay: 0.14s; }
+    .batch-results-summary.results-enter .stat-card:nth-child(3) { animation-delay: 0.2s; }
+    .batch-results-summary.results-enter .stat-card:nth-child(4) { animation-delay: 0.26s; }
+    .issues-loading {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
     @keyframes fadeSlideIn {
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
@@ -919,6 +986,18 @@
       border-radius: 8px;
       transition: width 0.5s ease;
       width: 0%;
+    }
+    .validation-progress-wrap.validation-complete .validation-progress {
+      border-color: rgba(16, 185, 129, 0.35);
+      box-shadow: 0 8px 28px rgba(16, 185, 129, 0.12);
+      transition: border-color 0.4s ease, box-shadow 0.4s ease;
+    }
+    .validation-progress-wrap.validation-complete .progress-bar-fill {
+      background: linear-gradient(90deg, var(--success), var(--accent));
+    }
+    .validation-progress-wrap.validation-complete .validation-icon {
+      transform: scale(1.08);
+      transition: transform 0.35s ease;
     }
     .rule-list {
       display: flex;
@@ -1645,6 +1724,7 @@
   </nav>
 
   <main class="main" id="mainContent">
+    <div class="step-stage" id="stepStage">
     <!-- Step 1: Provide Data -->
     <section class="step-panel active" id="step2" aria-labelledby="step2Title">
       <div class="card">
@@ -1847,6 +1927,7 @@
         </div>
       </div>
     </section>
+    </div>
   </main>
   </div>
 
@@ -2255,11 +2336,181 @@
       activeProfile: ACTIVE_PROFILE,
       ruleOutcomes: null,
       reportsPage: 1,
-      selectedReportId: null
+      selectedReportId: null,
+      parsedCache: null,
+      largeFilePreview: false
     };
+
+    const PERF = {
+      LARGE_FILE_BYTES: 100 * 1024,
+      JSON_WORKER_THRESHOLD: 50 * 1024,
+      LINE_NUMBERS_MAX_LINES: 400,
+      BATCH_CONCURRENCY: 2,
+      RULE_STAGGER_MS: 35,
+      RULE_COMPLETE_MS: 25,
+      POLL_MS: 60,
+      STEP_TRANSITION_MS: 500,
+      VALIDATION_COMPLETE_HOLD_MS: 450,
+      MAX_STORED_REPORTS: 25,
+      MAX_STORED_SOURCE_BYTES: 16 * 1024,
+      MAX_STORED_ISSUES: 250
+    };
+
+    let jsonWorker = null;
+    let lineNumbersTimer = null;
+    let batchProgressScheduled = false;
+
+    const uiBatch = {
+      pendingProgress: null,
+      pendingSubtitle: null,
+      ruleUpdates: [],
+      scheduled: false,
+      queueRuleUpdate(element, status, detail) {
+        if (!element) return;
+        this.ruleUpdates.push({ element, status, detail });
+        this.schedule();
+      },
+      queueProgress(value) {
+        this.pendingProgress = value;
+        this.schedule();
+      },
+      queueSubtitle(text) {
+        this.pendingSubtitle = text;
+        this.schedule();
+      },
+      schedule() {
+        if (this.scheduled) return;
+        this.scheduled = true;
+        requestAnimationFrame(() => this.flush());
+      },
+      flush() {
+        this.scheduled = false;
+        if (this.pendingProgress != null) {
+          updateValidationProgress(this.pendingProgress);
+          this.pendingProgress = null;
+        }
+        if (this.pendingSubtitle != null) {
+          updateValidationSubtitle(this.pendingSubtitle);
+          this.pendingSubtitle = null;
+        }
+        const updates = this.ruleUpdates.splice(0);
+        updates.forEach(({ element, status, detail }) => {
+          updateRuleStatus(element, status, detail);
+        });
+      }
+    };
+
+    function getJsonWorker() {
+      if (!jsonWorker) {
+        jsonWorker = new Worker('fhir-validator-worker.js');
+      }
+      return jsonWorker;
+    }
+
+    function runWorkerTask(type, payload) {
+      return new Promise((resolve, reject) => {
+        const id = `${type}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        const worker = getJsonWorker();
+        const onMessage = event => {
+          if (!event.data || event.data.id !== id) return;
+          worker.removeEventListener('message', onMessage);
+          if (event.data.ok) resolve(event.data);
+          else reject(new Error(event.data.error || 'Worker task failed'));
+        };
+        worker.addEventListener('message', onMessage);
+        worker.postMessage({ id, type, payload });
+      });
+    }
+
+    function parseJsonAsync(raw) {
+      const text = String(raw || '');
+      if (!text) return Promise.reject(new Error('Empty content'));
+      if (text.length < PERF.JSON_WORKER_THRESHOLD) {
+        return Promise.resolve(JSON.parse(text));
+      }
+      return runWorkerTask('parseJson', text).then(result => result.parsed);
+    }
+
+    function isLargeContent(content) {
+      return String(content || '').length >= PERF.LARGE_FILE_BYTES;
+    }
+
+    function scheduleLineNumbersUpdate() {
+      if (lineNumbersTimer) clearTimeout(lineNumbersTimer);
+      lineNumbersTimer = setTimeout(() => {
+        lineNumbersTimer = null;
+        updateLineNumbers();
+      }, 120);
+    }
+
+    function cleanupValidationMemory() {
+      state.parsedCache = null;
+      if (jsonWorker) {
+        jsonWorker.terminate();
+        jsonWorker = null;
+      }
+    }
+
+    function scheduleBatchProgressRender() {
+      if (batchProgressScheduled) return;
+      batchProgressScheduled = true;
+      requestAnimationFrame(() => {
+        batchProgressScheduled = false;
+        renderBatchProgressList();
+      });
+    }
+
+    function readTextFile(file, onProgress) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        if (onProgress) reader.onprogress = onProgress;
+        reader.onload = event => resolve(event.target.result);
+        reader.onerror = () => reject(reader.error || new Error('Failed to read file'));
+        reader.readAsText(file);
+      });
+    }
+
+    function applyLargeFilePreview(fileName, sizeBytes) {
+      const textarea = document.getElementById('jsonInput');
+      state.largeFilePreview = true;
+      textarea.value = '';
+      textarea.placeholder =
+        `Large file "${fileName}" loaded (${formatFileSize(sizeBytes)}). `
+        + 'Preview hidden for performance — validation uses the uploaded content.';
+      document.getElementById('lineNumbers').innerHTML = '1';
+    }
+
+    function clearLargeFilePreview() {
+      if (!state.largeFilePreview) return;
+      state.largeFilePreview = false;
+      document.getElementById('jsonInput').placeholder = '';
+    }
+
+    async function refreshActiveProfileAsync() {
+      const raw = state.inputData || document.getElementById('jsonInput').value;
+      if (!raw || !String(raw).trim()) return;
+      try {
+        let parsed;
+        if (String(raw).length >= PERF.JSON_WORKER_THRESHOLD) {
+          parsed = await parseJsonAsync(raw);
+        } else {
+          parsed = JSON.parse(raw);
+        }
+        state.parsedCache = parsed;
+        const profile = resolveProfileForResource(parsed);
+        state.activeProfile = profile;
+        renderProfileInfo(profile);
+      } catch (_) {
+        if (!state.activeProfile) {
+          state.activeProfile = ACTIVE_PROFILE;
+          renderProfileInfo(state.activeProfile);
+        }
+      }
+    }
 
     // --- Init ---
     function init() {
+      compactReportHistory();
       renderMainNav();
       renderSteps();
       document.getElementById('jsonInput').value = SAMPLE_PATIENT;
@@ -2367,13 +2618,12 @@
           showToast(`Skipped ${file.name} — only .json or .xml files are supported.`, 'warning');
           return;
         }
-        const reader = new FileReader();
-        reader.onload = e => {
+        readTextFile(file).then(content => {
           state.batchFiles.push({
             id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
             name: file.name,
             size: file.size,
-            content: e.target.result,
+            content,
             status: 'pending',
             result: null,
             error: null,
@@ -2381,8 +2631,7 @@
           });
           state.inputMethod = 'batch';
           renderBatchFileList();
-        };
-        reader.readAsText(file);
+        }).catch(() => showToast(`Failed to read ${file.name}`, 'error'));
       });
     }
 
@@ -2433,14 +2682,61 @@
       }
     }
 
+    function slimStoredReport(report) {
+      if (!report) return report;
+      const copy = { ...report };
+      const sourceLen = (copy.sourceText || '').length;
+      if (sourceLen > PERF.MAX_STORED_SOURCE_BYTES) {
+        copy.sourceText = '';
+        copy.sourceStored = false;
+        copy.sourceSizeBytes = sourceLen;
+      } else {
+        copy.sourceStored = Boolean(copy.sourceText);
+      }
+      delete copy.operationOutcome;
+      if (Array.isArray(copy.issues) && copy.issues.length > PERF.MAX_STORED_ISSUES) {
+        copy.issuesTruncated = true;
+        copy.issuesTotal = copy.issues.length;
+        copy.issues = copy.issues.slice(0, PERF.MAX_STORED_ISSUES);
+      }
+      if (Array.isArray(copy.batchFiles)) {
+        copy.batchFiles = copy.batchFiles.map(file => ({
+          name: file.name,
+          size: file.size,
+          status: file.status,
+          score: file.score,
+          errors: file.errors,
+          reportId: file.reportId
+        }));
+      }
+      return copy;
+    }
+
+    function persistReports(reports) {
+      let list = reports.map(slimStoredReport).slice(0, PERF.MAX_STORED_REPORTS);
+      while (list.length > 0) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+          return true;
+        } catch (_) {
+          if (list.length === 1) {
+            try { localStorage.removeItem(STORAGE_KEY); } catch (__) {}
+            return false;
+          }
+          list = list.slice(0, Math.max(1, Math.floor(list.length * 0.6)));
+        }
+      }
+      return false;
+    }
+
     function saveReports(reports) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+      persistReports(reports);
     }
 
     function addReport(report) {
       const reports = getReports();
       reports.unshift(report);
-      saveReports(reports);
+      return persistReports(reports);
     }
 
     function deleteReport(reportId) {
@@ -2494,8 +2790,42 @@
       };
     }
 
+    function compactReportHistory() {
+      try {
+        const reports = getReports();
+        if (reports.length) persistReports(reports);
+      } catch (_) {
+        try { localStorage.removeItem(STORAGE_KEY); } catch (__) {}
+      }
+    }
+
     function saveValidationReport(results) {
-      addReport(buildStoredReport(results));
+      const report = buildStoredReport(results);
+      setTimeout(() => {
+        const reports = getReports();
+        reports.unshift(report);
+        if (!persistReports(reports)) {
+          showToast('Report history is full — results are still shown on screen.', 'warning');
+        }
+      }, 0);
+    }
+
+    function saveBatchReportsToHistory(batchReport, files) {
+      setTimeout(() => {
+        const fileReports = files.filter(f => f.result).map(f => buildStoredReport(f.result));
+        const reports = [batchReport, ...fileReports, ...getReports()].slice(0, PERF.MAX_STORED_REPORTS);
+        if (!persistReports(reports)) {
+          showToast('Report history is full — batch results are still on screen.', 'warning');
+        }
+      }, 0);
+    }
+
+    function resolveStoredResult(reportId) {
+      const inMemory = state.batchFiles?.find(f =>
+        f.reportId === reportId || f.result?.id === reportId
+      );
+      if (inMemory?.result) return inMemory.result;
+      return getReports().find(r => r.id === reportId) || null;
     }
 
     function filterReportsList(reports) {
@@ -2760,7 +3090,12 @@
           showToast('Batch source data not available for this report', 'error');
           return;
         }
-        state.batchFiles = report.batchFiles.map(file => ({
+        const restorable = report.batchFiles.filter(file => file.sourceText);
+        if (!restorable.length) {
+          showToast('Source files were not stored (batch was too large). Re-upload to re-run.', 'warning');
+          return;
+        }
+        state.batchFiles = restorable.map(file => ({
           id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
           name: file.name,
           size: file.size || (file.sourceText ? file.sourceText.length : 0),
@@ -2778,7 +3113,10 @@
         return;
       }
       if (!report?.sourceText) {
-        showToast('Source data not available for this report', 'error');
+        const hint = report?.sourceStored === false
+          ? 'Source was too large to store in browser history. Re-upload the file to re-run.'
+          : 'Source data not available for this report';
+        showToast(hint, 'warning');
         return;
       }
       setMode('single');
@@ -2794,20 +3132,42 @@
     function renderSteps() {
       const list = document.getElementById('stepsList');
       const progress = document.getElementById('stepsProgress');
-      const existing = list.querySelectorAll('.step-item');
-      existing.forEach(el => el.remove());
+      let items = list.querySelectorAll('.step-item');
 
-      STEPS.forEach((label, i) => {
+      if (items.length !== STEPS.length) {
+        items.forEach(el => el.remove());
+        STEPS.forEach((label, i) => {
+          const step = i + 1;
+          const item = document.createElement('div');
+          item.className = 'step-item';
+          item.dataset.step = String(step);
+          item.setAttribute('role', 'button');
+          item.setAttribute('tabindex', '0');
+          item.setAttribute('aria-label', `Step ${step}: ${label}`);
+          item.innerHTML = `<div class="step-num">${step}</div><span class="step-label">${label}</span>`;
+          item.addEventListener('click', () => { if (step <= state.currentStep) goToStep(step); });
+          item.addEventListener('keydown', e => { if (e.key === 'Enter' && step <= state.currentStep) goToStep(step); });
+          list.insertBefore(item, progress);
+        });
+      }
+
+      list.querySelectorAll('.step-item').forEach((item, i) => {
         const step = i + 1;
-        const item = document.createElement('div');
-        item.className = 'step-item' + (step === state.currentStep ? ' active' : '') + (step < state.currentStep ? ' completed' : '');
-        item.setAttribute('role', 'button');
-        item.setAttribute('tabindex', '0');
+        const label = STEPS[i];
+        const labelEl = item.querySelector('.step-label');
+        const numEl = item.querySelector('.step-num');
+        if (labelEl) labelEl.textContent = label;
+        item.className = 'step-item'
+          + (step === state.currentStep ? ' active' : '')
+          + (step < state.currentStep ? ' completed' : '');
+        if (numEl) {
+          if (step < state.currentStep) {
+            numEl.innerHTML = '<i class="fas fa-check"></i>';
+          } else {
+            numEl.textContent = String(step);
+          }
+        }
         item.setAttribute('aria-label', `Step ${step}: ${label}`);
-        item.innerHTML = `<div class="step-num">${step < state.currentStep ? '<i class="fas fa-check"></i>' : step}</div><span class="step-label">${label}</span>`;
-        item.addEventListener('click', () => { if (step <= state.currentStep) goToStep(step); });
-        item.addEventListener('keydown', e => { if (e.key === 'Enter' && step <= state.currentStep) goToStep(step); });
-        list.insertBefore(item, progress);
       });
 
       const pct = ((state.currentStep - 1) / (STEPS.length - 1)) * 80;
@@ -2815,23 +3175,104 @@
       document.getElementById('stepBadge').textContent = STEP_TITLES[state.currentStep - 1];
     }
 
-    function goToStep(step) {
-      if (step < 1 || step > STEP_COUNT) return;
-      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
-      document.getElementById(STEP_PANEL_IDS[step - 1]).classList.add('active');
-      state.currentStep = step;
-      renderSteps();
+    function prefersReducedMotion() {
+      return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    function prepareStepContent(step) {
       if (step === 2) renderValidateSummary();
       if (step === 3) {
         if (state.viewingBatchFile && state.results) {
-          renderResults();
+          renderResults({ animateEntrance: false, deferIssues: true });
         } else if (state.mode === 'batch' && state.batchResults) {
-          renderBatchResults();
+          renderBatchResults({ animateEntrance: false });
         } else if (state.results) {
-          renderResults();
+          renderResults({ animateEntrance: false, deferIssues: true });
         }
       }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function playResultsEntrance() {
+      if (state.mode === 'batch' && !state.viewingBatchFile) {
+        const batchGrid = document.getElementById('batchSummaryGrid');
+        if (batchGrid) {
+          batchGrid.classList.remove('results-enter');
+          void batchGrid.offsetWidth;
+          batchGrid.classList.add('results-enter');
+        }
+        return;
+      }
+      const r = state.results;
+      if (!r) return;
+      const scoreNum = parseInt(String(r.complianceScore || '0'), 10) || 0;
+      const circle = document.getElementById('complianceCircle');
+      const circumference = 326.73;
+      if (circle) {
+        circle.style.transition = 'none';
+        circle.style.strokeDashoffset = String(circumference);
+        requestAnimationFrame(() => {
+          circle.style.transition = 'stroke-dashoffset 1s ease';
+          circle.style.strokeDashoffset = String(circumference - (scoreNum / 100) * circumference);
+        });
+      }
+      const grid = document.getElementById('summaryGrid');
+      if (grid) {
+        grid.classList.remove('results-enter');
+        void grid.offsetWidth;
+        grid.classList.add('results-enter');
+      }
+    }
+
+    async function goToStep(step, options = {}) {
+      const animate = options.animate !== false && !prefersReducedMotion();
+      if (step < 1 || step > STEP_COUNT) return;
+      if (step === state.currentStep) {
+        prepareStepContent(step);
+        playResultsEntrance();
+        return;
+      }
+
+      const fromPanel = document.getElementById(STEP_PANEL_IDS[state.currentStep - 1]);
+      const toPanel = document.getElementById(STEP_PANEL_IDS[step - 1]);
+      const stage = document.getElementById('stepStage');
+
+      prepareStepContent(step);
+
+      if (animate && fromPanel && toPanel && stage) {
+        stage.style.minHeight = `${Math.max(fromPanel.offsetHeight, toPanel.offsetHeight || fromPanel.offsetHeight)}px`;
+        toPanel.classList.add('active', 'is-entering');
+        fromPanel.classList.add('is-leaving');
+        state.currentStep = step;
+        renderSteps();
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        fromPanel.classList.remove('active', 'is-leaving');
+        toPanel.classList.remove('is-entering');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        await delay(PERF.STEP_TRANSITION_MS);
+        stage.style.minHeight = '';
+      } else {
+        document.querySelectorAll('.step-panel').forEach(panel => {
+          panel.classList.remove('active', 'is-leaving', 'is-entering');
+        });
+        toPanel?.classList.add('active');
+        state.currentStep = step;
+        renderSteps();
+        window.scrollTo({ top: 0, behavior: animate ? 'smooth' : 'auto' });
+      }
+
+      if (step === 3) playResultsEntrance();
+    }
+
+    async function transitionToResultsScreen(toastMessage) {
+      const loadingWrap = document.getElementById('validateLoading');
+      if (loadingWrap) loadingWrap.classList.add('validation-complete');
+      updateValidationSubtitle('Preparing your results...');
+      updateValidationProgress(100);
+      await delay(PERF.VALIDATION_COMPLETE_HOLD_MS);
+      await goToStep(3, { animate: true });
+      resetValidationUI();
+      if (loadingWrap) loadingWrap.classList.remove('validation-complete');
+      if (toastMessage) showToast(toastMessage.text, toastMessage.type);
     }
 
     function nextStep() { goToStep(state.currentStep + 1); }
@@ -2839,11 +3280,21 @@
 
     function updateLineNumbers() {
       const ta = document.getElementById('jsonInput');
+      if (!ta.value) {
+        document.getElementById('lineNumbers').innerHTML = '1';
+        return;
+      }
       const lines = ta.value.split('\n').length;
-      document.getElementById('lineNumbers').innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('<br>');
+      if (lines > PERF.LINE_NUMBERS_MAX_LINES) {
+        document.getElementById('lineNumbers').innerHTML =
+          `1<br>…<br>${lines}`;
+        return;
+      }
+      document.getElementById('lineNumbers').innerHTML =
+        Array.from({ length: lines }, (_, i) => i + 1).join('<br>');
     }
 
-    function parseJsonInput() {
+    async function parseJsonInputAsync() {
       let raw = document.getElementById('jsonInput').value.trim();
       if (!raw && state.inputData) {
         raw = String(state.inputData).trim();
@@ -2855,14 +3306,53 @@
         return null;
       }
       try {
-        const parsed = JSON.parse(raw);
+        const parsed = raw.length >= PERF.JSON_WORKER_THRESHOLD
+          ? await parseJsonAsync(raw)
+          : JSON.parse(raw);
         document.getElementById('jsonInput').classList.remove('invalid');
         document.getElementById('jsonError').style.display = 'none';
         state.inputData = raw;
+        state.parsedCache = parsed;
         return parsed;
       } catch (e) {
         showJsonError('Invalid JSON: ' + e.message);
         document.getElementById('jsonInput').classList.add('invalid');
+        state.parsedCache = null;
+        return null;
+      }
+    }
+
+    function parseJsonInput() {
+      if (state.parsedCache && state.inputData) {
+        let raw = document.getElementById('jsonInput').value.trim();
+        if (!raw) raw = String(state.inputData).trim();
+        if (raw === String(state.inputData).trim()) return state.parsedCache;
+      }
+      let raw = document.getElementById('jsonInput').value.trim();
+      if (!raw && state.inputData) {
+        raw = String(state.inputData).trim();
+      }
+      if (!raw) {
+        showJsonError(state.inputMethod === 'upload'
+          ? 'Please upload a FHIR JSON or XML file.'
+          : 'Please enter FHIR JSON data.');
+        return null;
+      }
+      if (raw.length >= PERF.JSON_WORKER_THRESHOLD) {
+        showToast('Large file detected — validation will parse in the background.', 'info');
+        return null;
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        document.getElementById('jsonInput').classList.remove('invalid');
+        document.getElementById('jsonError').style.display = 'none';
+        state.inputData = raw;
+        state.parsedCache = parsed;
+        return parsed;
+      } catch (e) {
+        showJsonError('Invalid JSON: ' + e.message);
+        document.getElementById('jsonInput').classList.add('invalid');
+        state.parsedCache = null;
         return null;
       }
     }
@@ -2906,11 +3396,16 @@
       let size = new Blob([state.inputData]).size;
       let resourceType = ACTIVE_PROFILE.resourceType;
       let profile = getSelectedProfile();
-      try {
-        const parsed = JSON.parse(state.inputData);
-        if (parsed.resourceType) resourceType = parsed.resourceType;
-        profile = resolveProfileForResource(parsed);
-      } catch (_) {}
+      if (state.parsedCache?.resourceType) {
+        resourceType = state.parsedCache.resourceType;
+        profile = resolveProfileForResource(state.parsedCache);
+      } else if (state.inputData && !isLargeContent(state.inputData)) {
+        try {
+          const parsed = JSON.parse(state.inputData);
+          if (parsed.resourceType) resourceType = parsed.resourceType;
+          profile = resolveProfileForResource(parsed);
+        } catch (_) {}
+      }
 
       document.getElementById('validateSummary').innerHTML = `
         <div class="validate-summary-item"><span>Profile</span><strong>${profile.name}</strong></div>
@@ -3386,38 +3881,42 @@
       for (let index = 0; index < totalRules; index += 1) {
         const rule = rules[index];
         const ruleElement = document.getElementById(`rule-${rule.id}`);
+        uiBatch.queueRuleUpdate(ruleElement, 'checking', rule.simpleLanguage);
+        uiBatch.queueProgress(Math.round(((index + 1) / totalRules) * 35));
+        uiBatch.queueSubtitle(`Checking: ${rule.simpleLanguage}`);
+        uiBatch.flush();
+        await delay(PERF.RULE_STAGGER_MS);
+      }
 
-        updateRuleStatus(ruleElement, 'checking', rule.simpleLanguage);
-        updateValidationProgress((index / totalRules) * 100);
-        updateValidationSubtitle(`Checking: ${rule.simpleLanguage}`);
-
-        await delay(rule.duration);
-
-        while (!getOutcomes()) {
-          if (getError && getError()) {
-            throw getError();
-          }
-          updateValidationSubtitle('Please wait...');
-          await delay(150);
+      while (!getOutcomes()) {
+        if (getError && getError()) {
+          throw getError();
         }
+        uiBatch.queueSubtitle('Waiting for validator response...');
+        uiBatch.queueProgress(Math.min(88, 35 + Math.round((performance.now() % 3000) / 40)));
+        uiBatch.flush();
+        await delay(PERF.POLL_MS);
+      }
 
-        const outcomes = getOutcomes();
+      const outcomes = getOutcomes();
+      for (let index = 0; index < totalRules; index += 1) {
+        const rule = rules[index];
+        const ruleElement = document.getElementById(`rule-${rule.id}`);
         const outcome = outcomes.find(item => item.id === rule.id);
-        updateRuleStatus(
+        uiBatch.queueRuleUpdate(
           ruleElement,
           outcome?.passed ? 'passed' : 'failed',
           outcome?.detail || rule.simpleLanguage
         );
-        updateValidationProgress(((index + 1) / totalRules) * 100);
-
-        if (index < totalRules - 1) {
-          await delay(200);
-        }
+        uiBatch.queueProgress(35 + Math.round(((index + 1) / totalRules) * 65));
+        uiBatch.flush();
+        await delay(PERF.RULE_COMPLETE_MS);
       }
+      uiBatch.flush();
     }
 
     async function runValidation() {
-      const parsed = parseJsonInput();
+      const parsed = await parseJsonInputAsync();
       if (!parsed && state.currentStep >= 1) {
         goToStep(1);
         return;
@@ -3470,19 +3969,17 @@
 
         state.results = normalizeValidationResult(apiResult, startedAt, profileUsed, parsed, state.inputData);
         state.results.profile = profileUsed.name;
+
+        await delay(220);
+        cleanupValidationMemory();
+        await transitionToResultsScreen({
+          text: state.results.status === 'PASSED' ? 'Validation passed!' : 'Validation complete with issues',
+          type: state.results.status === 'PASSED' ? 'success' : 'warning'
+        });
         saveValidationReport(state.results);
-
-        await delay(500);
-
-        resetValidationUI();
-        showToast(
-          state.results.status === 'PASSED' ? 'Validation passed!' : 'Validation complete with issues',
-          state.results.status === 'PASSED' ? 'success' : 'warning'
-        );
-        goToStep(3);
-        renderResults();
       } catch (error) {
         resetValidationUI();
+        cleanupValidationMemory();
         showToast(error.message || 'Validation failed. Check backend service.', 'error');
       }
     }
@@ -3501,12 +3998,106 @@
         const resourceType = extractXmlResourceType(raw);
         return { parsed: { resourceType: resourceType || 'Resource' }, error: null, isXml: true };
       }
+      if (raw.length >= PERF.JSON_WORKER_THRESHOLD) {
+        return { parsed: null, error: null, isXml: false, needsAsyncParse: true, raw };
+      }
       try {
         const parsed = JSON.parse(raw);
         return { parsed, error: null, isXml: false };
       } catch (error) {
         return { parsed: { resourceType: 'Resource' }, error: `Invalid JSON: ${error.message}` };
       }
+    }
+
+    async function parseResourceTextAsync(text) {
+      const outcome = parseResourceText(text);
+      if (outcome.needsAsyncParse) {
+        try {
+          const parsed = await parseJsonAsync(outcome.raw);
+          return { parsed, error: null, isXml: false };
+        } catch (error) {
+          return { parsed: { resourceType: 'Resource' }, error: `Invalid JSON: ${error.message}` };
+        }
+      }
+      return outcome;
+    }
+
+    async function validateBatchFileAtIndex(index, batchId) {
+      const file = state.batchFiles[index];
+      file.status = 'validating';
+      scheduleBatchProgressRender();
+      uiBatch.queueSubtitle(`Validating ${file.name} (${index + 1}/${state.batchFiles.length})...`);
+      uiBatch.flush();
+
+      const startedAt = performance.now();
+      const parseOutcome = await parseResourceTextAsync(file.content);
+      const parsed = parseOutcome.parsed || { resourceType: 'Resource' };
+      const profileUsed = resolveProfileForResource(parsed);
+      try {
+        if (parseOutcome.error && !parseOutcome.isXml) {
+          file.result = buildBatchErrorResult(file, parseOutcome.error, batchId);
+        } else {
+          const apiResult = await submitValidation(file.content, parsed, profileUsed);
+          file.result = normalizeValidationResult(apiResult, startedAt, profileUsed, parsed, file.content, {
+            id: `VAL-${Date.now()}-${index + 1}`,
+            batchId,
+            sourceFileName: file.name
+          });
+        }
+      } catch (error) {
+        file.result = buildBatchErrorResult(file, error.message || 'Validation failed.', batchId);
+      }
+
+      file.status = 'done';
+      file.reportId = file.result.id;
+      scheduleBatchProgressRender();
+    }
+
+    async function runBatchValidation() {
+      if (!state.batchFiles.length) {
+        showToast('Please add at least one file to validate.', 'warning');
+        return;
+      }
+
+      state.isBatchRunning = true;
+      state.batchResults = null;
+      state.results = null;
+      state.viewingBatchFile = false;
+      updateModePanels();
+      beginBatchValidationUI();
+
+      const batchId = `BATCH-${Date.now()}`;
+      const total = state.batchFiles.length;
+      let completed = 0;
+      let nextIndex = 0;
+      const workerCount = Math.min(PERF.BATCH_CONCURRENCY, total);
+
+      async function batchWorker() {
+        while (true) {
+          const index = nextIndex;
+          nextIndex += 1;
+          if (index >= total) break;
+          await validateBatchFileAtIndex(index, batchId);
+          completed += 1;
+          uiBatch.queueProgress((completed / total) * 100);
+          uiBatch.flush();
+        }
+      }
+
+      await Promise.all(Array.from({ length: workerCount }, () => batchWorker()));
+
+      state.isBatchRunning = false;
+      state.batchResults = buildBatchReport(batchId);
+      renderBatchFileList();
+      updateValidationSubtitle('✅ Batch validation complete!');
+      updateValidationProgress(100);
+      document.getElementById('validationIcon')?.classList.remove('spinning');
+      const batchIcon = document.getElementById('validationIcon');
+      if (batchIcon) batchIcon.textContent = '✅';
+      await delay(220);
+      cleanupValidationMemory();
+      await transitionToResultsScreen({ text: 'Batch validation complete!', type: 'success' });
+      saveBatchReportsToHistory(state.batchResults, state.batchFiles);
     }
 
     function buildBatchErrorResult(file, message, batchId) {
@@ -3595,73 +4186,6 @@
       }).join('');
     }
 
-    async function runBatchValidation() {
-      if (!state.batchFiles.length) {
-        showToast('Please add at least one file to validate.', 'warning');
-        return;
-      }
-
-      state.isBatchRunning = true;
-      state.batchResults = null;
-      state.results = null;
-      state.viewingBatchFile = false;
-      updateModePanels();
-      beginBatchValidationUI();
-
-      const batchId = `BATCH-${Date.now()}`;
-      let completed = 0;
-      const total = state.batchFiles.length;
-
-      for (let i = 0; i < state.batchFiles.length; i += 1) {
-        const file = state.batchFiles[i];
-        file.status = 'validating';
-        renderBatchProgressList();
-        updateValidationSubtitle(`Validating ${file.name} (${i + 1}/${total})...`);
-        updateValidationProgress((completed / total) * 100);
-
-        const startedAt = performance.now();
-        const parseOutcome = parseResourceText(file.content);
-        const parsed = parseOutcome.parsed || { resourceType: 'Resource' };
-        const profileUsed = resolveProfileForResource(parsed);
-        try {
-          if (parseOutcome.error && !parseOutcome.isXml) {
-            file.result = buildBatchErrorResult(file, parseOutcome.error, batchId);
-          } else {
-            const apiResult = await submitValidation(file.content, parsed, profileUsed);
-            const result = normalizeValidationResult(apiResult, startedAt, profileUsed, parsed, file.content, {
-              id: `VAL-${Date.now()}-${i + 1}`,
-              batchId,
-              sourceFileName: file.name
-            });
-            file.result = result;
-          }
-        } catch (error) {
-          file.result = buildBatchErrorResult(file, error.message || 'Validation failed.', batchId);
-        }
-
-        file.status = 'done';
-        const stored = buildStoredReport(file.result);
-        addReport(stored);
-        file.reportId = stored.id;
-
-        completed += 1;
-        updateValidationProgress((completed / total) * 100);
-        renderBatchProgressList();
-      }
-
-      state.isBatchRunning = false;
-      state.batchResults = buildBatchReport(batchId);
-      addReport(state.batchResults);
-      renderBatchFileList();
-      updateValidationSubtitle('Preparing batch results...');
-      updateValidationProgress(100);
-      await delay(600);
-      resetValidationUI();
-      goToStep(3);
-      renderBatchResults();
-      showToast('Batch validation complete!', 'success');
-    }
-
     function buildBatchReport(batchId) {
       const files = state.batchFiles.map(file => ({
         name: file.name,
@@ -3669,8 +4193,7 @@
         status: file.result?.status || 'FAILED',
         score: parseInt(String(file.result?.complianceScore || '0'), 10) || 0,
         errors: file.result?.summary?.errors ?? 0,
-        reportId: file.reportId,
-        sourceText: file.content || ''
+        reportId: file.reportId || file.result?.id
       }));
       const passed = files.filter(file => file.status === 'PASSED').length;
       const failed = files.length - passed;
@@ -3708,8 +4231,9 @@
       return buildStoredReport(resultPayload);
     }
 
-    function renderBatchResults() {
+    function renderBatchResults(options = {}) {
       if (!state.batchResults) return;
+      const animateEntrance = options.animateEntrance !== false;
       updateModePanels();
       const batch = state.batchResults;
       const total = batch.batchCount || batch.summary?.total || 0;
@@ -3746,6 +4270,14 @@
             if (btn.dataset.batchView) openBatchFileResult(btn.dataset.batchView);
           });
         });
+      }
+      if (animateEntrance) {
+        const batchGrid = document.getElementById('batchSummaryGrid');
+        if (batchGrid) {
+          batchGrid.classList.remove('results-enter');
+          void batchGrid.offsetWidth;
+          batchGrid.classList.add('results-enter');
+        }
       }
     }
 
@@ -3786,8 +4318,8 @@
         .catch(() => showToast('Could not copy summary', 'error'));
     }
 
-    function openBatchFileResult(reportId) {
-      const report = getReports().find(r => r.id === reportId);
+    async function openBatchFileResult(reportId) {
+      const report = resolveStoredResult(reportId);
       if (!report) {
         showToast('Report not found for this file.', 'error');
         return;
@@ -3796,10 +4328,14 @@
       state.activeFilter = 'all';
       state.viewingBatchFile = true;
       updateModePanels();
-      navigateTo('validator');
-      goToStep(3);
-      renderResults();
-      showToast(`Viewing results for ${report.sourceFileName || report.id}`, 'info');
+      navigateTo('validator', false);
+      await goToStep(3, { animate: true });
+      const label = report.sourceFileName || report.id;
+      if (report.issuesTruncated && report.issuesTotal) {
+        showToast(`Viewing ${label} (first ${PERF.MAX_STORED_ISSUES} of ${report.issuesTotal} issues from history)`, 'info');
+      } else {
+        showToast(`Viewing results for ${label}`, 'info');
+      }
     }
 
     async function submitValidation(resourceText, parsed, profileUsed) {
@@ -3873,7 +4409,6 @@
         issues,
         sourceText: sourceText || '',
         apiSummary: apiResult.summary || '',
-        operationOutcome: apiResult.operation_outcome || null,
         batchId: overrides.batchId || null,
         sourceFileName: overrides.sourceFileName || state.uploadedFileName || ''
       };
@@ -4017,7 +4552,9 @@
       }
     }
 
-    function renderResults() {
+    function renderResults(options = {}) {
+      const animateEntrance = options.animateEntrance !== false;
+      const deferIssues = options.deferIssues !== false;
       const r = state.results;
       if (!r) return;
       updateModePanels();
@@ -4038,11 +4575,17 @@
         summary.total = summary.errors + summary.warnings + summary.info;
       }
 
-      const scoreNum = parseInt(r.complianceScore, 10) || 0;
+      const scoreNum = parseInt(String(r.complianceScore || '0'), 10) || 0;
       document.getElementById('complianceScore').textContent = r.complianceScore;
       const circle = document.getElementById('complianceCircle');
       const circumference = 326.73;
-      circle.style.strokeDashoffset = circumference - (scoreNum / 100) * circumference;
+      const targetOffset = circumference - (scoreNum / 100) * circumference;
+      if (animateEntrance) {
+        circle.style.transition = 'none';
+        circle.style.strokeDashoffset = String(circumference);
+      } else {
+        circle.style.strokeDashoffset = String(targetOffset);
+      }
 
       const badge = document.getElementById('statusBadge');
       badge.className = 'status-badge ' + (r.status === 'PASSED' ? 'passed' : 'failed');
@@ -4070,7 +4613,25 @@
       `;
 
       renderFilters();
-      renderIssues();
+      if (deferIssues) {
+        document.getElementById('issueList').innerHTML =
+          '<div class="issues-loading">Loading issue details...</div>';
+        requestAnimationFrame(() => renderIssues());
+      } else {
+        renderIssues();
+      }
+      if (animateEntrance) {
+        const grid = document.getElementById('summaryGrid');
+        grid.classList.remove('results-enter');
+        void grid.offsetWidth;
+        grid.classList.add('results-enter');
+        if (circle) {
+          requestAnimationFrame(() => {
+            circle.style.transition = 'stroke-dashoffset 1s ease';
+            circle.style.strokeDashoffset = String(targetOffset);
+          });
+        }
+      }
     }
 
     function renderFilters() {
@@ -4115,7 +4676,7 @@
         return;
       }
       list.innerHTML = issues.map((issue, idx) => `
-        <div class="issue-card ${issue.severity}" style="animation-delay:${idx * 0.06}s" data-idx="${idx}">
+        <div class="issue-card ${issue.severity}" style="animation-delay:${Math.min(idx * 0.04, 0.8)}s" data-idx="${idx}">
           <div class="issue-header" role="button" tabindex="0" aria-expanded="false">
             <div class="issue-left">
               <span class="severity-pill ${issue.severity}">${issue.severity === 'error' ? '⛔' : issue.severity === 'warning' ? '⚠️' : 'ℹ️'} ${issue.severity === 'information' ? 'Information' : issue.severity}</span>
@@ -4681,18 +5242,22 @@
       state.inputData = state.mode === 'single' ? SAMPLE_PATIENT : '';
       state.inputMethod = state.mode === 'single' ? 'paste' : 'batch';
       state.uploadedFileName = null;
+      state.parsedCache = null;
+      state.largeFilePreview = false;
       document.getElementById('jsonInput').value = state.mode === 'single' ? SAMPLE_PATIENT : '';
+      document.getElementById('jsonInput').placeholder = '';
       document.getElementById('fileName').classList.remove('show');
       updateLineNumbers();
       renderBatchFileList();
       updateModePanels();
+      cleanupValidationMemory();
       goToStep(1);
       renderValidateSummary();
       showToast('Ready for new validation', 'info');
     }
 
     function bindEvents() {
-      document.getElementById('step2Next').addEventListener('click', () => {
+      document.getElementById('step2Next').addEventListener('click', async () => {
         if (state.mode === 'batch') {
           if (!state.batchFiles.length) {
             showToast('Please add at least one file to validate.', 'warning');
@@ -4701,7 +5266,7 @@
           nextStep();
           return;
         }
-        if (parseJsonInput()) nextStep();
+        if (await parseJsonInputAsync()) nextStep();
       });
 
       document.getElementById('step3Back').addEventListener('click', prevStep);
@@ -4717,7 +5282,7 @@
         if (state.viewingBatchFile) {
           state.viewingBatchFile = false;
           updateModePanels();
-          renderBatchResults();
+          renderBatchResults({ animateEntrance: true });
           return;
         }
         prevStep();
@@ -4764,12 +5329,17 @@
 
       document.getElementById('clearJsonBtn').addEventListener('click', () => {
         document.getElementById('jsonInput').value = '';
+        state.inputData = '';
+        state.parsedCache = null;
+        clearLargeFilePreview();
         updateLineNumbers();
       });
 
       document.getElementById('jsonInput').addEventListener('input', () => {
-        updateLineNumbers();
+        clearLargeFilePreview();
+        scheduleLineNumbersUpdate();
         state.inputData = document.getElementById('jsonInput').value;
+        state.parsedCache = null;
         refreshActiveProfile();
       });
 
@@ -4846,29 +5416,42 @@
       });
     }
 
-    function handleFile(file) {
+    async function handleFile(file) {
       const valid = file.name.endsWith('.json') || file.name.endsWith('.xml');
       if (!valid) {
         showToast('Please upload a .json or .xml file', 'error');
         return;
       }
-      const reader = new FileReader();
-      reader.onload = e => {
-        state.inputData = e.target.result;
+      try {
+        const content = await readTextFile(file, event => {
+          if (event.lengthComputable && event.total > PERF.LARGE_FILE_BYTES) {
+            const pct = Math.round((event.loaded / event.total) * 100);
+            document.getElementById('fileName').textContent = `Loading ${file.name}… ${pct}%`;
+            document.getElementById('fileName').classList.add('show');
+          }
+        });
+        state.inputData = content;
         state.uploadedFileName = file.name;
         state.inputMethod = 'upload';
+        state.parsedCache = null;
         document.getElementById('fileName').textContent = '✓ ' + file.name;
         document.getElementById('fileName').classList.add('show');
         if (file.name.endsWith('.json')) {
-          document.getElementById('jsonInput').value = e.target.result;
-          updateLineNumbers();
+          if (isLargeContent(content)) {
+            applyLargeFilePreview(file.name, content.length);
+          } else {
+            clearLargeFilePreview();
+            document.getElementById('jsonInput').value = content;
+            scheduleLineNumbersUpdate();
+          }
         }
         document.getElementById('jsonInput').classList.remove('invalid');
         document.getElementById('jsonError').style.display = 'none';
-        refreshActiveProfile();
+        await refreshActiveProfileAsync();
         showToast('File loaded: ' + file.name, 'success');
-      };
-      reader.readAsText(file);
+      } catch (_) {
+        showToast('Failed to read file: ' + file.name, 'error');
+      }
       document.getElementById('fileInput').value = '';
     }
 

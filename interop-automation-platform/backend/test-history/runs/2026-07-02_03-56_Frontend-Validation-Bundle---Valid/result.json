@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "id": "2026-07-02_03-56_Frontend-Validation-Bundle---Valid",
+    "name": "Frontend Validation: Bundle - Valid",
+    "timestamp": "2026-07-02T03:56:15"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "parity-bundle-two-patients",
+      "type": "collection",
+      "entry": [
+        {
+          "fullUrl": "urn:uuid:a1b2c3d4-e5f6-4789-a012-3456789abcde",
+          "resource": {
+            "resourceType": "Patient",
+            "id": "bundle-patient-a",
+            "name": [
+              {
+                "family": "Alpha",
+                "given": [
+                  "Alice"
+                ]
+              }
+            ],
+            "gender": "female",
+            "birthDate": "1990-01-01"
+          }
+        },
+        {
+          "fullUrl": "urn:uuid:b2c3d4e5-f6a7-4890-b123-456789abcdef",
+          "resource": {
+            "resourceType": "Patient",
+            "id": "bundle-patient-b",
+            "name": [
+              {
+                "family": "Beta",
+                "given": [
+                  "Bob"
+                ]
+              }
+            ],
+            "gender": "male",
+            "birthDate": "1988-07-22"
+          }
+        }
+      ]
+    },
+    "profiles": [],
+    "resource_type": "Bundle"
+  },
+  "response": {
+    "valid": true,
+    "resource_type": "Bundle",
+    "profiles": [],
+    "summary": "Validation successful with 2 warning(s) and 0 information message(s)",
+    "error_count": 0,
+    "warning_count": 2,
+    "info_count": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Bundle.entry[0].resource/*Patient/bundle-patient-a*/",
+        "line": 8,
+        "column": 8
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Bundle.entry[1].resource/*Patient/bundle-patient-b*/",
+        "line": 23,
+        "column": 8
+      }
+    ],
+    "operation_outcome": {
+      "resourceType": "OperationOutcome",
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>warning</td><td>Bundle.entry[0].resource/*Patient/bundle-patient-a*/</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Bundle.entry[1].resource/*Patient/bundle-patient-b*/</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "issue": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "Bundle.entry[0].resource/*Patient/bundle-patient-a*/"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 23
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "Bundle.entry[1].resource/*Patient/bundle-patient-b*/"
+          ]
+        }
+      ]
+    }
+  }
+}

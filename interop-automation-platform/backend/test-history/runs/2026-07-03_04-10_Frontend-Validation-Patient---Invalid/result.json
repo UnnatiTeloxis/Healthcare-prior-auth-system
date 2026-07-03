@@ -1,0 +1,117 @@
+{
+  "meta": {
+    "id": "2026-07-03_04-10_Frontend-Validation-Patient---Invalid",
+    "name": "Frontend Validation: Patient - Invalid",
+    "timestamp": "2026-07-03T04:10:27"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "parity-invalid-birthdate",
+      "name": [
+        {
+          "family": "BadDate",
+          "given": [
+            "Test"
+          ]
+        }
+      ],
+      "gender": "male",
+      "birthDate": "15-06-1985"
+    },
+    "profiles": [],
+    "resource_type": "Patient"
+  },
+  "response": {
+    "valid": false,
+    "resource_type": "Patient",
+    "profiles": [],
+    "summary": "Validation failed with 1 error(s)",
+    "error_count": 1,
+    "warning_count": 1,
+    "info_count": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "invalid",
+        "message": "Not a valid date ('15-06-1985' doesn't meet format requirements for date)",
+        "location": "Patient.birthDate",
+        "line": 11,
+        "column": 28
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Patient",
+        "line": 1,
+        "column": 2
+      }
+    ],
+    "operation_outcome": {
+      "resourceType": "OperationOutcome",
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>error</td><td>Patient.birthDate</td><td>invalid</td><td>Not a valid date ('15-06-1985' doesn't meet format requirements for date)</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Patient</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "issue": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 11
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 28
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Type_Specific_Checks_DT_Date_Valid"
+            }
+          ],
+          "severity": "error",
+          "code": "invalid",
+          "details": {
+            "text": "Not a valid date ('15-06-1985' doesn't meet format requirements for date)"
+          },
+          "expression": [
+            "Patient.birthDate"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "Patient"
+          ]
+        }
+      ]
+    }
+  }
+}

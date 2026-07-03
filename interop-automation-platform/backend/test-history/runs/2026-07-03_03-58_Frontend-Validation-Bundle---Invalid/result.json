@@ -1,0 +1,1205 @@
+{
+  "meta": {
+    "id": "2026-07-03_03-58_Frontend-Validation-Bundle---Invalid",
+    "name": "Frontend Validation: Bundle - Invalid",
+    "timestamp": "2026-07-03T03:58:17"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "parity-stress-huge-bundle",
+      "type": "collection",
+      "entry": [
+        {
+          "fullUrl": "urn:uuid:patient-1",
+          "resource": {
+            "resourceType": "Patient",
+            "id": "stress-patient-1",
+            "identifier": [
+              {
+                "system": "http://example.org/fhir/identifier/mrn",
+                "value": "STRESS-1"
+              }
+            ],
+            "name": [
+              {
+                "family": "Stress",
+                "given": [
+                  "One"
+                ]
+              }
+            ],
+            "gender": "male",
+            "birthDate": "1990-01-01"
+          }
+        },
+        {
+          "fullUrl": "urn:uuid:patient-2",
+          "resource": {
+            "resourceType": "Patient",
+            "id": "stress-patient-2",
+            "name": [
+              {
+                "family": "Stress",
+                "given": [
+                  "Two"
+                ]
+              }
+            ],
+            "gender": "female",
+            "birthDate": "1992-02-02"
+          }
+        },
+        {
+          "fullUrl": "urn:uuid:obs-height",
+          "resource": {
+            "resourceType": "Observation",
+            "id": "stress-obs-height",
+            "status": "final",
+            "category": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                    "code": "vital-signs",
+                    "display": "Vital Signs"
+                  }
+                ]
+              }
+            ],
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8302-2",
+                  "display": "Body height"
+                }
+              ]
+            },
+            "subject": {
+              "reference": "Patient/stress-patient-1"
+            },
+            "effectiveDateTime": "2024-01-10T14:30:00Z",
+            "valueQuantity": {
+              "value": 175,
+              "unit": "cm",
+              "system": "http://unitsofmeasure.org",
+              "code": "cm"
+            }
+          }
+        },
+        {
+          "fullUrl": "urn:uuid:obs-glucose",
+          "resource": {
+            "resourceType": "Observation",
+            "id": "stress-obs-glucose",
+            "status": "final",
+            "category": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                    "code": "laboratory",
+                    "display": "Laboratory"
+                  }
+                ]
+              }
+            ],
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "2339-0",
+                  "display": "Glucose"
+                }
+              ]
+            },
+            "subject": {
+              "reference": "Patient/stress-patient-1"
+            },
+            "effectiveDateTime": "2024-03-15T08:00:00Z",
+            "valueQuantity": {
+              "value": 95,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          }
+        },
+        {
+          "fullUrl": "urn:uuid:condition-1",
+          "resource": {
+            "resourceType": "Condition",
+            "id": "stress-condition-1",
+            "clinicalStatus": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                  "code": "active"
+                }
+              ]
+            },
+            "verificationStatus": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                  "code": "confirmed"
+                }
+              ]
+            },
+            "code": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "44054006",
+                  "display": "Diabetes mellitus type 2"
+                }
+              ]
+            },
+            "subject": {
+              "reference": "Patient/stress-patient-1"
+            }
+          }
+        },
+        {
+          "fullUrl": "http://example.org/fhir/Patient/bad-entry",
+          "resource": {
+            "resourceType": "Patient",
+            "id": "stress-bad-url-patient",
+            "name": [
+              {
+                "family": "BadUrl",
+                "given": [
+                  "Entry"
+                ]
+              }
+            ],
+            "gender": "unknown-gender"
+          }
+        }
+      ]
+    },
+    "profiles": [],
+    "resource_type": "Bundle"
+  },
+  "response": {
+    "valid": false,
+    "resource_type": "Bundle",
+    "profiles": [],
+    "summary": "Validation failed with 12 error(s)",
+    "error_count": 12,
+    "warning_count": 15,
+    "info_count": 2,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "code-invalid",
+        "message": "Error from http://tx.fhir.org/r4: Unparseable HTML",
+        "location": "Bundle.entry[2].resource/*Observation/stress-obs-height*/.code.coding[0]",
+        "line": 59,
+        "column": 10
+      },
+      {
+        "severity": "error",
+        "code": "code-invalid",
+        "message": "The value provided ('cm') was not found in the value set 'Body Length Units' (http://hl7.org/fhir/ValueSet/ucum-bodylength|4.0.1), and a code is required from this value set  (error message = Error from http://tx.fhir.org/r4: Unparseable HTML)",
+        "location": "Bundle.entry[2].resource/*Observation/stress-obs-height*/.value.ofType(Quantity).code",
+        "line": 76,
+        "column": 23
+      },
+      {
+        "severity": "error",
+        "code": "code-invalid",
+        "message": "java.net.SocketTimeoutException: timeout",
+        "location": "Bundle.entry[3].resource/*Observation/stress-obs-glucose*/.code.coding[0]",
+        "line": 97,
+        "column": 10
+      },
+      {
+        "severity": "error",
+        "code": "code-invalid",
+        "message": "java.net.SocketTimeoutException: timeout",
+        "location": "Bundle.entry[4].resource/*Condition/stress-condition-1*/.code.coding[0]",
+        "line": 139,
+        "column": 10
+      },
+      {
+        "severity": "error",
+        "code": "code-invalid",
+        "message": "The value provided ('unknown-gender') was not found in the value set 'AdministrativeGender' (http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1), and a code is required from this value set  (error message = The System URI could not be determined for the code 'unknown-gender' in the ValueSet 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1'; The provided code '#unknown-gender' was not found in the value set 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1')",
+        "location": "Bundle.entry[5].resource/*Patient/stress-bad-url-patient*/.gender",
+        "line": 164,
+        "column": 35
+      },
+      {
+        "severity": "error",
+        "code": "invalid",
+        "message": "UUIDs must be valid and lowercase (patient-1)",
+        "location": "Bundle.entry[0].fullUrl",
+        "line": 7,
+        "column": 38
+      },
+      {
+        "severity": "error",
+        "code": "invalid",
+        "message": "Example URLs are not allowed in this context (http://example.org/fhir/identifier/mrn)",
+        "location": "Bundle.entry[0].resource/*Patient/stress-patient-1*/.identifier[0].system",
+        "line": 13,
+        "column": 63
+      },
+      {
+        "severity": "error",
+        "code": "invalid",
+        "message": "UUIDs must be valid and lowercase (patient-2)",
+        "location": "Bundle.entry[1].fullUrl",
+        "line": 28,
+        "column": 38
+      },
+      {
+        "severity": "error",
+        "code": "invalid",
+        "message": "UUIDs must be valid and lowercase (obs-height)",
+        "location": "Bundle.entry[2].fullUrl",
+        "line": 43,
+        "column": 39
+      },
+      {
+        "severity": "error",
+        "code": "invalid",
+        "message": "UUIDs must be valid and lowercase (obs-glucose)",
+        "location": "Bundle.entry[3].fullUrl",
+        "line": 81,
+        "column": 40
+      },
+      {
+        "severity": "error",
+        "code": "invalid",
+        "message": "UUIDs must be valid and lowercase (condition-1)",
+        "location": "Bundle.entry[4].fullUrl",
+        "line": 119,
+        "column": 40
+      },
+      {
+        "severity": "error",
+        "code": "invalid",
+        "message": "The fullUrl 'http://example.org/fhir/Patient/bad-entry' looks like a RESTful server URL, so it must end with the correct type and id (/Patient/stress-bad-url-patient)",
+        "location": "Bundle.entry[0]",
+        "line": 153,
+        "column": 6
+      },
+      {
+        "severity": "information",
+        "code": "informational",
+        "message": "Validate Observation against the Body height profile (http://hl7.org/fhir/StructureDefinition/bodyheight) which is required by the FHIR specification because the LOINC code 8302-2 was found",
+        "location": "Bundle.entry[2].resource/*Observation/stress-obs-height*/",
+        "line": 44,
+        "column": 8
+      },
+      {
+        "severity": "information",
+        "code": "informational",
+        "message": "Validate Observation against the Body height profile (http://hl7.org/fhir/StructureDefinition/bodyheight) which is required by the FHIR specification because the LOINC code 8302-2 was found",
+        "location": "Bundle.entry[2].resource",
+        "line": 44,
+        "column": 8
+      },
+      {
+        "severity": "warning",
+        "code": "code-invalid",
+        "message": "None of the codings provided are in the value set 'Vital Signs' (http://hl7.org/fhir/ValueSet/observation-vitalsignresult|4.0.1), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://loinc.org#8302-2)",
+        "location": "Bundle.entry[2].resource/*Observation/stress-obs-height*/.code",
+        "line": 59,
+        "column": 10
+      },
+      {
+        "severity": "warning",
+        "code": "code-invalid",
+        "message": "Error from http://tx.fhir.org/r4: Unparseable HTML",
+        "location": "Bundle.entry[2].resource/*Observation/stress-obs-height*/.value.ofType(Quantity)",
+        "line": 72,
+        "column": 10
+      },
+      {
+        "severity": "warning",
+        "code": "code-invalid",
+        "message": "Error from http://tx.fhir.org/r4: Unparseable HTML",
+        "location": "Bundle.entry[3].resource/*Observation/stress-obs-glucose*/.value.ofType(Quantity)",
+        "line": 110,
+        "column": 10
+      },
+      {
+        "severity": "warning",
+        "code": "invalid",
+        "message": "Best Practice Recommendation: In general, all observations should have a performer",
+        "location": "Bundle.entry[2].resource/*Observation/stress-obs-height*/",
+        "line": 44,
+        "column": 8
+      },
+      {
+        "severity": "warning",
+        "code": "invalid",
+        "message": "Best Practice Recommendation: In general, all observations should have a performer",
+        "location": "Bundle.entry[2].resource",
+        "line": 44,
+        "column": 8
+      },
+      {
+        "severity": "warning",
+        "code": "invalid",
+        "message": "Best Practice Recommendation: In general, all observations should have a performer",
+        "location": "Bundle.entry[3].resource/*Observation/stress-obs-glucose*/",
+        "line": 82,
+        "column": 8
+      },
+      {
+        "severity": "warning",
+        "code": "invalid",
+        "message": "Best Practice Recommendation: In general, all observations should have a performer",
+        "location": "Bundle.entry[3].resource",
+        "line": 82,
+        "column": 8
+      },
+      {
+        "severity": "warning",
+        "code": "required",
+        "message": "Entry 0 matches the reference Patient/stress-patient-1 by type and id but it's fullUrl urn:uuid:patient-1 does not match the full target URL urn:uuid:stress-patient-1 by Bundle resolution rules",
+        "location": "Bundle.entry[2].resource/*Observation/stress-obs-height*/.subject",
+        "line": null,
+        "column": null
+      },
+      {
+        "severity": "warning",
+        "code": "required",
+        "message": "Entry 0 matches the reference Patient/stress-patient-1 by type and id but it's fullUrl urn:uuid:patient-1 does not match the full target URL urn:uuid:stress-patient-1 by Bundle resolution rules",
+        "location": "Bundle.entry[3].resource/*Observation/stress-obs-glucose*/.subject",
+        "line": null,
+        "column": null
+      },
+      {
+        "severity": "warning",
+        "code": "required",
+        "message": "Entry 0 matches the reference Patient/stress-patient-1 by type and id but it's fullUrl urn:uuid:patient-1 does not match the full target URL urn:uuid:stress-patient-1 by Bundle resolution rules",
+        "location": "Bundle.entry[4].resource/*Condition/stress-condition-1*/.subject",
+        "line": null,
+        "column": null
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Bundle.entry[0].resource/*Patient/stress-patient-1*/",
+        "line": 8,
+        "column": 8
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Bundle.entry[1].resource/*Patient/stress-patient-2*/",
+        "line": 29,
+        "column": 8
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Bundle.entry[3].resource/*Observation/stress-obs-glucose*/",
+        "line": 82,
+        "column": 8
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Bundle.entry[4].resource/*Condition/stress-condition-1*/",
+        "line": 120,
+        "column": 8
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Bundle.entry[5].resource/*Patient/stress-bad-url-patient*/",
+        "line": 155,
+        "column": 8
+      }
+    ],
+    "operation_outcome": {
+      "resourceType": "OperationOutcome",
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>error</td><td>Bundle.entry[2].resource/*Observation/stress-obs-height*/.code.coding[0]</td><td>code-invalid</td><td>Error from http://tx.fhir.org/r4: Unparseable HTML</td><td/><td>TerminologyEngine</td></tr><tr><td>error</td><td>Bundle.entry[2].resource/*Observation/stress-obs-height*/.value.ofType(Quantity).code</td><td>code-invalid</td><td>The value provided ('cm') was not found in the value set 'Body Length Units' (http://hl7.org/fhir/ValueSet/ucum-bodylength|4.0.1), and a code is required from this value set  (error message = Error from http://tx.fhir.org/r4: Unparseable HTML)</td><td/><td>TerminologyEngine</td></tr><tr><td>error</td><td>Bundle.entry[3].resource/*Observation/stress-obs-glucose*/.code.coding[0]</td><td>code-invalid</td><td>java.net.SocketTimeoutException: timeout</td><td/><td>TerminologyEngine</td></tr><tr><td>error</td><td>Bundle.entry[4].resource/*Condition/stress-condition-1*/.code.coding[0]</td><td>code-invalid</td><td>java.net.SocketTimeoutException: timeout</td><td/><td>TerminologyEngine</td></tr><tr><td>error</td><td>Bundle.entry[5].resource/*Patient/stress-bad-url-patient*/.gender</td><td>code-invalid</td><td>The value provided ('unknown-gender') was not found in the value set 'AdministrativeGender' (http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1), and a code is required from this value set  (error message = The System URI could not be determined for the code 'unknown-gender' in the ValueSet 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1'; The provided code '#unknown-gender' was not found in the value set 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1')</td><td/><td>TerminologyEngine</td></tr><tr><td>error</td><td>Bundle.entry[0].fullUrl</td><td>invalid</td><td>UUIDs must be valid and lowercase (patient-1)</td><td/><td>InstanceValidator</td></tr><tr><td>error</td><td>Bundle.entry[0].resource/*Patient/stress-patient-1*/.identifier[0].system</td><td>invalid</td><td>Example URLs are not allowed in this context (http://example.org/fhir/identifier/mrn)</td><td/><td>InstanceValidator</td></tr><tr><td>error</td><td>Bundle.entry[1].fullUrl</td><td>invalid</td><td>UUIDs must be valid and lowercase (patient-2)</td><td/><td>InstanceValidator</td></tr><tr><td>error</td><td>Bundle.entry[2].fullUrl</td><td>invalid</td><td>UUIDs must be valid and lowercase (obs-height)</td><td/><td>InstanceValidator</td></tr><tr><td>error</td><td>Bundle.entry[3].fullUrl</td><td>invalid</td><td>UUIDs must be valid and lowercase (obs-glucose)</td><td/><td>InstanceValidator</td></tr><tr><td>error</td><td>Bundle.entry[4].fullUrl</td><td>invalid</td><td>UUIDs must be valid and lowercase (condition-1)</td><td/><td>InstanceValidator</td></tr><tr><td>error</td><td>Bundle.entry[0]</td><td>invalid</td><td>The fullUrl 'http://example.org/fhir/Patient/bad-entry' looks like a RESTful server URL, so it must end with the correct type and id (/Patient/stress-bad-url-patient)</td><td/><td>InstanceValidator</td></tr><tr><td>information</td><td>Bundle.entry[2].resource/*Observation/stress-obs-height*/</td><td>informational</td><td>Validate Observation against the Body height profile (http://hl7.org/fhir/StructureDefinition/bodyheight) which is required by the FHIR specification because the LOINC code 8302-2 was found</td><td/><td>InstanceValidator</td></tr><tr><td>information</td><td>Bundle.entry[2].resource</td><td>informational</td><td>Validate Observation against the Body height profile (http://hl7.org/fhir/StructureDefinition/bodyheight) which is required by the FHIR specification because the LOINC code 8302-2 was found</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Bundle.entry[2].resource/*Observation/stress-obs-height*/.code</td><td>code-invalid</td><td>None of the codings provided are in the value set 'Vital Signs' (http://hl7.org/fhir/ValueSet/observation-vitalsignresult|4.0.1), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://loinc.org#8302-2)</td><td/><td>TerminologyEngine</td></tr><tr><td>warning</td><td>Bundle.entry[2].resource/*Observation/stress-obs-height*/.value.ofType(Quantity)</td><td>code-invalid</td><td>Error from http://tx.fhir.org/r4: Unparseable HTML</td><td/><td>TerminologyEngine</td></tr><tr><td>warning</td><td>Bundle.entry[3].resource/*Observation/stress-obs-glucose*/.value.ofType(Quantity)</td><td>code-invalid</td><td>Error from http://tx.fhir.org/r4: Unparseable HTML</td><td/><td>TerminologyEngine</td></tr><tr><td>warning</td><td>Bundle.entry[2].resource/*Observation/stress-obs-height*/</td><td>invalid</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Bundle.entry[2].resource</td><td>invalid</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Bundle.entry[3].resource/*Observation/stress-obs-glucose*/</td><td>invalid</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Bundle.entry[3].resource</td><td>invalid</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Bundle.entry[2].resource/*Observation/stress-obs-height*/.subject</td><td>required</td><td>Entry 0 matches the reference Patient/stress-patient-1 by type and id but it's fullUrl urn:uuid:patient-1 does not match the full target URL urn:uuid:stress-patient-1 by Bundle resolution rules</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Bundle.entry[3].resource/*Observation/stress-obs-glucose*/.subject</td><td>required</td><td>Entry 0 matches the reference Patient/stress-patient-1 by type and id but it's fullUrl urn:uuid:patient-1 does not match the full target URL urn:uuid:stress-patient-1 by Bundle resolution rules</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Bundle.entry[4].resource/*Condition/stress-condition-1*/.subject</td><td>required</td><td>Entry 0 matches the reference Patient/stress-patient-1 by type and id but it's fullUrl urn:uuid:patient-1 does not match the full target URL urn:uuid:stress-patient-1 by Bundle resolution rules</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Bundle.entry[0].resource/*Patient/stress-patient-1*/</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Bundle.entry[1].resource/*Patient/stress-patient-2*/</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Bundle.entry[3].resource/*Observation/stress-obs-glucose*/</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Bundle.entry[4].resource/*Condition/stress-condition-1*/</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Bundle.entry[5].resource/*Patient/stress-bad-url-patient*/</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "issue": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 59
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 10
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            }
+          ],
+          "severity": "error",
+          "code": "code-invalid",
+          "details": {
+            "text": "Error from http://tx.fhir.org/r4: Unparseable HTML"
+          },
+          "expression": [
+            "Bundle.entry[2].resource/*Observation/stress-obs-height*/.code.coding[0]"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 76
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 23
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Terminology_TX_NoValid_16"
+            }
+          ],
+          "severity": "error",
+          "code": "code-invalid",
+          "details": {
+            "text": "The value provided ('cm') was not found in the value set 'Body Length Units' (http://hl7.org/fhir/ValueSet/ucum-bodylength|4.0.1), and a code is required from this value set  (error message = Error from http://tx.fhir.org/r4: Unparseable HTML)"
+          },
+          "expression": [
+            "Bundle.entry[2].resource/*Observation/stress-obs-height*/.value.ofType(Quantity).code"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 97
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 10
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            }
+          ],
+          "severity": "error",
+          "code": "code-invalid",
+          "details": {
+            "text": "java.net.SocketTimeoutException: timeout"
+          },
+          "expression": [
+            "Bundle.entry[3].resource/*Observation/stress-obs-glucose*/.code.coding[0]"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 139
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 10
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            }
+          ],
+          "severity": "error",
+          "code": "code-invalid",
+          "details": {
+            "text": "java.net.SocketTimeoutException: timeout"
+          },
+          "expression": [
+            "Bundle.entry[4].resource/*Condition/stress-condition-1*/.code.coding[0]"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 164
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 35
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Terminology_TX_NoValid_16"
+            }
+          ],
+          "severity": "error",
+          "code": "code-invalid",
+          "details": {
+            "text": "The value provided ('unknown-gender') was not found in the value set 'AdministrativeGender' (http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1), and a code is required from this value set  (error message = The System URI could not be determined for the code 'unknown-gender' in the ValueSet 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1'; The provided code '#unknown-gender' was not found in the value set 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1')"
+          },
+          "expression": [
+            "Bundle.entry[5].resource/*Patient/stress-bad-url-patient*/.gender"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 7
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 38
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Type_Specific_Checks_DT_UUID_Valid"
+            }
+          ],
+          "severity": "error",
+          "code": "invalid",
+          "details": {
+            "text": "UUIDs must be valid and lowercase (patient-1)"
+          },
+          "expression": [
+            "Bundle.entry[0].fullUrl"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 13
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 63
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE"
+            }
+          ],
+          "severity": "error",
+          "code": "invalid",
+          "details": {
+            "text": "Example URLs are not allowed in this context (http://example.org/fhir/identifier/mrn)"
+          },
+          "expression": [
+            "Bundle.entry[0].resource/*Patient/stress-patient-1*/.identifier[0].system"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 28
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 38
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Type_Specific_Checks_DT_UUID_Valid"
+            }
+          ],
+          "severity": "error",
+          "code": "invalid",
+          "details": {
+            "text": "UUIDs must be valid and lowercase (patient-2)"
+          },
+          "expression": [
+            "Bundle.entry[1].fullUrl"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 43
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 39
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Type_Specific_Checks_DT_UUID_Valid"
+            }
+          ],
+          "severity": "error",
+          "code": "invalid",
+          "details": {
+            "text": "UUIDs must be valid and lowercase (obs-height)"
+          },
+          "expression": [
+            "Bundle.entry[2].fullUrl"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 81
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 40
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Type_Specific_Checks_DT_UUID_Valid"
+            }
+          ],
+          "severity": "error",
+          "code": "invalid",
+          "details": {
+            "text": "UUIDs must be valid and lowercase (obs-glucose)"
+          },
+          "expression": [
+            "Bundle.entry[3].fullUrl"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 119
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 40
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Type_Specific_Checks_DT_UUID_Valid"
+            }
+          ],
+          "severity": "error",
+          "code": "invalid",
+          "details": {
+            "text": "UUIDs must be valid and lowercase (condition-1)"
+          },
+          "expression": [
+            "Bundle.entry[4].fullUrl"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 153
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 6
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "BUNDLE_ENTRY_URL_MATCHES_TYPE_ID"
+            }
+          ],
+          "severity": "error",
+          "code": "invalid",
+          "details": {
+            "text": "The fullUrl 'http://example.org/fhir/Patient/bad-entry' looks like a RESTful server URL, so it must end with the correct type and id (/Patient/stress-bad-url-patient)"
+          },
+          "expression": [
+            "Bundle.entry[0]"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 44
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "VALIDATION_VAL_PROFILE_SIGNPOST_OBS"
+            }
+          ],
+          "severity": "information",
+          "code": "informational",
+          "details": {
+            "text": "Validate Observation against the Body height profile (http://hl7.org/fhir/StructureDefinition/bodyheight) which is required by the FHIR specification because the LOINC code 8302-2 was found"
+          },
+          "expression": [
+            "Bundle.entry[2].resource/*Observation/stress-obs-height*/"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 44
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "VALIDATION_VAL_PROFILE_SIGNPOST_OBS"
+            }
+          ],
+          "severity": "information",
+          "code": "informational",
+          "details": {
+            "text": "Validate Observation against the Body height profile (http://hl7.org/fhir/StructureDefinition/bodyheight) which is required by the FHIR specification because the LOINC code 8302-2 was found"
+          },
+          "expression": [
+            "Bundle.entry[2].resource"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 59
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 10
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Terminology_TX_NoValid_2_CC"
+            }
+          ],
+          "severity": "warning",
+          "code": "code-invalid",
+          "details": {
+            "text": "None of the codings provided are in the value set 'Vital Signs' (http://hl7.org/fhir/ValueSet/observation-vitalsignresult|4.0.1), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://loinc.org#8302-2)"
+          },
+          "expression": [
+            "Bundle.entry[2].resource/*Observation/stress-obs-height*/.code"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 72
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 10
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            }
+          ],
+          "severity": "warning",
+          "code": "code-invalid",
+          "details": {
+            "text": "Error from http://tx.fhir.org/r4: Unparseable HTML"
+          },
+          "expression": [
+            "Bundle.entry[2].resource/*Observation/stress-obs-height*/.value.ofType(Quantity)"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 110
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 10
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            }
+          ],
+          "severity": "warning",
+          "code": "code-invalid",
+          "details": {
+            "text": "Error from http://tx.fhir.org/r4: Unparseable HTML"
+          },
+          "expression": [
+            "Bundle.entry[3].resource/*Observation/stress-obs-glucose*/.value.ofType(Quantity)"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 44
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "All_observations_should_have_a_performer"
+            }
+          ],
+          "severity": "warning",
+          "code": "invalid",
+          "details": {
+            "text": "Best Practice Recommendation: In general, all observations should have a performer"
+          },
+          "expression": [
+            "Bundle.entry[2].resource/*Observation/stress-obs-height*/"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 44
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "All_observations_should_have_a_performer"
+            }
+          ],
+          "severity": "warning",
+          "code": "invalid",
+          "details": {
+            "text": "Best Practice Recommendation: In general, all observations should have a performer"
+          },
+          "expression": [
+            "Bundle.entry[2].resource"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 82
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "All_observations_should_have_a_performer"
+            }
+          ],
+          "severity": "warning",
+          "code": "invalid",
+          "details": {
+            "text": "Best Practice Recommendation: In general, all observations should have a performer"
+          },
+          "expression": [
+            "Bundle.entry[3].resource/*Observation/stress-obs-glucose*/"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 82
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "All_observations_should_have_a_performer"
+            }
+          ],
+          "severity": "warning",
+          "code": "invalid",
+          "details": {
+            "text": "Best Practice Recommendation: In general, all observations should have a performer"
+          },
+          "expression": [
+            "Bundle.entry[3].resource"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "BUNDLE_BUNDLE_POSSIBLE_MATCH_WRONG_FU"
+            }
+          ],
+          "severity": "warning",
+          "code": "required",
+          "details": {
+            "text": "Entry 0 matches the reference Patient/stress-patient-1 by type and id but it's fullUrl urn:uuid:patient-1 does not match the full target URL urn:uuid:stress-patient-1 by Bundle resolution rules"
+          },
+          "expression": [
+            "Bundle.entry[2].resource/*Observation/stress-obs-height*/.subject"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "BUNDLE_BUNDLE_POSSIBLE_MATCH_WRONG_FU"
+            }
+          ],
+          "severity": "warning",
+          "code": "required",
+          "details": {
+            "text": "Entry 0 matches the reference Patient/stress-patient-1 by type and id but it's fullUrl urn:uuid:patient-1 does not match the full target URL urn:uuid:stress-patient-1 by Bundle resolution rules"
+          },
+          "expression": [
+            "Bundle.entry[3].resource/*Observation/stress-obs-glucose*/.subject"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "BUNDLE_BUNDLE_POSSIBLE_MATCH_WRONG_FU"
+            }
+          ],
+          "severity": "warning",
+          "code": "required",
+          "details": {
+            "text": "Entry 0 matches the reference Patient/stress-patient-1 by type and id but it's fullUrl urn:uuid:patient-1 does not match the full target URL urn:uuid:stress-patient-1 by Bundle resolution rules"
+          },
+          "expression": [
+            "Bundle.entry[4].resource/*Condition/stress-condition-1*/.subject"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "Bundle.entry[0].resource/*Patient/stress-patient-1*/"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 29
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "Bundle.entry[1].resource/*Patient/stress-patient-2*/"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 82
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "Bundle.entry[3].resource/*Observation/stress-obs-glucose*/"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 120
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "Bundle.entry[4].resource/*Condition/stress-condition-1*/"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 155
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "Bundle.entry[5].resource/*Patient/stress-bad-url-patient*/"
+          ]
+        }
+      ]
+    }
+  }
+}
