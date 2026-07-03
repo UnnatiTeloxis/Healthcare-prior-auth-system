@@ -1,142 +1,99 @@
-# Deploy to Render.com (FREE tier)
+# Deploy to Render.com
 
-This guide covers deploying the Interop Automation Platform to [Render.com](https://render.com) using the **Render Blueprint** (`render.yaml`). No application source code changes are required — only the deployment files in this document.
+Single-URL production deploy: **UI + API + FHIR Validator** on one domain, with a co-deployed Inferno wrapper service.
 
-## Files added for Render
+## Architecture
 
-| File | Purpose |
-|------|---------|
-| `render.yaml` | Full-stack Blueprint (backend, frontend, Postgres, Redis) |
-| `backend/Dockerfile.render` | Backend image with `PORT` support for Render |
-| `backend/render.yaml` | Optional backend-only Blueprint |
-| `frontend/Dockerfile.render` | Frontend production build + nginx |
-| `frontend/nginx.render.conf` | Nginx proxy to backend on Render |
-| `docker-compose.render.yml` | Local simplified stack (backend + frontend) |
-| `.env.production` | Production environment template |
-| `.dockerignore` | Root Docker build exclusions |
-| `scripts/deploy-render.sh` | Linux/macOS push + deploy helper |
-| `scripts/deploy-render.ps1` | Windows push + deploy helper |
+| URL | Serves |
+|-----|--------|
+| `https://interop-platform.onrender.com/` | React SPA |
+| `https://interop-platform.onrender.com/fhir-validator.html` | FHIR Conformance Validator UI |
+| `https://interop-platform.onrender.com/api/v1/*` | Validation API |
+| `https://interop-platform.onrender.com/health` | Health check |
+| `https://interop-platform.onrender.com/docs` | Swagger docs |
 
-Existing `Dockerfile`, `docker-compose.yml`, and `nginx.conf` files are **unchanged** and still used for local development.
+| Service | Image | Role |
+|---------|-------|------|
+| `interop-platform` | `Dockerfile` (unified build) | Frontend + FastAPI + bundled IG packages |
+| `fhir-validator-wrapper` | `infernocommunity/fhir-validator-service` | Inferno validation engine |
 
-## Prerequisites
+FHIR Implementation Guides are **bundled** in `backend/fhir_packages/` and loaded offline at runtime (no IG download from the internet).
 
-1. GitHub repository with this project pushed
-2. [Render.com](https://render.com) account (free tier)
-3. **Inferno FHIR validator wrapper** URL for live validation (see below)
+## Quick deploy
 
-## Quick deploy (Blueprint)
-
-1. Push this repo to GitHub:
-   ```bash
-   cd interop-automation-platform
-   ./scripts/deploy-render.sh
-   ```
-   Windows:
+1. Push to GitHub:
    ```powershell
    cd interop-automation-platform
    .\scripts\deploy-render.ps1
    ```
 
-2. In Render Dashboard: **New +** → **Blueprint**
+2. [Render Dashboard](https://dashboard.render.com) → **New +** → **Blueprint**
 
-3. Connect your GitHub repository
+3. Connect repo and select `render.yaml`:
+   - Monorepo root: `/render.yaml`
+   - Or set **Root Directory** to `interop-automation-platform` and use its `render.yaml`
 
-4. Choose the correct `render.yaml`:
-   - Repo root is `Healthcare-prior-auth-system` → use `/render.yaml` at repository root
-   - Repo root is `interop-automation-platform` → use `interop-automation-platform/render.yaml`
+4. Click **Apply** (two services are created)
 
-5. Set **Root Directory** (if needed):
-   - Monorepo: leave root `render.yaml` (it sets `rootDir: interop-automation-platform`)
-   - Or set Root Directory to `interop-automation-platform` and use that folder's `render.yaml`
+5. Wait 10–15 minutes for first build (frontend + backend in one Docker image)
 
-6. After Blueprint preview, set **`INFERNO_VALIDATOR_URL`** on the backend service (marked `sync: false` in blueprint)
-
-7. Click **Apply** and wait 5–10 minutes
-
-## Service URLs
-
-After deploy:
-
-| Service | URL |
-|---------|-----|
-| Backend API | `https://fhir-validator-backend.onrender.com` |
-| API Docs | `https://fhir-validator-backend.onrender.com/docs` |
-| Health | `https://fhir-validator-backend.onrender.com/health` |
-| Frontend | `https://fhir-validator-frontend.onrender.com` |
-| FHIR Validator UI | `https://fhir-validator-frontend.onrender.com/fhir-validator.html` |
-
-## Inferno validator (important)
-
-Full FHIR conformance validation requires the **Inferno FHIR validator wrapper** (`INFERNO_VALIDATOR_URL`). The local `docker-compose.yml` runs this as `fhir-validator-wrapper`.
-
-On Render free tier you must either:
-
-- Host the wrapper elsewhere and set `INFERNO_VALIDATOR_URL` to its public URL, or
-- Use Render private networking between services (paid feature) with a custom wrapper service
-
-Without a reachable wrapper, `/health` still works but validation endpoints will fail.
-
-## Environment variables
-
-Copy from `.env.production` into Render Dashboard → each service → **Environment**:
-
-| Variable | Service | Notes |
-|----------|---------|-------|
-| `PORT` | Backend | Set by Render automatically |
-| `DATABASE_URL` | Backend | Linked from Render Postgres |
-| `REDIS_URL` | Backend | Linked from Render Redis |
-| `INFERNO_VALIDATOR_URL` | Backend | **You must set this** |
-| `CORS_ORIGINS` | Backend | `*` or your frontend URL |
-| `VITE_API_BASE_URL` | Frontend build | `/api/v1` (nginx proxies `/api`) |
-
-## Verify deployment
+## Verify
 
 ```bash
-curl https://fhir-validator-backend.onrender.com/health
+curl https://interop-platform.onrender.com/health
+curl https://fhir-validator-wrapper.onrender.com/version
 ```
 
-Expected: `{"status":"healthy","service":"interop-platform"}`
+Open: `https://interop-platform.onrender.com/fhir-validator.html`
 
-Open the frontend URL in a browser and run a validation.
-
-## Local Docker (Render-style)
+## Local test (same image as Render)
 
 ```bash
 cd interop-automation-platform
-cp .env.production .env
-docker compose -f docker-compose.render.yml up -d --build
+docker build -t interop-platform .
+docker run -p 8000:8000 -e PORT=8000 \
+  -e INFERNO_VALIDATOR_URL=http://host.docker.internal:4567 \
+  interop-platform
 ```
 
-- Frontend: http://localhost:3000  
-- Backend: http://localhost:8000  
+For full validation locally, run `docker compose up` (includes Inferno wrapper).
 
-## Manual Docker build
+## FHIR packages (offline IGs)
 
-```bash
-# Backend
-cd backend
-docker build -f Dockerfile.render -t fhir-backend-render .
-docker run -p 8000:8000 -e PORT=8000 fhir-backend-render
+Packages must exist in `backend/fhir_packages/` before deploy (already in repo if committed):
 
-# Frontend
-cd frontend
-docker build -f Dockerfile.render -t fhir-frontend-render .
-docker run -p 3000:80 fhir-frontend-render
+```powershell
+New-Item -ItemType Directory -Force backend\fhir_packages | Out-Null
+Invoke-WebRequest "https://hl7.org/fhir/us/core/package.tgz" -OutFile "backend\fhir_packages\us-core.tgz"
 ```
 
-## Free tier notes
+## Environment variables
 
-- Services spin down after ~15 minutes of inactivity; first request may take 30–60 seconds
-- Free Postgres and Redis are included in `render.yaml` but have storage/connection limits
-- Rename services in `render.yaml` if names are already taken in your Render account
+| Variable | Service | Default in blueprint |
+|----------|---------|----------------------|
+| `INFERNO_VALIDATOR_URL` | interop-platform | `https://fhir-validator-wrapper.onrender.com` |
+| `FHIR_PACKAGES_PATH` | interop-platform | `/app/fhir_packages` |
+| `DEFAULT_IGS` | interop-platform | `hl7.fhir.us.core#6.1.0` |
+| `TX_SERVER_URL` | wrapper | `https://tx.fhir.org/r4` |
+
+If your wrapper service name differs, update `INFERNO_VALIDATOR_URL` in the Render dashboard.
 
 ## Troubleshooting
 
 | Issue | Fix |
 |-------|-----|
-| Blueprint not found | Set Root Directory to `interop-automation-platform` or use repo-root `render.yaml` |
-| Health check fails | Check backend logs; ensure `PORT` is used (Dockerfile.render) |
-| Frontend 502 on `/api` | Update `backend_host` in `frontend/nginx.render.conf` to match your backend service URL |
-| Validation errors | Set `INFERNO_VALIDATOR_URL` to a running Inferno wrapper |
-| Cold start slow | Normal on free tier; upgrade or use a keep-alive ping |
+| `open Dockerfile: no such file` | Set Root Directory to `interop-automation-platform` |
+| IG load errors | Ensure `backend/fhir_packages/*.tgz` are committed |
+| Validation API errors | Check wrapper is up: `/version` on wrapper URL |
+| Cold start slow | Free tier sleeps after ~15 min inactivity |
+| Service name taken | Rename services in `render.yaml` and update `INFERNO_VALIDATOR_URL` |
+
+## Files
+
+| File | Purpose |
+|------|---------|
+| `Dockerfile` | Production unified image (frontend build + backend) |
+| `render.yaml` | Render Blueprint |
+| `backend/Dockerfile` | Dev-only image for `docker-compose.yml` |
+| `backend/fhir_packages/` | Bundled FHIR IG `.tgz` files |
+| `.dockerignore` | Docker build exclusions |

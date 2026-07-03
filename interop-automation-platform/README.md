@@ -99,61 +99,27 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 ## Deploy to Render.com (FREE)
 
-Deployment files are **additive only** — existing Docker/dev setup is unchanged.
+**Single URL** — UI, API, and FHIR Validator on one domain (`interop-platform.onrender.com`).
 
-1. Fork or push this repository to GitHub
-2. Create an account at [render.com](https://render.com)
-3. Click **New +** → **Blueprint** and connect your repository
-4. Select `render.yaml` (repo root or `interop-automation-platform/render.yaml`)
-5. Set **`INFERNO_VALIDATOR_URL`** on the backend service (required for live FHIR validation)
-6. Click **Apply** and wait 5–10 minutes
-
-**Helper scripts** (commit + push deployment files):
-
-```powershell
-# Windows
-.\scripts\deploy-render.ps1
-```
+1. Push to GitHub (`.\scripts\deploy-render.ps1`)
+2. [render.com](https://render.com) → **New +** → **Blueprint** → connect repo
+3. Use `render.yaml` (repo root or `interop-automation-platform/render.yaml`)
+4. Click **Apply** — creates `interop-platform` + `fhir-validator-wrapper`
+5. Wait 10–15 minutes for the first Docker build
 
 ```bash
-# Linux / macOS
-chmod +x scripts/deploy-render.sh
-./scripts/deploy-render.sh
+curl https://interop-platform.onrender.com/health
+# Validator UI: https://interop-platform.onrender.com/fhir-validator.html
 ```
 
-**After deploy:**
-
-| Service | URL |
-|---------|-----|
-| Backend | `https://fhir-validator-backend.onrender.com` |
-| Frontend | `https://fhir-validator-frontend.onrender.com` |
-| Validator UI | `https://fhir-validator-frontend.onrender.com/fhir-validator.html` |
-
-```bash
-curl https://fhir-validator-backend.onrender.com/health
-```
-
-**Local Render-style stack:**
-
-```bash
-docker compose -f docker-compose.render.yml --env-file .env.production up -d --build
-```
-
-Full details: [docs/DEPLOYMENT_RENDER.md](docs/DEPLOYMENT_RENDER.md)
-
-### Deployment files
+Full guide: [docs/DEPLOYMENT_RENDER.md](docs/DEPLOYMENT_RENDER.md)
 
 | File | Purpose |
 |------|---------|
-| `render.yaml` | Render Blueprint (backend, frontend, Postgres, Redis) |
-| `backend/Dockerfile.render` | Backend container for Render (`PORT` aware) |
-| `frontend/Dockerfile.render` | Frontend production build |
-| `frontend/nginx.render.conf` | Nginx config for Render |
-| `docker-compose.render.yml` | Simplified local production stack |
-| `.env.production` | Production environment template |
-| `.dockerignore` | Docker build exclusions |
-| `scripts/deploy-render.sh` | Render deploy helper (Unix) |
-| `scripts/deploy-render.ps1` | Render deploy helper (Windows) |
+| `Dockerfile` | Production image (frontend + backend + bundled IGs) |
+| `render.yaml` | Render Blueprint |
+| `backend/fhir_packages/` | Offline FHIR IG packages |
+| `backend/Dockerfile` | Dev-only image for `docker-compose.yml` |
 
 ## Local Development (without Docker)
 

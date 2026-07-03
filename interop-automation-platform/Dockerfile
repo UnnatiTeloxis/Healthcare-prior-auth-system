@@ -1,8 +1,8 @@
-# Unified single-service image: React frontend + FastAPI backend
-# Build context MUST be interop-automation-platform/ (this directory)
+# Production image for Render.com: React frontend + FastAPI backend + bundled IGs
+# Build context: interop-automation-platform/
 #
-#   docker build -t fhir-validator .
-#   docker run -p 8000:8000 -e PORT=8000 fhir-validator
+#   docker build -t interop-platform .
+#   docker run -p 8000:8000 -e PORT=8000 interop-platform
 
 # Stage 1: Build frontend
 FROM node:20-alpine AS frontend-builder

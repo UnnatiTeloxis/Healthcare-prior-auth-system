@@ -1,22 +1,4 @@
-# Unified image — build from interop-automation-platform/ (parent directory):
-#
-#   cd interop-automation-platform
-#   docker build -f backend/Dockerfile -t fhir-validator .
-#
-# Railway uses interop-automation-platform/Dockerfile (recommended).
-
-# Stage 1: Build frontend
-FROM node:20-alpine AS frontend-builder
-
-WORKDIR /app/frontend
-
-COPY frontend/package.json frontend/package-lock.json* ./
-RUN npm install --legacy-peer-deps
-
-COPY frontend/ .
-RUN npm run build
-
-# Stage 2: Backend + static frontend
+# Development / docker-compose backend image (API only, hot reload via compose command)
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -28,20 +10,18 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    gcc \
     libpq5 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY backend/requirements.txt /app/requirements.txt
+COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r /app/requirements.txt
+    pip install --no-cache-dir -r requirements.txt
 
-COPY backend/ /app/
-COPY --from=frontend-builder /app/frontend/dist /app/frontend/dist
+COPY . .
 
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f "http://localhost:${PORT:-8000}/health" || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
 
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
