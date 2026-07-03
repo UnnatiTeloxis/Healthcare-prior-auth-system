@@ -97,6 +97,64 @@ Copy-Item .env.example .env
 docker compose -f docker-compose.prod.yml up -d --build
 ```
 
+## Deploy to Render.com (FREE)
+
+Deployment files are **additive only** — existing Docker/dev setup is unchanged.
+
+1. Fork or push this repository to GitHub
+2. Create an account at [render.com](https://render.com)
+3. Click **New +** → **Blueprint** and connect your repository
+4. Select `render.yaml` (repo root or `interop-automation-platform/render.yaml`)
+5. Set **`INFERNO_VALIDATOR_URL`** on the backend service (required for live FHIR validation)
+6. Click **Apply** and wait 5–10 minutes
+
+**Helper scripts** (commit + push deployment files):
+
+```powershell
+# Windows
+.\scripts\deploy-render.ps1
+```
+
+```bash
+# Linux / macOS
+chmod +x scripts/deploy-render.sh
+./scripts/deploy-render.sh
+```
+
+**After deploy:**
+
+| Service | URL |
+|---------|-----|
+| Backend | `https://fhir-validator-backend.onrender.com` |
+| Frontend | `https://fhir-validator-frontend.onrender.com` |
+| Validator UI | `https://fhir-validator-frontend.onrender.com/fhir-validator.html` |
+
+```bash
+curl https://fhir-validator-backend.onrender.com/health
+```
+
+**Local Render-style stack:**
+
+```bash
+docker compose -f docker-compose.render.yml --env-file .env.production up -d --build
+```
+
+Full details: [docs/DEPLOYMENT_RENDER.md](docs/DEPLOYMENT_RENDER.md)
+
+### Deployment files
+
+| File | Purpose |
+|------|---------|
+| `render.yaml` | Render Blueprint (backend, frontend, Postgres, Redis) |
+| `backend/Dockerfile.render` | Backend container for Render (`PORT` aware) |
+| `frontend/Dockerfile.render` | Frontend production build |
+| `frontend/nginx.render.conf` | Nginx config for Render |
+| `docker-compose.render.yml` | Simplified local production stack |
+| `.env.production` | Production environment template |
+| `.dockerignore` | Docker build exclusions |
+| `scripts/deploy-render.sh` | Render deploy helper (Unix) |
+| `scripts/deploy-render.ps1` | Render deploy helper (Windows) |
+
 ## Local Development (without Docker)
 
 ```powershell

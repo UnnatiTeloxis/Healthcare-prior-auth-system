@@ -1,0 +1,28 @@
+# Backend-only Render Blueprint (optional — use root render.yaml for full stack)
+services:
+  - type: web
+    name: fhir-validator-backend
+    runtime: docker
+    region: oregon
+    plan: free
+    dockerContext: .
+    dockerfilePath: ./Dockerfile.render
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      - key: PORT
+        value: "8000"
+      - key: API_DEBUG
+        value: "false"
+      - key: API_RELOAD
+        value: "false"
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: TERMINOLOGY_SERVER_URL
+        value: https://tx.fhir.org/r4
+      - key: DEFAULT_IGS
+        value: hl7.fhir.us.core#6.1.0
+      # Set INFERNO_VALIDATOR_URL to your Inferno wrapper URL (required for FHIR validation)
+      - key: INFERNO_VALIDATOR_URL
+        sync: false
