@@ -6,7 +6,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.router import router
@@ -97,6 +97,9 @@ if FRONTEND_DIST:
 
     @app.get("/")
     async def serve_frontend_root():
+        validator_path = FRONTEND_DIST / "fhir-validator.html"
+        if validator_path.is_file():
+            return RedirectResponse(url="/fhir-validator.html", status_code=302)
         index_path = FRONTEND_DIST / "index.html"
         if index_path.is_file():
             return FileResponse(index_path)
