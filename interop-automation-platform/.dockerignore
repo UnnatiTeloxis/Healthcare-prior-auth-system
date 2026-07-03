@@ -5,7 +5,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# Build outputs
+# Build outputs (rebuilt inside Docker)
+frontend/dist/
 dist/
 dist-ssr/
 *.local
@@ -14,10 +15,6 @@ dist-ssr/
 .env
 .env.local
 .env.*.local
-
-# Docker (keep Render-specific files in image)
-Dockerfile
-.dockerignore
 
 # IDE
 .idea/
@@ -35,15 +32,16 @@ Dockerfile
 *.md
 docs/
 
-# Tests
+# Tests & history
 coverage/
 .nyc_output/
 __tests__/
 *.test.js
 *.spec.js
 test-history/
+backend/test-history/
 
-# Python
+# Python caches
 __pycache__/
 *.py[cod]
 .venv/
@@ -51,5 +49,6 @@ venv/
 .pytest_cache/
 .mypy_cache/
 
-# Data / logs (large; mount or configure separately in production)
-*.log
+# Local Docker / dev volumes
+postgres_data/
+redis_data/

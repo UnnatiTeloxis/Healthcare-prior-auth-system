@@ -1,9 +1,8 @@
-# Unified image — build from interop-automation-platform/ (parent directory):
+# Unified single-service image: React frontend + FastAPI backend
+# Build context MUST be interop-automation-platform/ (this directory)
 #
-#   cd interop-automation-platform
-#   docker build -f backend/Dockerfile -t fhir-validator .
-#
-# Railway uses interop-automation-platform/Dockerfile (recommended).
+#   docker build -t fhir-validator .
+#   docker run -p 8000:8000 -e PORT=8000 fhir-validator
 
 # Stage 1: Build frontend
 FROM node:20-alpine AS frontend-builder
