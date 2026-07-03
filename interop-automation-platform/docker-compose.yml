@@ -64,11 +64,13 @@ services:
       DATABASE_URL: postgresql://interop:interop123@postgres:5432/interop
       REDIS_URL: redis://redis:6379
       INFERNO_VALIDATOR_URL: http://fhir-validator-wrapper:4567
+      FHIR_PACKAGES_PATH: /app/fhir_packages
       DEFAULT_IGS: hl7.fhir.us.core#6.1.0
       CORS_ORIGINS: "*"
       PYTHONUNBUFFERED: "1"
     volumes:
       - ./backend:/app
+      - ./frontend/public:/app/frontend/public:ro
       - ./data:/app/data:ro
     depends_on:
       postgres:

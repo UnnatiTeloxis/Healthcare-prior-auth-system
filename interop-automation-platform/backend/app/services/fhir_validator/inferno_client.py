@@ -26,6 +26,7 @@ class InfernoClient:
         self.client: httpx.AsyncClient | None = None
         self._loaded_igs: set[str] = set()
         self._ready = asyncio.Event()
+        self._engine_warm = False
         self._startup_lock = asyncio.Lock()
 
     async def _get_client(self) -> httpx.AsyncClient:
@@ -53,6 +54,7 @@ class InfernoClient:
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
             if await self._is_engine_ready():
+                self._engine_warm = True
                 logger.info("Inferno validator engine is ready")
                 return
             await asyncio.sleep(_STARTUP_POLL_INTERVAL)
@@ -129,22 +131,30 @@ class InfernoClient:
             if self._ready.is_set():
                 return
 
-            await self._wait_for_engine()
-            await self._preload_local_packages()
+            try:
+                await self._wait_for_engine()
+            except TimeoutError as exc:
+                logger.warning("%s — validation will retry until Inferno is ready", exc)
 
-            for ig_spec in settings.default_igs_list:
-                package_id, version = _split_ig_spec(ig_spec)
-                key = _ig_key(package_id, version)
-                if key in self._loaded_igs:
-                    continue
-                try:
-                    await self.load_ig_by_id(package_id, version, startup=True)
-                except Exception as exc:
-                    logger.warning("Unable to load default IG %s: %s", key, exc)
+            try:
+                await self._preload_local_packages()
 
-            await self._sync_loaded_igs_from_server()
+                for ig_spec in settings.default_igs_list:
+                    package_id, version = _split_ig_spec(ig_spec)
+                    key = _ig_key(package_id, version)
+                    if key in self._loaded_igs:
+                        continue
+                    try:
+                        await self.load_ig_by_id(package_id, version, startup=True)
+                    except Exception as exc:
+                        logger.warning("Unable to load default IG %s: %s", key, exc)
+
+                await self._sync_loaded_igs_from_server()
+            except Exception as exc:
+                logger.warning("Inferno IG preload incomplete: %s", exc)
+
             self._ready.set()
-            logger.info("Inferno validator ready (%s IGs loaded)", len(self._loaded_igs))
+            logger.info("Inferno validator startup complete (%s IGs tracked)", len(self._loaded_igs))
 
     async def validate_resource(self, resource: str, profiles: list[str]) -> dict[str, Any]:
         await self.ensure_ready()
@@ -156,7 +166,7 @@ class InfernoClient:
         response = await self._request(
             "POST",
             f"{self.base_url}/validate",
-            startup=False,
+            startup=not self._engine_warm,
             content=resource,
             headers=headers,
             params=params,

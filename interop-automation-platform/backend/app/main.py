@@ -39,6 +39,31 @@ def _resolve_frontend_dist() -> Path | None:
 FRONTEND_DIST = _resolve_frontend_dist()
 
 
+def _resolve_fhir_validator_html() -> Path | None:
+    env_path = os.getenv("FHIR_VALIDATOR_HTML_PATH", "").strip()
+    if env_path:
+        candidate = Path(env_path)
+        if candidate.is_file():
+            return candidate
+
+    candidates = [
+        Path("/app/frontend/dist/fhir-validator.html"),
+        Path("/app/frontend/public/fhir-validator.html"),
+        Path(__file__).resolve().parent.parent / "frontend" / "dist" / "fhir-validator.html",
+        Path(__file__).resolve().parent.parent / "frontend" / "public" / "fhir-validator.html",
+    ]
+    if FRONTEND_DIST:
+        candidates.insert(0, FRONTEND_DIST / "fhir-validator.html")
+
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+FHIR_VALIDATOR_HTML = _resolve_fhir_validator_html()
+
+
 async def _preload_validator_igs() -> None:
     try:
         await inferno_client.ensure_ready()
@@ -73,6 +98,14 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix="/api/v1")
+
+
+if FHIR_VALIDATOR_HTML:
+    logger.info("FHIR validator UI available at /fhir-validator.html (%s)", FHIR_VALIDATOR_HTML)
+
+    @app.get("/fhir-validator.html")
+    async def serve_fhir_validator_page():
+        return FileResponse(FHIR_VALIDATOR_HTML)
 
 
 @app.get("/health")
@@ -117,6 +150,8 @@ else:
 
     @app.get("/")
     async def root():
+        if FHIR_VALIDATOR_HTML:
+            return RedirectResponse(url="/fhir-validator.html", status_code=302)
         return {
             "message": "Interop Automation Platform",
             "version": "1.0.0",
