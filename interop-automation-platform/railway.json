@@ -1,0 +1,32 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "services": {
+    "backend": {
+      "source": {
+        "rootDirectory": "backend"
+      },
+      "build": {
+        "builder": "NIXPACKS",
+        "nixpacksConfigPath": "nixpacks.toml"
+      },
+      "deploy": {
+        "startCommand": "uvicorn app.main:app --host 0.0.0.0 --port $PORT",
+        "healthcheckPath": "/health",
+        "restartPolicyType": "ON_FAILURE"
+      }
+    },
+    "frontend": {
+      "source": {
+        "rootDirectory": "frontend"
+      },
+      "build": {
+        "builder": "NIXPACKS",
+        "nixpacksConfigPath": "nixpacks.toml"
+      },
+      "deploy": {
+        "startCommand": "npm run start",
+        "restartPolicyType": "ON_FAILURE"
+      }
+    }
+  }
+}
