@@ -1,6 +1,6 @@
 # Render Blueprint (repository root)
 # Monorepo entrypoint — services live under interop-automation-platform/
-# In Render: Root Directory can stay empty; paths below are relative to repo root.
+# Paths below are relative to rootDir.
 
 services:
   - type: web
@@ -10,7 +10,7 @@ services:
     plan: free
     rootDir: interop-automation-platform
     dockerContext: ./backend
-    dockerfilePath: ./Dockerfile.render
+    dockerfilePath: ./backend/Dockerfile
     healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
@@ -53,7 +53,7 @@ services:
     plan: free
     rootDir: interop-automation-platform
     dockerContext: ./frontend
-    dockerfilePath: ./Dockerfile.render
+    dockerfilePath: ./frontend/Dockerfile
     envVars:
       - key: VITE_API_BASE_URL
         value: /api/v1
