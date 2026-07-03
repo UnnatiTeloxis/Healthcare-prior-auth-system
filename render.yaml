@@ -1,20 +1,15 @@
-# Render Blueprint (repository root)
-# Monorepo entrypoint — services live under interop-automation-platform/
-# Paths below are relative to rootDir.
+# Render Blueprint (monorepo) — single all-in-one Web Service
 
 services:
   - type: web
-    name: fhir-validator-backend
+    name: interop-platform
     runtime: docker
     region: oregon
     plan: free
     rootDir: interop-automation-platform
-    dockerContext: ./backend
-    dockerfilePath: ./backend/Dockerfile
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /health
     envVars:
-      - key: PYTHON_VERSION
-        value: "3.11.0"
       - key: PORT
         value: "8000"
       - key: API_DEBUG
@@ -23,44 +18,15 @@ services:
         value: "false"
       - key: CORS_ORIGINS
         value: "*"
+      - key: FHIR_PACKAGES_PATH
+        value: /app/fhir_packages
+      - key: INFERNO_VALIDATOR_URL
+        value: http://127.0.0.1:4567
       - key: TERMINOLOGY_SERVER_URL
         value: https://tx.fhir.org/r4
       - key: DEFAULT_IGS
         value: hl7.fhir.us.core#6.1.0
-      - key: DATABASE_URL
-        fromDatabase:
-          name: fhir-validator-db
-          property: connectionString
-      - key: REDIS_URL
-        fromService:
-          name: fhir-validator-redis
-          type: redis
-          property: connectionString
-      - key: INFERNO_VALIDATOR_URL
-        sync: false
-
-  - type: redis
-    name: fhir-validator-redis
-    region: oregon
-    plan: free
-    maxmemoryPolicy: allkeys_lru
-    ipAllowList: []
-
-  - type: web
-    name: fhir-validator-frontend
-    runtime: docker
-    region: oregon
-    plan: free
-    rootDir: interop-automation-platform
-    dockerContext: ./frontend
-    dockerfilePath: ./frontend/Dockerfile
-    envVars:
-      - key: VITE_API_BASE_URL
-        value: /api/v1
-
-databases:
-  - name: fhir-validator-db
-    region: oregon
-    plan: free
-    databaseName: interop
-    user: interop
+      - key: TX_SERVER_URL
+        value: https://tx.fhir.org/r4
+      - key: DISPLAY_ISSUES_ARE_WARNINGS
+        value: "true"

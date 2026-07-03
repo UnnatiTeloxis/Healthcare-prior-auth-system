@@ -99,27 +99,21 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 ## Deploy to Render.com (FREE)
 
-**Single URL** — UI, API, and FHIR Validator on one domain (`interop-platform.onrender.com`).
+**One Web Service** — Inferno validator + API + UI on a single URL.
 
-1. Push to GitHub (`.\scripts\deploy-render.ps1`)
-2. [render.com](https://render.com) → **New +** → **Blueprint** → connect repo
-3. Use `render.yaml` (repo root or `interop-automation-platform/render.yaml`)
-4. Click **Apply** — creates `interop-platform` + `fhir-validator-wrapper`
-5. Wait 10–15 minutes for the first Docker build
+| Field | Value |
+|-------|--------|
+| Root Directory | `interop-automation-platform` |
+| Branch | `interop-automation` |
+| Dockerfile | `./Dockerfile` |
+| Health check | `/health` |
 
-```bash
-curl https://interop-platform.onrender.com/health
-# Validator UI: https://interop-platform.onrender.com/fhir-validator.html
+```env
+INFERNO_VALIDATOR_URL=http://127.0.0.1:4567
+FHIR_PACKAGES_PATH=/app/fhir_packages
 ```
 
-Full guide: [docs/DEPLOYMENT_RENDER.md](docs/DEPLOYMENT_RENDER.md)
-
-| File | Purpose |
-|------|---------|
-| `Dockerfile` | Production image (frontend + backend + bundled IGs) |
-| `render.yaml` | Render Blueprint |
-| `backend/fhir_packages/` | Offline FHIR IG packages |
-| `backend/Dockerfile` | Dev-only image for `docker-compose.yml` |
+Guide: [docs/DEPLOYMENT_RENDER.md](docs/DEPLOYMENT_RENDER.md)
 
 ## Local Development (without Docker)
 

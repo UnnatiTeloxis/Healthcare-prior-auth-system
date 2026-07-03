@@ -1,8 +1,9 @@
-# Production image for Render.com: React frontend + FastAPI backend + bundled IGs
-# Build context: interop-automation-platform/
+# All-in-one production image for Render.com:
+#   - Inferno FHIR validator wrapper (localhost:4567)
+#   - FastAPI backend + React frontend (PORT)
 #
-#   docker build -t interop-platform .
-#   docker run -p 8000:8000 -e PORT=8000 interop-platform
+# Build: docker build -t interop-platform .
+# Run:   docker run -p 8000:8000 -e PORT=8000 interop-platform
 
 # Stage 1: Build frontend
 FROM node:20-alpine AS frontend-builder
@@ -15,7 +16,10 @@ RUN npm install --legacy-peer-deps
 COPY frontend/ .
 RUN npm run build
 
-# Stage 2: Backend + static frontend
+# Stage 2: Inferno validator (Java wrapper)
+FROM infernocommunity/fhir-validator-service:latest AS inferno
+
+# Stage 3: Python app + bundled Inferno
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -23,7 +27,13 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
-    FHIR_PACKAGES_PATH=/app/fhir_packages
+    FHIR_PACKAGES_PATH=/app/fhir_packages \
+    JAVA_HOME=/usr/local/openjdk-11 \
+    INFERNO_VALIDATOR_URL=http://127.0.0.1:4567 \
+    TX_SERVER_URL=https://tx.fhir.org/r4 \
+    DISPLAY_ISSUES_ARE_WARNINGS=true
+
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
@@ -31,16 +41,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     && rm -rf /var/lib/apt/lists/*
 
+# Inferno wrapper runtime (Java + service files)
+COPY --from=inferno /usr/local/openjdk-11 /usr/local/openjdk-11
+COPY --from=inferno /home /home
+
 COPY backend/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r /app/requirements.txt
 
 COPY backend/ /app/
 COPY --from=frontend-builder /app/frontend/dist /app/frontend/dist
+COPY scripts/start-all.sh /start-all.sh
+RUN sed -i 's/\r$//' /start-all.sh && chmod +x /start-all.sh
 
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=5 \
     CMD curl -f "http://localhost:${PORT:-8000}/health" || exit 1
 
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["/start-all.sh"]

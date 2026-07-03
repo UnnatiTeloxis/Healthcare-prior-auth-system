@@ -1,24 +1,7 @@
-# Render Blueprint — single URL (UI + API) + Inferno validator wrapper
-# Deploy: Render Dashboard → New + → Blueprint → connect GitHub repo
-# Monorepo: set Root Directory to interop-automation-platform OR use repo-root render.yaml
+# Render Blueprint — single Web Service (UI + API + Inferno validator)
+# Root Directory: interop-automation-platform (or use repo-root render.yaml)
 
 services:
-  # Inferno FHIR validator wrapper (same engine as inferno.healthit.gov/validator)
-  - type: web
-    name: fhir-validator-wrapper
-    runtime: image
-    region: oregon
-    plan: free
-    image:
-      url: docker.io/infernocommunity/fhir-validator-service:latest
-    healthCheckPath: /version
-    envVars:
-      - key: TX_SERVER_URL
-        value: https://tx.fhir.org/r4
-      - key: DISPLAY_ISSUES_ARE_WARNINGS
-        value: "true"
-
-  # Unified app: React UI + FastAPI API on one domain
   - type: web
     name: interop-platform
     runtime: docker
@@ -37,9 +20,13 @@ services:
         value: "*"
       - key: FHIR_PACKAGES_PATH
         value: /app/fhir_packages
+      - key: INFERNO_VALIDATOR_URL
+        value: http://127.0.0.1:4567
       - key: TERMINOLOGY_SERVER_URL
         value: https://tx.fhir.org/r4
       - key: DEFAULT_IGS
         value: hl7.fhir.us.core#6.1.0
-      - key: INFERNO_VALIDATOR_URL
-        value: https://fhir-validator-wrapper.onrender.com
+      - key: TX_SERVER_URL
+        value: https://tx.fhir.org/r4
+      - key: DISPLAY_ISSUES_ARE_WARNINGS
+        value: "true"
