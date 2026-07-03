@@ -19,6 +19,11 @@ RUN npm run build
 # Stage 2: Inferno validator (Java wrapper)
 FROM infernocommunity/fhir-validator-service:latest AS inferno
 
+# Stage 2b: Bind Inferno to 127.0.0.1 so Render only exposes FastAPI on PORT
+FROM inferno AS inferno-launcher-build
+COPY scripts/InfernoLocalLauncher.java /build/
+RUN /usr/local/openjdk-11/bin/javac -cp '/home/lib/*' -d /build/out /build/InfernoLocalLauncher.java
+
 # Stage 3: Python app + bundled Inferno
 FROM python:3.11-slim
 
@@ -44,6 +49,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Inferno wrapper runtime (Java + service files)
 COPY --from=inferno /usr/local/openjdk-11 /usr/local/openjdk-11
 COPY --from=inferno /home /home
+COPY --from=inferno-launcher-build /build/out /app/inferno-launcher
 
 COPY backend/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \
