@@ -6,6 +6,7 @@ from typing import Any
 import httpx
 
 from app.config import settings
+from app.services.fhir_validator.fhir_loader import get_fhir_package_loader
 from app.utils.fhir_helpers import extract_meta_profiles
 
 logger = logging.getLogger(__name__)
@@ -80,6 +81,24 @@ class InfernoClient:
             return {}
 
     async def load_ig_by_id(self, package_id: str, version: str | None = None) -> dict[str, Any]:
+        # Prefer offline/local packages when available to avoid outbound network calls.
+        loader = get_fhir_package_loader()
+        if loader.is_enabled():
+            package_bytes = loader.load_package_bytes(package_id, version)
+            if package_bytes:
+                result = await self.upload_custom_ig(package_bytes)
+                # Response usually includes package metadata; still mark requested key as loaded.
+                self._loaded_igs.add(_ig_key(package_id, version))
+                try:
+                    resp_pid = str(result.get("package_id") or result.get("packageId") or "").strip()
+                    resp_ver = str(result.get("version") or "").strip() or None
+                    if resp_pid:
+                        self._loaded_igs.add(_ig_key(resp_pid, resp_ver))
+                except Exception:
+                    pass
+                logger.info("Loaded FHIR IG from local package %s", _ig_key(package_id, version))
+                return result
+
         client = await self._get_client()
         params = {"version": version} if version else None
 
