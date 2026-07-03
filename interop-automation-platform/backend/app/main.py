@@ -40,21 +40,12 @@ FRONTEND_DIST = _resolve_frontend_dist()
 
 
 async def _preload_validator_igs() -> None:
-    for attempt in range(1, 31):
-        try:
-            await inferno_client._wait_for_engine(timeout=120.0)
-            await inferno_client.load_default_igs()
-            if inferno_client._loaded_igs:
-                version = await inferno_client.get_version()
-                logger.info("FHIR validator IGs preloaded: %s", version)
-                return
-            logger.warning("IG preload attempt %s: no IGs loaded yet", attempt)
-        except Exception as exc:
-            logger.warning("FHIR validator IG preload attempt %s failed: %s", attempt, exc)
-        await asyncio.sleep(10)
-
-    logger.warning("FHIR validator IG preload gave up after retries; validation will retry on demand")
-    inferno_client._igs_ready.set()
+    try:
+        await inferno_client.ensure_ready()
+        version = await inferno_client.get_version()
+        logger.info("FHIR validator ready at startup: %s", version)
+    except Exception as exc:
+        logger.warning("FHIR validator startup preload failed: %s", exc)
 
 
 @asynccontextmanager

@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from app.api.v1.fhir_validator.schemas import (
@@ -65,7 +66,9 @@ class ValidationService:
         resources: list[str],
         profiles: list[str],
     ) -> BatchValidationResult:
-        results = [await self.validate_resource(resource, profiles) for resource in resources]
+        results = await asyncio.gather(
+            *[self.validate_resource(resource, profiles) for resource in resources]
+        )
         valid_count = sum(1 for result in results if result.valid)
 
         return BatchValidationResult(

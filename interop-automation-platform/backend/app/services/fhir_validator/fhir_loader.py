@@ -86,6 +86,29 @@ class FHIRPackageLoader:
 
         return None
 
+    def iter_local_package_paths(self) -> list[Path]:
+        if not self.is_enabled() or not self.packages_dir:
+            return []
+        return sorted(self.packages_dir.glob("*.tgz"))
+
+    def package_ref_for_path(self, path: Path) -> FHIRPackageRef | None:
+        name = path.name.lower()
+        alias_map = {
+            "us-core.tgz": ("hl7.fhir.us.core", None),
+            "davinci-crd.tgz": ("hl7.fhir.us.davinci-crd", None),
+            "davinci-dtr.tgz": ("hl7.fhir.us.davinci-dtr", None),
+            "davinci-pas.tgz": ("hl7.fhir.us.davinci-pas", None),
+        }
+        if name in alias_map:
+            package_id, version = alias_map[name]
+            return FHIRPackageRef(package_id=package_id, version=version)
+
+        stem = path.stem
+        if "#" in stem:
+            package_id, version = stem.split("#", 1)
+            return FHIRPackageRef(package_id=package_id, version=version or None)
+        return FHIRPackageRef(package_id=stem, version=None)
+
 
 @functools.lru_cache(maxsize=1)
 def get_fhir_package_loader() -> FHIRPackageLoader:

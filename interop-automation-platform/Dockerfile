@@ -28,8 +28,11 @@ RUN /usr/local/openjdk-11/bin/javac -cp '/home/lib/*' -d /build/out /build/Infer
 FROM inferno AS inferno-warm
 COPY --from=inferno-launcher-build /build/out /app/inferno-launcher
 COPY backend/fhir_packages /app/fhir_packages
+COPY scripts/preload-igs.sh /preload-igs.sh
 COPY scripts/warm-inferno.sh /warm-inferno.sh
-RUN sed -i 's/\r$//' /warm-inferno.sh && chmod +x /warm-inferno.sh && /warm-inferno.sh
+RUN sed -i 's/\r$//' /preload-igs.sh /warm-inferno.sh && \
+    chmod +x /preload-igs.sh /warm-inferno.sh && \
+    /warm-inferno.sh
 
 # Stage 3: Python app + bundled Inferno
 FROM python:3.11-slim
@@ -66,7 +69,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY backend/ /app/
 COPY --from=frontend-builder /app/frontend/dist /app/frontend/dist
 COPY scripts/start-all.sh /start-all.sh
-RUN sed -i 's/\r$//' /start-all.sh && chmod +x /start-all.sh
+COPY scripts/preload-igs.sh /preload-igs.sh
+RUN sed -i 's/\r$//' /start-all.sh /preload-igs.sh && chmod +x /start-all.sh /preload-igs.sh
 
 EXPOSE 8000
 
