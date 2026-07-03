@@ -11,16 +11,16 @@ cd /home
 java -cp "/app/inferno-launcher:/home/lib/*" inferno.local.InfernoLocalLauncher &
 INFERNO_PID=$!
 
-echo "Waiting for Inferno on 127.0.0.1:4567..."
+echo "Waiting for Inferno engine on 127.0.0.1:4567..."
 READY=0
 i=1
-while [ "$i" -le 90 ]; do
-  if curl -sf "http://127.0.0.1:4567/version" >/dev/null 2>&1; then
-    echo "Inferno validator ready"
+while [ "$i" -le 120 ]; do
+  if curl -sf "http://127.0.0.1:4567/profiles" >/dev/null 2>&1; then
+    echo "Inferno validator engine ready"
     READY=1
     break
   fi
-  sleep 2
+  sleep 5
   i=$((i + 1))
 done
 

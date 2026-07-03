@@ -24,6 +24,13 @@ FROM inferno AS inferno-launcher-build
 COPY scripts/InfernoLocalLauncher.java /build/
 RUN /usr/local/openjdk-11/bin/javac -cp '/home/lib/*' -d /build/out /build/InfernoLocalLauncher.java
 
+# Stage 2c: Pre-warm FHIR package cache during build (avoids 503 on cold start)
+FROM inferno AS inferno-warm
+COPY --from=inferno-launcher-build /build/out /app/inferno-launcher
+COPY backend/fhir_packages /app/fhir_packages
+COPY scripts/warm-inferno.sh /warm-inferno.sh
+RUN sed -i 's/\r$//' /warm-inferno.sh && chmod +x /warm-inferno.sh && /warm-inferno.sh
+
 # Stage 3: Python app + bundled Inferno
 FROM python:3.11-slim
 
@@ -50,6 +57,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=inferno /usr/local/openjdk-11 /usr/local/openjdk-11
 COPY --from=inferno /home /home
 COPY --from=inferno-launcher-build /build/out /app/inferno-launcher
+COPY --from=inferno-warm /root/.fhir /root/.fhir
 
 COPY backend/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \
@@ -62,7 +70,7 @@ RUN sed -i 's/\r$//' /start-all.sh && chmod +x /start-all.sh
 
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=5 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=300s --retries=5 \
     CMD curl -f "http://localhost:${PORT:-8000}/health" || exit 1
 
 CMD ["/start-all.sh"]

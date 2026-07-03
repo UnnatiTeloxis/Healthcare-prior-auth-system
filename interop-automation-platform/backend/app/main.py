@@ -42,6 +42,7 @@ FRONTEND_DIST = _resolve_frontend_dist()
 async def _preload_validator_igs() -> None:
     for attempt in range(1, 31):
         try:
+            await inferno_client._wait_for_engine(timeout=120.0)
             await inferno_client.load_default_igs()
             if inferno_client._loaded_igs:
                 version = await inferno_client.get_version()

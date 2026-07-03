@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import time
 from typing import Any
 
 import httpx
@@ -11,6 +12,11 @@ from app.utils.fhir_helpers import extract_meta_profiles
 
 logger = logging.getLogger(__name__)
 
+_ENGINE_WAIT_INTERVAL = 5.0
+_ENGINE_WAIT_TIMEOUT = 600.0
+_REQUEST_RETRY_INTERVAL = 5.0
+_REQUEST_RETRY_ATTEMPTS = 120
+
 
 class InfernoClient:
     def __init__(self) -> None:
@@ -19,6 +25,45 @@ class InfernoClient:
         self._loaded_igs: set[str] = set()
         self._attempted_default_load = False
         self._igs_ready = asyncio.Event()
+        self._engine_ready = asyncio.Event()
+
+    async def _is_engine_ready(self) -> bool:
+        client = await self._get_client()
+        try:
+            response = await client.get(f"{self.base_url}/profiles")
+            if response.status_code == 503:
+                return False
+            response.raise_for_status()
+            payload = response.json()
+            return isinstance(payload, list)
+        except Exception:
+            return False
+
+    async def _wait_for_engine(self, timeout: float = _ENGINE_WAIT_TIMEOUT) -> None:
+        if self._engine_ready.is_set():
+            return
+
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            if await self._is_engine_ready():
+                self._engine_ready.set()
+                logger.info("Inferno validator engine is ready")
+                return
+            await asyncio.sleep(_ENGINE_WAIT_INTERVAL)
+
+        logger.warning("Inferno validator engine not ready after %.0fs", timeout)
+
+    async def _request_with_retry(self, method: str, url: str, **kwargs: Any) -> httpx.Response:
+        client = await self._get_client()
+        response: httpx.Response | None = None
+        for attempt in range(1, _REQUEST_RETRY_ATTEMPTS + 1):
+            response = await client.request(method, url, **kwargs)
+            if response.status_code != 503:
+                return response
+            logger.info("Inferno returned 503 for %s (attempt %s)", url, attempt)
+            await asyncio.sleep(_REQUEST_RETRY_INTERVAL)
+        assert response is not None
+        return response
 
     async def _get_client(self) -> httpx.AsyncClient:
         if self.client is None:
@@ -31,17 +76,17 @@ class InfernoClient:
             self.client = None
 
     async def validate_resource(self, resource: str, profiles: list[str]) -> dict[str, Any]:
+        await self._wait_for_engine()
         await self._wait_for_igs()
         await self.load_default_igs()
         await self._ensure_igs_for_meta_profiles(resource)
 
         client = await self._get_client()
         headers = {"Content-Type": "application/json"}
-        # Match Inferno default: no profile query param unless user explicitly selects one.
-        # The engine still validates meta.profile URLs declared on the resource.
         params = {"profile": ",".join(profiles)} if profiles else None
 
-        response = await client.post(
+        response = await self._request_with_retry(
+            "POST",
             f"{self.base_url}/validate",
             content=resource,
             headers=headers,
@@ -99,10 +144,13 @@ class InfernoClient:
                 logger.info("Loaded FHIR IG from local package %s", _ig_key(package_id, version))
                 return result
 
-        client = await self._get_client()
         params = {"version": version} if version else None
 
-        response = await client.put(f"{self.base_url}/igs/{package_id}", params=params)
+        response = await self._request_with_retry(
+            "PUT",
+            f"{self.base_url}/igs/{package_id}",
+            params=params,
+        )
         response.raise_for_status()
         result = response.json()
         self._loaded_igs.add(_ig_key(package_id, version))
@@ -110,8 +158,8 @@ class InfernoClient:
         return result
 
     async def upload_custom_ig(self, package_data: bytes) -> dict[str, Any]:
-        client = await self._get_client()
-        response = await client.post(
+        response = await self._request_with_retry(
+            "POST",
             f"{self.base_url}/igs",
             content=package_data,
             headers={"Content-Encoding": "gzip"},
@@ -130,9 +178,14 @@ class InfernoClient:
             return {}
 
     async def load_default_igs(self) -> None:
-        if self._attempted_default_load:
+        if self._attempted_default_load and self._loaded_igs:
             self._igs_ready.set()
             return
+
+        if self._attempted_default_load and not self._loaded_igs:
+            self._attempted_default_load = False
+
+        await self._wait_for_engine(timeout=120.0)
 
         self._attempted_default_load = True
         all_loaded = True
