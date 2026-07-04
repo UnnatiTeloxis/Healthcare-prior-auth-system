@@ -38,13 +38,22 @@ def is_valid_xml(resource: str) -> bool:
 
 
 def extract_meta_profiles(resource: str) -> list[str]:
-    """Collect profile URLs from a resource or nested bundle entries."""
+    """Collect profile URLs from a resource or nested bundle entries (JSON or XML)."""
+    text = resource.strip()
+    profiles: list[str] = []
+
+    if text.startswith("<"):
+        # FHIR XML: <profile value="http://..."/> or <profile value='...'/>
+        for match in re.finditer(r'<profile\s+value=["\']([^"\']+)["\']', text, flags=re.IGNORECASE):
+            url = match.group(1).strip()
+            if url and url not in profiles:
+                profiles.append(url)
+        return profiles
+
     try:
-        parsed = json.loads(resource.strip())
+        parsed = json.loads(text)
     except json.JSONDecodeError:
         return []
-
-    profiles: list[str] = []
 
     def add_from(obj: dict[str, Any]) -> None:
         if not isinstance(obj, dict):

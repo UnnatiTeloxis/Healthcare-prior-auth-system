@@ -203,7 +203,7 @@
     }
     .step-stage {
       position: relative;
-      transition: min-height 0.45s ease;
+      transition: min-height 0.4s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .step-stage > .step-panel {
       position: absolute;
@@ -212,34 +212,43 @@
       left: 0;
       opacity: 0;
       visibility: hidden;
-      transform: translateY(18px);
+      transform: translate3d(28px, 0, 0);
       transition:
-        opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-        transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-        visibility 0.5s;
+        opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0.38s;
       pointer-events: none;
       will-change: opacity, transform;
+      backface-visibility: hidden;
     }
     .step-stage > .step-panel.active {
       position: relative;
       opacity: 1;
       visibility: visible;
-      transform: translateY(0);
+      transform: translate3d(0, 0, 0);
       pointer-events: auto;
       z-index: 2;
     }
     .step-stage > .step-panel.is-leaving {
       position: absolute;
       opacity: 0;
-      transform: translateY(-14px);
+      transform: translate3d(-22px, 0, 0);
       z-index: 1;
+      pointer-events: none;
     }
     .step-stage > .step-panel.is-entering {
       position: relative;
       opacity: 1;
       visibility: visible;
-      transform: translateY(0);
+      transform: translate3d(0, 0, 0);
       z-index: 3;
+      pointer-events: auto;
+    }
+    .step-stage > .step-panel.is-entering.is-entering-from-left {
+      transform: translate3d(-28px, 0, 0);
+    }
+    .step-stage > .step-panel.is-leaving.is-leaving-to-right {
+      transform: translate3d(22px, 0, 0);
     }
     @media (prefers-reduced-motion: reduce) {
       .step-stage > .step-panel {
@@ -2349,8 +2358,8 @@
       RULE_STAGGER_MS: 35,
       RULE_COMPLETE_MS: 25,
       POLL_MS: 60,
-      STEP_TRANSITION_MS: 500,
-      VALIDATION_COMPLETE_HOLD_MS: 450,
+      STEP_TRANSITION_MS: 380,
+      VALIDATION_COMPLETE_HOLD_MS: 280,
       MAX_STORED_REPORTS: 25,
       MAX_STORED_SOURCE_BYTES: 16 * 1024,
       MAX_STORED_ISSUES: 250
@@ -3232,27 +3241,46 @@
         return;
       }
 
-      const fromPanel = document.getElementById(STEP_PANEL_IDS[state.currentStep - 1]);
+      const fromStep = state.currentStep;
+      const goingForward = step > fromStep;
+      const fromPanel = document.getElementById(STEP_PANEL_IDS[fromStep - 1]);
       const toPanel = document.getElementById(STEP_PANEL_IDS[step - 1]);
       const stage = document.getElementById('stepStage');
 
       prepareStepContent(step);
 
       if (animate && fromPanel && toPanel && stage) {
-        stage.style.minHeight = `${Math.max(fromPanel.offsetHeight, toPanel.offsetHeight || fromPanel.offsetHeight)}px`;
+        const fromHeight = fromPanel.offsetHeight;
+        stage.style.minHeight = `${Math.max(fromHeight, toPanel.scrollHeight || fromHeight)}px`;
+
+        // Place panels off-screen first, then animate in on the next frame.
         toPanel.classList.add('active', 'is-entering');
         fromPanel.classList.add('is-leaving');
+        if (goingForward) {
+          toPanel.classList.remove('is-entering-from-left');
+          fromPanel.classList.remove('is-leaving-to-right');
+        } else {
+          toPanel.classList.add('is-entering-from-left');
+          fromPanel.classList.add('is-leaving-to-right');
+        }
+
         state.currentStep = step;
         renderSteps();
-        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-        fromPanel.classList.remove('active', 'is-leaving');
-        toPanel.classList.remove('is-entering');
         window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        toPanel.classList.remove('is-entering-from-left');
+        fromPanel.classList.remove('is-leaving-to-right');
+
         await delay(PERF.STEP_TRANSITION_MS);
+
+        fromPanel.classList.remove('active', 'is-leaving', 'is-leaving-to-right', 'is-entering', 'is-entering-from-left');
+        toPanel.classList.remove('is-entering', 'is-entering-from-left', 'is-leaving', 'is-leaving-to-right');
+        toPanel.classList.add('active');
         stage.style.minHeight = '';
       } else {
         document.querySelectorAll('.step-panel').forEach(panel => {
-          panel.classList.remove('active', 'is-leaving', 'is-entering');
+          panel.classList.remove('active', 'is-leaving', 'is-entering', 'is-entering-from-left', 'is-leaving-to-right');
         });
         toPanel?.classList.add('active');
         state.currentStep = step;

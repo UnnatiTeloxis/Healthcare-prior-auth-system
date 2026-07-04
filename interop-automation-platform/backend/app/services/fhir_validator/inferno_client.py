@@ -7,16 +7,16 @@ import httpx
 
 from app.config import settings
 from app.services.fhir_validator.fhir_loader import get_fhir_package_loader
-from app.utils.fhir_helpers import extract_meta_profiles
+from app.utils.fhir_helpers import extract_meta_profiles, is_valid_xml
 
 logger = logging.getLogger(__name__)
 
 _ENGINE_POLL_INTERVAL = 1.0
 _ENGINE_POLL_TIMEOUT = 300.0
-_STARTUP_503_RETRIES = 60
+_STARTUP_503_RETRIES = 90
 _STARTUP_503_INTERVAL = 1.0
-_RUNTIME_503_RETRIES = 2
-_RUNTIME_503_INTERVAL = 0.5
+_RUNTIME_503_RETRIES = 5
+_RUNTIME_503_INTERVAL = 1.0
 
 
 class InfernoClient:
@@ -25,12 +25,14 @@ class InfernoClient:
         self.client: httpx.AsyncClient | None = None
         self._loaded_igs: set[str] = set()
         self._ready = asyncio.Event()
+        self._engine_warm = False
         self._startup_lock = asyncio.Lock()
 
     async def _get_client(self) -> httpx.AsyncClient:
         if self.client is None:
+            # Large FHIR Bundles can take minutes; keep connect short, read long.
             self.client = httpx.AsyncClient(
-                timeout=httpx.Timeout(300.0, connect=15.0),
+                timeout=httpx.Timeout(600.0, connect=15.0, write=120.0),
                 limits=httpx.Limits(max_connections=20, max_keepalive_connections=10),
             )
         return self.client
@@ -52,11 +54,16 @@ class InfernoClient:
             return False
 
     async def _wait_for_engine(self, timeout: float = _ENGINE_POLL_TIMEOUT) -> None:
+        if self._engine_warm and await self._is_engine_ready():
+            return
+
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
             if await self._is_engine_ready():
+                self._engine_warm = True
                 logger.info("Inferno validator engine is ready")
                 return
+            self._engine_warm = False
             await asyncio.sleep(_ENGINE_POLL_INTERVAL)
         raise TimeoutError(f"Inferno engine not ready after {timeout:.0f}s")
 
@@ -74,11 +81,28 @@ class InfernoClient:
         response: httpx.Response | None = None
 
         for attempt in range(1, attempts + 1):
-            response = await client.request(method, url, **kwargs)
-            if response.status_code != 503:
-                return response
-            if attempt < attempts:
+            try:
+                response = await client.request(method, url, **kwargs)
+            except httpx.TransportError as exc:
+                if attempt >= attempts:
+                    raise
+                logger.info("Inferno transport error for %s (attempt %s/%s): %s", url, attempt, attempts, exc)
                 await asyncio.sleep(interval)
+                continue
+
+            if response.status_code != 503:
+                if response.status_code < 500:
+                    self._engine_warm = True
+                return response
+
+            self._engine_warm = False
+            if attempt < attempts:
+                logger.info("Inferno 503 for %s (attempt %s/%s)", url, attempt, attempts)
+                # Re-check engine readiness between retries so cold starts recover.
+                try:
+                    await self._wait_for_engine(timeout=30.0)
+                except TimeoutError:
+                    await asyncio.sleep(interval)
 
         assert response is not None
         return response
@@ -117,11 +141,11 @@ class InfernoClient:
             self._register_loaded_ig(package_id, version)
 
     async def ensure_ready(self) -> None:
-        if self._ready.is_set():
+        if self._ready.is_set() and self._engine_warm:
             return
 
         async with self._startup_lock:
-            if self._ready.is_set():
+            if self._ready.is_set() and self._engine_warm:
                 return
 
             try:
@@ -144,18 +168,30 @@ class InfernoClient:
             self._ready.set()
             logger.info("Inferno validator ready (%s IGs tracked)", len(self._loaded_igs))
 
+    @staticmethod
+    def _content_type_for_resource(resource: str) -> str:
+        # Match Inferno hosted validator: XML must not be sent as application/json.
+        if is_valid_xml(resource):
+            return "application/fhir+xml"
+        return "application/fhir+json"
+
     async def validate_resource(self, resource: str, profiles: list[str]) -> dict[str, Any]:
         await self.ensure_ready()
+        if not self._engine_warm:
+            await self._wait_for_engine(timeout=120.0)
+
         await self._ensure_igs_for_meta_profiles(resource)
 
-        headers = {"Content-Type": "application/json"}
+        headers = {"Content-Type": self._content_type_for_resource(resource)}
         params = {"profile": ",".join(profiles)} if profiles else None
+        # Send UTF-8 bytes so large JSON/XML payloads are handled consistently.
+        body = resource.encode("utf-8") if isinstance(resource, str) else resource
 
         response = await self._request(
             "POST",
             f"{self.base_url}/validate",
-            startup=False,
-            content=resource,
+            startup=not self._engine_warm,
+            content=body,
             headers=headers,
             params=params,
         )
@@ -259,7 +295,7 @@ class InfernoClient:
             if self._is_ig_loaded(package_id, version):
                 continue
             try:
-                await self.load_ig_by_id(package_id, version)
+                await self.load_ig_by_id(package_id, version, startup=not self._engine_warm)
             except Exception as exc:
                 logger.warning("Unable to load IG for profile %s: %s", profile_url, exc)
 

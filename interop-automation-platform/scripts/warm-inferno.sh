@@ -4,7 +4,7 @@ set -e
 
 export TX_SERVER_URL="${TX_SERVER_URL:-https://tx.fhir.org/r4}"
 export DISPLAY_ISSUES_ARE_WARNINGS="${DISPLAY_ISSUES_ARE_WARNINGS:-true}"
-export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:--Xms384m -Xmx512m -XX:+TieredCompilation -XX:TieredStopAtLevel=1}"
+export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:--Xms128m -Xmx256m -XX:+UseSerialGC -XX:+TieredCompilation -XX:TieredStopAtLevel=1}"
 
 cd /home
 java -cp "/app/inferno-launcher:/home/lib/*" inferno.local.InfernoLocalLauncher &

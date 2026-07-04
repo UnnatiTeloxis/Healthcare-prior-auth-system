@@ -6,7 +6,8 @@ export DISPLAY_ISSUES_ARE_WARNINGS="${DISPLAY_ISSUES_ARE_WARNINGS:-true}"
 export INFERNO_VALIDATOR_URL="${INFERNO_VALIDATOR_URL:-http://127.0.0.1:4567}"
 export FHIR_PACKAGES_PATH="${FHIR_PACKAGES_PATH:-/app/fhir_packages}"
 export PORT="${PORT:-8000}"
-export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:--Xms384m -Xmx512m -XX:+TieredCompilation -XX:TieredStopAtLevel=1}"
+# Keep JVM heap modest so Java + Python fit on Render free tier (512 MB).
+export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:--Xms128m -Xmx256m -XX:+UseSerialGC -XX:+TieredCompilation -XX:TieredStopAtLevel=1}"
 
 echo "Starting Inferno FHIR validator wrapper (127.0.0.1 only)..."
 cd /home

@@ -10,7 +10,6 @@ from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.router import router
-from app.config import settings
 from app.services.fhir_validator.inferno_client import inferno_client
 
 logger = logging.getLogger(__name__)
@@ -67,20 +66,16 @@ FHIR_VALIDATOR_HTML = _resolve_fhir_validator_html()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Production: block until Inferno is warm so first validation is fast.
-    # Dev (--reload): preload in background to avoid stalling hot reload.
-    if settings.API_RELOAD:
-        preload_task = asyncio.create_task(inferno_client.ensure_ready())
-        try:
-            yield
-        finally:
-            preload_task.cancel()
-            with asyncio.suppress(asyncio.CancelledError):
-                await preload_task
-    else:
-        await inferno_client.ensure_ready()
+    # Always warm Inferno in the background so /health stays up on Render cold starts.
+    # Validation waits on ensure_ready() / engine readiness before calling Inferno.
+    preload_task = asyncio.create_task(inferno_client.ensure_ready())
+    try:
         yield
-    await inferno_client.close()
+    finally:
+        preload_task.cancel()
+        with asyncio.suppress(asyncio.CancelledError):
+            await preload_task
+        await inferno_client.close()
 
 
 app = FastAPI(
