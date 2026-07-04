@@ -10,14 +10,9 @@ A complete single-file validator UI is available at:
 frontend/public/fhir-validator.html
 ```
 
-**Open directly in browser** (no server needed):
-- Double-click the file, or
-- `start frontend/public/fhir-validator.html`
+**With Docker (recommended):** http://localhost:8000/fhir-validator.html
 
-**Via Docker frontend** (after rebuild):
-- http://localhost:3000/fhir-validator.html
-
-Features: 5-step wizard, profile selection, JSON paste/upload, mock validation, results with filters, JSON export.
+Features: multi-step wizard, JSON/XML upload, Inferno-backed validation, results with filters, export.
 
 ## Quick Start (Docker)
 
@@ -97,23 +92,24 @@ Copy-Item .env.example .env
 docker compose -f docker-compose.prod.yml up -d --build
 ```
 
-## Deploy to Render.com (FREE)
+## FHIR Validator (local)
 
-**One Web Service** — Inferno validator + API + UI on a single URL.
+Runs entirely on localhost via Docker Compose (Inferno wrapper + API + UI).
 
-| Field | Value |
-|-------|--------|
-| Root Directory | `interop-automation-platform` |
-| Branch | `interop-automation` |
-| Dockerfile | `./Dockerfile` |
-| Health check | `/health` |
+| URL | Purpose |
+|-----|---------|
+| http://localhost:8000/fhir-validator.html | Validator UI (API on same origin) |
+| http://localhost:8000/health | API health |
+| http://localhost:4567/version | Inferno wrapper |
 
-```env
-INFERNO_VALIDATOR_URL=http://127.0.0.1:4567
-FHIR_PACKAGES_PATH=/app/fhir_packages
+Validation uses the same Inferno/HL7 engine settings as the hosted Inferno resource validator (`TX_SERVER_URL`, `DISPLAY_ISSUES_ARE_WARNINGS`). US Core is auto-loaded from `backend/fhir_packages/us-core.tgz`.
+
+```powershell
+cd interop-automation-platform
+docker compose up -d
 ```
 
-Guide: [docs/DEPLOYMENT_RENDER.md](docs/DEPLOYMENT_RENDER.md)
+First start may take 1–3 minutes while Inferno loads packages; later validations are cached and concurrent for speed.
 
 ## Local Development (without Docker)
 

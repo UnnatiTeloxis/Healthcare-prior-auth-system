@@ -42,8 +42,9 @@ class InfernoClient:
     async def _get_client(self) -> httpx.AsyncClient:
         if self.client is None:
             self.client = httpx.AsyncClient(
-                timeout=httpx.Timeout(120.0, connect=10.0, write=60.0),
-                limits=httpx.Limits(max_connections=20, max_keepalive_connections=10),
+                # Large Bundles + terminology can take minutes; keep connect short.
+                timeout=httpx.Timeout(600.0, connect=10.0, write=120.0),
+                limits=httpx.Limits(max_connections=32, max_keepalive_connections=16),
             )
         return self.client
 

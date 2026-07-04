@@ -5,19 +5,19 @@ services:
     ports:
       - "4567:4567"
     environment:
-      # Local: skip remote TX — tx.fhir.org is often unreachable and crashes Inferno init.
-      # Structural + profile validation still runs (same as Inferno `-tx n/a`).
-      DISABLE_TX: "true"
+      # Match inferno.healthit.gov/validator defaults for result parity.
+      TX_SERVER_URL: "https://tx.fhir.org/r4"
       DISPLAY_ISSUES_ARE_WARNINGS: "true"
     volumes:
-      # Mount US Core into Inferno auto-load folder (do NOT replace entire /home/igs).
+      # Auto-load US Core at engine start (do NOT replace entire /home/igs).
       - ./backend/fhir_packages/us-core.tgz:/home/igs/us-core.tgz:ro
+      - fhir_package_cache:/root/.fhir
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4567/version"]
+      test: ["CMD", "curl", "-f", "http://localhost:4567/profiles"]
       interval: 10s
-      timeout: 5s
-      retries: 30
-      start_period: 120s
+      timeout: 10s
+      retries: 36
+      start_period: 180s
     networks:
       - interop_network
     restart: unless-stopped
@@ -117,3 +117,4 @@ networks:
 volumes:
   postgres_data:
   redis_data:
+  fhir_package_cache:
