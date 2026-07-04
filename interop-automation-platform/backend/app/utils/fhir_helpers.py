@@ -114,11 +114,12 @@ def parse_operation_outcome(
     operation_outcome: dict[str, Any],
     resource: str | None = None,
 ) -> tuple[bool, list[dict[str, Any]]]:
-    """Map OperationOutcome issues with optional Inferno parity overrides."""
+    """Map OperationOutcome issues 1:1 from Inferno — no severity or message changes."""
+    del resource  # call-site compatibility only; never mutates issues
     if not operation_outcome or "issue" not in operation_outcome:
         return True, []
 
-    is_valid, error_count, _, _ = count_operation_outcome_severities(operation_outcome)
+    is_valid, _, _, _ = count_operation_outcome_severities(operation_outcome)
     issues: list[dict[str, Any]] = []
 
     for issue in operation_outcome.get("issue", []):
@@ -142,66 +143,4 @@ def parse_operation_outcome(
             }
         )
 
-    if resource:
-        issues = _apply_inferno_parity_overrides(resource, issues)
-
     return is_valid, issues
-
-
-def _apply_inferno_parity_overrides(resource: str, issues: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Match Inferno hosted outputs for known parity gaps."""
-    removed_draft = False
-    filtered: list[dict[str, Any]] = []
-    for issue in issues:
-        message = str(issue.get("message") or "")
-        if issue.get("severity") == "information" and message.startswith("Reference to draft CodeSystem"):
-            removed_draft = True
-            continue
-        filtered.append(issue)
-
-    profiles = extract_meta_profiles(resource)
-    if (
-        removed_draft
-        and any("us-core-observation-lab" in profile for profile in profiles)
-        and not any("US Core Laboratory Test Codes" in str(issue.get("message") or "") for issue in filtered)
-    ):
-        codes = _extract_observation_codes(resource)
-        code_suffix = f" (codes = {', '.join(codes)})" if codes else ""
-        filtered.append(
-            {
-                "severity": "warning",
-                "code": "business-rule",
-                "message": (
-                    "Observation.code: None of the codings provided are in the value set "
-                    "'US Core Laboratory Test Codes' "
-                    "(http://hl7.org/fhir/us/core/ValueSet/us-core-laboratory-test-codes); "
-                    "a coding should come from this value set unless it has no suitable code "
-                    "(note that the validator cannot judge what is suitable)"
-                    f"{code_suffix}"
-                ),
-                "location": "Observation.code",
-                "line": None,
-                "column": None,
-            }
-        )
-
-    return filtered
-
-
-def _extract_observation_codes(resource: str) -> list[str]:
-    try:
-        parsed = json.loads(resource.strip())
-    except json.JSONDecodeError:
-        return []
-    if not isinstance(parsed, dict) or parsed.get("resourceType") != "Observation":
-        return []
-    codings = parsed.get("code", {}).get("coding") or []
-    codes: list[str] = []
-    for coding in codings:
-        if not isinstance(coding, dict):
-            continue
-        system = coding.get("system")
-        code = coding.get("code")
-        if system and code:
-            codes.append(f"{system}#{code}")
-    return codes
