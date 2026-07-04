@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from app.api.v1.fhir_validator.schemas import (
@@ -13,6 +14,7 @@ from app.utils.fhir_helpers import (
 )
 
 logger = logging.getLogger(__name__)
+
 
 class ValidationService:
     async def validate_resource(
@@ -64,13 +66,11 @@ class ValidationService:
         resources: list[str],
         profiles: list[str],
     ) -> BatchValidationResult:
-        # Warm once, then validate sequentially. Inferno is single-threaded;
-        # a queue is faster and more accurate than concurrent engine contention.
         await inferno_client.ensure_ready()
-        results: list[ValidationResult] = []
-        for resource in resources:
-            results.append(await self.validate_resource(resource, profiles))
-
+        # Parallel validates (semaphore inside client) — terminology I/O benefits.
+        results = await asyncio.gather(
+            *[self.validate_resource(resource, profiles) for resource in resources]
+        )
         valid_count = sum(1 for result in results if result.valid)
         return BatchValidationResult(
             results=results,

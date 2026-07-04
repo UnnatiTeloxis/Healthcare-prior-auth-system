@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 import logging
 import time
 from typing import Any
@@ -11,33 +12,37 @@ from app.utils.fhir_helpers import extract_meta_profiles, is_valid_xml
 
 logger = logging.getLogger(__name__)
 
-_ENGINE_POLL_INTERVAL = 1.0
+_ENGINE_POLL_INTERVAL = 0.5
 _ENGINE_POLL_TIMEOUT = 300.0
 _STARTUP_503_RETRIES = 90
 _STARTUP_503_INTERVAL = 1.0
-_RUNTIME_503_RETRIES = 5
-_RUNTIME_503_INTERVAL = 1.0
+_RUNTIME_503_RETRIES = 3
+_RUNTIME_503_INTERVAL = 0.5
+_RESULT_CACHE_TTL_S = 600.0
+_US_CORE_PATIENT_PROFILE = (
+    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+)
+# Terminology calls are network-bound; modest parallelism speeds batches up.
+_VALIDATE_CONCURRENCY = 4
 
 
 class InfernoClient:
     def __init__(self) -> None:
         self.base_url = settings.inferno_validator_url.rstrip("/")
         self.client: httpx.AsyncClient | None = None
-        # Only packages we successfully uploaded/PUT in this process.
-        # Do NOT trust GET /igs — Inferno lists package-server catalog entries that
-        # are not fully loaded (profiles won't resolve).
+        # Packages we successfully loaded in this process (upload/PUT), or confirmed
+        # present via /profiles (auto-loaded from /home/igs).
         self._loaded_igs: set[str] = set()
         self._ready = asyncio.Event()
         self._engine_warm = False
         self._startup_lock = asyncio.Lock()
-        # Inferno's Java engine is effectively single-threaded; serialize validates
-        # so concurrent batch requests don't thrash and slow everything down.
-        self._validate_lock = asyncio.Lock()
+        self._validate_sem = asyncio.Semaphore(_VALIDATE_CONCURRENCY)
+        self._result_cache: dict[str, tuple[float, dict[str, Any]]] = {}
 
     async def _get_client(self) -> httpx.AsyncClient:
         if self.client is None:
             self.client = httpx.AsyncClient(
-                timeout=httpx.Timeout(600.0, connect=15.0, write=120.0),
+                timeout=httpx.Timeout(120.0, connect=10.0, write=60.0),
                 limits=httpx.Limits(max_connections=20, max_keepalive_connections=10),
             )
         return self.client
@@ -59,7 +64,7 @@ class InfernoClient:
             return False
 
     async def _wait_for_engine(self, timeout: float = _ENGINE_POLL_TIMEOUT) -> None:
-        if self._engine_warm and await self._is_engine_ready():
+        if self._engine_warm:
             return
 
         deadline = time.monotonic() + timeout
@@ -68,7 +73,6 @@ class InfernoClient:
                 self._engine_warm = True
                 logger.info("Inferno validator engine is ready")
                 return
-            self._engine_warm = False
             await asyncio.sleep(_ENGINE_POLL_INTERVAL)
         raise TimeoutError(f"Inferno engine not ready after {timeout:.0f}s")
 
@@ -104,7 +108,7 @@ class InfernoClient:
             if attempt < attempts:
                 logger.info("Inferno 503 for %s (attempt %s/%s)", url, attempt, attempts)
                 try:
-                    await self._wait_for_engine(timeout=30.0)
+                    await self._wait_for_engine(timeout=20.0)
                 except TimeoutError:
                     await asyncio.sleep(interval)
 
@@ -116,7 +120,9 @@ class InfernoClient:
             self._loaded_igs.add(_ig_key(package_id, version))
             self._loaded_igs.add(package_id)
         if result:
-            resp_pid = str(result.get("package_id") or result.get("packageId") or result.get("id") or "").strip()
+            resp_pid = str(
+                result.get("package_id") or result.get("packageId") or result.get("id") or ""
+            ).strip()
             resp_ver = str(result.get("version") or "").strip() or None
             if resp_pid:
                 self._loaded_igs.add(_ig_key(resp_pid, resp_ver))
@@ -132,6 +138,11 @@ class InfernoClient:
             return any(key.startswith(prefix) for key in self._loaded_igs)
         return False
 
+    async def _us_core_profiles_loaded(self) -> bool:
+        """True when US Core StructureDefinitions are in the engine (not just catalog)."""
+        profiles = await self.get_profiles()
+        return any(_US_CORE_PATIENT_PROFILE in p for p in profiles)
+
     async def ensure_ready(self) -> None:
         if self._ready.is_set() and self._engine_warm:
             return
@@ -144,36 +155,78 @@ class InfernoClient:
                 await self._wait_for_engine()
             except TimeoutError as exc:
                 logger.warning("%s — validation will retry until Inferno is ready", exc)
+                return
 
-            # Always upload bundled default IGs. GET /igs is a package catalog and
-            # must not be treated as "already loaded into the validation engine".
-            for ig_spec in settings.default_igs_list:
-                package_id, version = _split_ig_spec(ig_spec)
-                if self._is_ig_loaded(package_id, version):
-                    continue
-                try:
-                    await self.load_ig_by_id(package_id, version, startup=True)
-                except Exception as exc:
-                    logger.warning("Unable to load default IG %s: %s", _ig_key(package_id, version), exc)
+            # Prefer packages auto-loaded from /home/igs (fast). Only POST upload if missing.
+            if await self._us_core_profiles_loaded():
+                self._register_loaded_ig("hl7.fhir.us.core", None)
+                logger.info("US Core profiles already present in Inferno engine")
+            else:
+                for ig_spec in settings.default_igs_list:
+                    package_id, version = _split_ig_spec(ig_spec)
+                    if self._is_ig_loaded(package_id, version):
+                        continue
+                    try:
+                        await self.load_ig_by_id(package_id, version, startup=True)
+                    except Exception as exc:
+                        logger.warning(
+                            "Unable to load default IG %s: %s",
+                            _ig_key(package_id, version),
+                            exc,
+                        )
 
             self._ready.set()
-            logger.info("Inferno validator ready (%s IGs loaded by this process)", len(self._loaded_igs))
+            logger.info("Inferno validator ready (%s IGs tracked)", len(self._loaded_igs))
 
     @staticmethod
     def _content_type_for_resource(resource: str) -> str:
-        # Match Inferno hosted / wrapper defaults used by parity checks.
         if is_valid_xml(resource):
             return "application/fhir+xml"
         return "application/json"
 
-    async def validate_resource(self, resource: str, profiles: list[str]) -> dict[str, Any]:
-        await self.ensure_ready()
+    @staticmethod
+    def _cache_key(resource: str, profiles: list[str]) -> str:
+        digest = hashlib.sha256()
+        digest.update(resource.encode("utf-8") if isinstance(resource, str) else resource)
+        digest.update(b"\0")
+        digest.update(",".join(profiles).encode("utf-8"))
+        return digest.hexdigest()
 
-        # Serialize engine work: concurrent batch calls queue here instead of
-        # contending inside the Java validator (which is much slower).
-        async with self._validate_lock:
+    def _cache_get(self, key: str) -> dict[str, Any] | None:
+        item = self._result_cache.get(key)
+        if not item:
+            return None
+        expires_at, payload = item
+        if time.monotonic() > expires_at:
+            self._result_cache.pop(key, None)
+            return None
+        return payload
+
+    def _cache_set(self, key: str, payload: dict[str, Any]) -> None:
+        # Bound cache size for memory on free tier.
+        if len(self._result_cache) > 256:
+            oldest = sorted(self._result_cache.items(), key=lambda kv: kv[1][0])[:64]
+            for old_key, _ in oldest:
+                self._result_cache.pop(old_key, None)
+        self._result_cache[key] = (time.monotonic() + _RESULT_CACHE_TTL_S, payload)
+
+    async def validate_resource(self, resource: str, profiles: list[str]) -> dict[str, Any]:
+        cache_key = self._cache_key(resource, profiles)
+        cached = self._cache_get(cache_key)
+        if cached is not None:
+            return cached
+
+        if not (self._ready.is_set() and self._engine_warm):
+            await self.ensure_ready()
+
+        async with self._validate_sem:
+            # Re-check cache after waiting for a slot (another worker may have filled it).
+            cached = self._cache_get(cache_key)
+            if cached is not None:
+                return cached
+
             if not self._engine_warm:
-                await self._wait_for_engine(timeout=120.0)
+                await self._wait_for_engine(timeout=60.0)
 
             await self._ensure_igs_for_meta_profiles(resource)
 
@@ -190,14 +243,17 @@ class InfernoClient:
                 params=params,
             )
             response.raise_for_status()
-            return response.json()
+            payload = response.json()
+            self._cache_set(cache_key, payload)
+            return payload
 
     async def get_profiles(self) -> list[str]:
         client = await self._get_client()
         try:
             response = await client.get(f"{self.base_url}/profiles")
             response.raise_for_status()
-            return response.json()
+            data = response.json()
+            return data if isinstance(data, list) else []
         except Exception as exc:
             logger.warning("Failed to fetch validator profiles: %s", exc)
             return []
@@ -287,6 +343,10 @@ class InfernoClient:
                 continue
             package_id, version = _split_ig_spec(ig_spec)
             if self._is_ig_loaded(package_id, version):
+                continue
+            # US Core often auto-loaded from /home/igs — confirm via profiles first.
+            if package_id.startswith("hl7.fhir.us.core") and await self._us_core_profiles_loaded():
+                self._register_loaded_ig(package_id, version)
                 continue
             try:
                 await self.load_ig_by_id(package_id, version, startup=not self._engine_warm)

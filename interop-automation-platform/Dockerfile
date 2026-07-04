@@ -45,7 +45,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     FHIR_PACKAGES_PATH=/app/fhir_packages \
     JAVA_HOME=/usr/local/openjdk-11 \
     INFERNO_VALIDATOR_URL=http://127.0.0.1:4567 \
-    TX_SERVER_URL=https://tx.fhir.org/r4 \
+    DISABLE_TX=true \
     DISPLAY_ISSUES_ARE_WARNINGS=true \
     API_RELOAD=false
 
@@ -62,6 +62,8 @@ COPY --from=inferno /usr/local/openjdk-11 /usr/local/openjdk-11
 COPY --from=inferno /home /home
 COPY --from=inferno-launcher-build /build/out /app/inferno-launcher
 COPY --from=inferno-warm /root/.fhir /root/.fhir
+# Auto-load US Core at Inferno startup (fast path). Other IGs load on demand from /app/fhir_packages.
+COPY backend/fhir_packages/us-core.tgz /home/igs/us-core.tgz
 
 COPY backend/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \

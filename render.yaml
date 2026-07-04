@@ -22,11 +22,9 @@ services:
         value: /app/fhir_packages
       - key: INFERNO_VALIDATOR_URL
         value: http://127.0.0.1:4567
-      - key: TERMINOLOGY_SERVER_URL
-        value: https://tx.fhir.org/r4
       - key: DEFAULT_IGS
         value: hl7.fhir.us.core#6.1.0
-      - key: TX_SERVER_URL
-        value: https://tx.fhir.org/r4
+      - key: DISABLE_TX
+        value: "true"
       - key: DISPLAY_ISSUES_ARE_WARNINGS
         value: "true"
