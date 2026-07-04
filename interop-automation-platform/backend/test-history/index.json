@@ -6510,5 +6510,126 @@
     "info_count": 0,
     "summary": "Validation failed with 1 error(s)",
     "folder": "runs/2026-07-04_03-53_Frontend-Validation-Patient---Invalid"
+  },
+  {
+    "id": "2026-07-04_03-56_Frontend-Validation-Condition---Invalid",
+    "timestamp": "2026-07-04T03:56:32",
+    "name": "Frontend Validation: Condition - Invalid",
+    "valid": false,
+    "error_count": 1,
+    "warning_count": 1,
+    "info_count": 0,
+    "summary": "Validation failed with 1 error(s)",
+    "folder": "runs/2026-07-04_03-56_Frontend-Validation-Condition---Invalid"
+  },
+  {
+    "id": "2026-07-04_03-59_Frontend-Validation-Observation---Invalid",
+    "timestamp": "2026-07-04T03:59:42",
+    "name": "Frontend Validation: Observation - Invalid",
+    "valid": false,
+    "error_count": 2,
+    "warning_count": 4,
+    "info_count": 1,
+    "summary": "Validation failed with 2 error(s)",
+    "folder": "runs/2026-07-04_03-59_Frontend-Validation-Observation---Invalid"
+  },
+  {
+    "id": "2026-07-04_04-03_Frontend-Validation-Patient---Valid",
+    "timestamp": "2026-07-04T04:03:27",
+    "name": "Frontend Validation: Patient - Valid",
+    "valid": true,
+    "error_count": 0,
+    "warning_count": 1,
+    "info_count": 0,
+    "summary": "Validation successful with 1 warning(s) and 0 information message(s)",
+    "folder": "runs/2026-07-04_04-03_Frontend-Validation-Patient---Valid"
+  },
+  {
+    "id": "2026-07-04_04-03_Frontend-Validation-Bundle---Invalid",
+    "timestamp": "2026-07-04T04:03:27",
+    "name": "Frontend Validation: Bundle - Invalid",
+    "valid": false,
+    "error_count": 2,
+    "warning_count": 1,
+    "info_count": 0,
+    "summary": "Validation failed with 2 error(s)",
+    "folder": "runs/2026-07-04_04-03_Frontend-Validation-Bundle---Invalid"
+  },
+  {
+    "id": "2026-07-04_04-09_Frontend-Validation-Observation---Invalid",
+    "timestamp": "2026-07-04T04:09:38",
+    "name": "Frontend Validation: Observation - Invalid",
+    "valid": false,
+    "error_count": 1,
+    "warning_count": 4,
+    "info_count": 1,
+    "summary": "Validation failed with 1 error(s)",
+    "folder": "runs/2026-07-04_04-09_Frontend-Validation-Observation---Invalid"
+  },
+  {
+    "id": "2026-07-04_04-09_Frontend-Validation-Bundle---Invalid",
+    "timestamp": "2026-07-04T04:09:38",
+    "name": "Frontend Validation: Bundle - Invalid",
+    "valid": false,
+    "error_count": 12,
+    "warning_count": 15,
+    "info_count": 2,
+    "summary": "Validation failed with 12 error(s)",
+    "folder": "runs/2026-07-04_04-09_Frontend-Validation-Bundle---Invalid"
+  },
+  {
+    "id": "2026-07-04_04-14_Frontend-Validation-Patient---Valid",
+    "timestamp": "2026-07-04T04:14:54",
+    "name": "Frontend Validation: Patient - Valid",
+    "valid": true,
+    "error_count": 0,
+    "warning_count": 1,
+    "info_count": 0,
+    "summary": "Validation successful with 1 warning(s) and 0 information message(s)",
+    "folder": "runs/2026-07-04_04-14_Frontend-Validation-Patient---Valid"
+  },
+  {
+    "id": "2026-07-04_04-14_Frontend-Validation-Bundle---Invalid",
+    "timestamp": "2026-07-04T04:14:54",
+    "name": "Frontend Validation: Bundle - Invalid",
+    "valid": false,
+    "error_count": 2,
+    "warning_count": 1,
+    "info_count": 0,
+    "summary": "Validation failed with 2 error(s)",
+    "folder": "runs/2026-07-04_04-14_Frontend-Validation-Bundle---Invalid"
+  },
+  {
+    "id": "2026-07-04_04-16_Frontend-Validation-Patient---Invalid",
+    "timestamp": "2026-07-04T04:16:21",
+    "name": "Frontend Validation: Patient - Invalid",
+    "valid": false,
+    "error_count": 1,
+    "warning_count": 2,
+    "info_count": 1,
+    "summary": "Validation failed with 1 error(s)",
+    "folder": "runs/2026-07-04_04-16_Frontend-Validation-Patient---Invalid"
+  },
+  {
+    "id": "2026-07-04_04-19_Frontend-Validation-Observation---Invalid",
+    "timestamp": "2026-07-04T04:19:39",
+    "name": "Frontend Validation: Observation - Invalid",
+    "valid": false,
+    "error_count": 1,
+    "warning_count": 4,
+    "info_count": 0,
+    "summary": "Validation failed with 1 error(s)",
+    "folder": "runs/2026-07-04_04-19_Frontend-Validation-Observation---Invalid"
+  },
+  {
+    "id": "2026-07-04_04-20_Frontend-Validation-Patient---Invalid",
+    "timestamp": "2026-07-04T04:20:30",
+    "name": "Frontend Validation: Patient - Invalid",
+    "valid": false,
+    "error_count": 1,
+    "warning_count": 1,
+    "info_count": 0,
+    "summary": "Validation failed with 1 error(s)",
+    "folder": "runs/2026-07-04_04-20_Frontend-Validation-Patient---Invalid"
   }
 ]
