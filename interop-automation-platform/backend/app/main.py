@@ -66,9 +66,8 @@ FHIR_VALIDATOR_HTML = _resolve_fhir_validator_html()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Always warm Inferno in the background so /health stays up on Render cold starts.
-    # Validation waits on ensure_ready() / engine readiness before calling Inferno.
-    preload_task = asyncio.create_task(inferno_client.ensure_ready())
+    # Warm Inferno + run a probe validate in the background so user requests stay fast.
+    preload_task = asyncio.create_task(inferno_client.warm_up())
     try:
         yield
     finally:

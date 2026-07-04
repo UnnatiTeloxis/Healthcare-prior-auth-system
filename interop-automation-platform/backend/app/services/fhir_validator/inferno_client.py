@@ -16,14 +16,15 @@ _ENGINE_POLL_INTERVAL = 0.5
 _ENGINE_POLL_TIMEOUT = 300.0
 _STARTUP_503_RETRIES = 90
 _STARTUP_503_INTERVAL = 1.0
-_RUNTIME_503_RETRIES = 3
-_RUNTIME_503_INTERVAL = 0.5
-_RESULT_CACHE_TTL_S = 600.0
+_RUNTIME_503_RETRIES = 2
+_RUNTIME_503_INTERVAL = 0.25
+_RESULT_CACHE_TTL_S = 3600.0
 _US_CORE_PATIENT_PROFILE = (
     "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
 )
-# Terminology calls are network-bound; modest parallelism speeds batches up.
-_VALIDATE_CONCURRENCY = 4
+# Terminology is network-bound; parallel validates keep batch latency low.
+_VALIDATE_CONCURRENCY = 6
+_WARMUP_RESOURCE = '{"resourceType":"Patient","id":"warmup"}'
 
 
 class InfernoClient:
@@ -204,12 +205,22 @@ class InfernoClient:
         return payload
 
     def _cache_set(self, key: str, payload: dict[str, Any]) -> None:
-        # Bound cache size for memory on free tier.
-        if len(self._result_cache) > 256:
-            oldest = sorted(self._result_cache.items(), key=lambda kv: kv[1][0])[:64]
+        if len(self._result_cache) > 512:
+            oldest = sorted(self._result_cache.items(), key=lambda kv: kv[1][0])[:128]
             for old_key, _ in oldest:
                 self._result_cache.pop(old_key, None)
         self._result_cache[key] = (time.monotonic() + _RESULT_CACHE_TTL_S, payload)
+
+    async def warm_up(self) -> None:
+        """Load IGs and run one probe validate so the first user request is fast."""
+        await self.ensure_ready()
+        if not self._engine_warm:
+            return
+        try:
+            await self.validate_resource(_WARMUP_RESOURCE, [])
+            logger.info("Inferno warm-up probe complete")
+        except Exception as exc:
+            logger.warning("Inferno warm-up probe failed: %s", exc)
 
     async def validate_resource(self, resource: str, profiles: list[str]) -> dict[str, Any]:
         cache_key = self._cache_key(resource, profiles)
@@ -217,17 +228,14 @@ class InfernoClient:
         if cached is not None:
             return cached
 
+        # Fast path: engine already warm — skip startup locks/waits.
         if not (self._ready.is_set() and self._engine_warm):
             await self.ensure_ready()
 
         async with self._validate_sem:
-            # Re-check cache after waiting for a slot (another worker may have filled it).
             cached = self._cache_get(cache_key)
             if cached is not None:
                 return cached
-
-            if not self._engine_warm:
-                await self._wait_for_engine(timeout=60.0)
 
             await self._ensure_igs_for_meta_profiles(resource)
 
@@ -235,10 +243,11 @@ class InfernoClient:
             params = {"profile": ",".join(profiles)} if profiles else None
             body = resource.encode("utf-8") if isinstance(resource, str) else resource
 
+            # Single-shot when warm (no long 503 retry loops on the hot path).
             response = await self._request(
                 "POST",
                 f"{self.base_url}/validate",
-                startup=not self._engine_warm,
+                startup=False,
                 content=body,
                 headers=headers,
                 params=params,
@@ -338,6 +347,19 @@ class InfernoClient:
         await self.ensure_ready()
 
     async def _ensure_igs_for_meta_profiles(self, resource: str) -> None:
+        # Hot path: when default IGs are loaded, skip work for common US Core resources.
+        needs_load = False
+        for profile_url in extract_meta_profiles(resource):
+            ig_spec = _ig_spec_for_profile_url(profile_url)
+            if not ig_spec:
+                continue
+            package_id, version = _split_ig_spec(ig_spec)
+            if not self._is_ig_loaded(package_id, version):
+                needs_load = True
+                break
+        if not needs_load:
+            return
+
         for profile_url in extract_meta_profiles(resource):
             ig_spec = _ig_spec_for_profile_url(profile_url)
             if not ig_spec:
@@ -345,12 +367,11 @@ class InfernoClient:
             package_id, version = _split_ig_spec(ig_spec)
             if self._is_ig_loaded(package_id, version):
                 continue
-            # US Core often auto-loaded from /home/igs — confirm via profiles first.
             if package_id.startswith("hl7.fhir.us.core") and await self._us_core_profiles_loaded():
                 self._register_loaded_ig(package_id, version)
                 continue
             try:
-                await self.load_ig_by_id(package_id, version, startup=not self._engine_warm)
+                await self.load_ig_by_id(package_id, version, startup=False)
             except Exception as exc:
                 logger.warning("Unable to load IG for profile %s: %s", profile_url, exc)
 
