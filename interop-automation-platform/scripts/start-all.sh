@@ -9,33 +9,34 @@ export PORT="${PORT:-8000}"
 # Keep JVM heap modest so Java + Python fit on Render free tier (512 MB).
 export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:--Xms128m -Xmx256m -XX:+UseSerialGC -XX:+TieredCompilation -XX:TieredStopAtLevel=1}"
 
+# Background: wait for Inferno, then preload default IGs (must not block PORT bind).
+warmup_inferno() {
+  echo "Waiting for Inferno engine (background)..."
+  i=1
+  while [ "$i" -le 300 ]; do
+    if curl -sf "http://127.0.0.1:4567/profiles" >/dev/null 2>&1; then
+      echo "Inferno validator engine ready"
+      echo "Preloading bundled FHIR IGs (background)..."
+      /preload-igs.sh || echo "Warning: IG preload had errors; API will retry on first validation"
+      return 0
+    fi
+    sleep 1
+    i=$((i + 1))
+  done
+  echo "Warning: Inferno did not become ready in time; validation will wait on demand"
+}
+
 echo "Starting Inferno FHIR validator wrapper (127.0.0.1 only)..."
 cd /home
 java -cp "/app/inferno-launcher:/home/lib/*" inferno.local.InfernoLocalLauncher &
 INFERNO_PID=$!
 
-echo "Waiting for Inferno engine on 127.0.0.1:4567..."
-READY=0
-i=1
-while [ "$i" -le 180 ]; do
-  if curl -sf "http://127.0.0.1:4567/profiles" >/dev/null 2>&1; then
-    echo "Inferno validator engine ready"
-    READY=1
-    break
-  fi
-  sleep 1
-  i=$((i + 1))
-done
+warmup_inferno &
+WARMUP_PID=$!
 
-if [ "$READY" -ne 1 ]; then
-  echo "Warning: Inferno validator did not become ready in time; API may fail until it starts"
-else
-  echo "Preloading bundled FHIR IGs before accepting API traffic..."
-  /preload-igs.sh || echo "Warning: IG preload had errors; API will retry on first validation"
-fi
+trap 'kill "$INFERNO_PID" "$WARMUP_PID" 2>/dev/null || true' EXIT TERM INT
 
-trap 'kill "$INFERNO_PID" 2>/dev/null || true' EXIT TERM INT
-
+# Bind public PORT immediately so Render health/port scan succeeds.
 echo "Starting FastAPI on 0.0.0.0:${PORT}..."
 cd /app
 exec uvicorn app.main:app --host 0.0.0.0 --port "$PORT"

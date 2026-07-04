@@ -15,6 +15,9 @@ from app.utils.fhir_helpers import (
 
 logger = logging.getLogger(__name__)
 
+# Inferno is CPU-bound; limited concurrency is faster than flooding it.
+_BATCH_CONCURRENCY = 4
+
 
 class ValidationService:
     async def validate_resource(
@@ -66,9 +69,16 @@ class ValidationService:
         resources: list[str],
         profiles: list[str],
     ) -> BatchValidationResult:
-        results = await asyncio.gather(
-            *[self.validate_resource(resource, profiles) for resource in resources]
-        )
+        # Warm Inferno once for the whole batch, then validate with limited concurrency.
+        await inferno_client.ensure_ready()
+
+        semaphore = asyncio.Semaphore(_BATCH_CONCURRENCY)
+
+        async def _one(resource: str) -> ValidationResult:
+            async with semaphore:
+                return await self.validate_resource(resource, profiles)
+
+        results = await asyncio.gather(*[_one(resource) for resource in resources])
         valid_count = sum(1 for result in results if result.valid)
 
         return BatchValidationResult(
