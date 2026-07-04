@@ -23,14 +23,19 @@ class InfernoClient:
     def __init__(self) -> None:
         self.base_url = settings.inferno_validator_url.rstrip("/")
         self.client: httpx.AsyncClient | None = None
+        # Only packages we successfully uploaded/PUT in this process.
+        # Do NOT trust GET /igs — Inferno lists package-server catalog entries that
+        # are not fully loaded (profiles won't resolve).
         self._loaded_igs: set[str] = set()
         self._ready = asyncio.Event()
         self._engine_warm = False
         self._startup_lock = asyncio.Lock()
+        # Inferno's Java engine is effectively single-threaded; serialize validates
+        # so concurrent batch requests don't thrash and slow everything down.
+        self._validate_lock = asyncio.Lock()
 
     async def _get_client(self) -> httpx.AsyncClient:
         if self.client is None:
-            # Large FHIR Bundles can take minutes; keep connect short, read long.
             self.client = httpx.AsyncClient(
                 timeout=httpx.Timeout(600.0, connect=15.0, write=120.0),
                 limits=httpx.Limits(max_connections=20, max_keepalive_connections=10),
@@ -98,7 +103,6 @@ class InfernoClient:
             self._engine_warm = False
             if attempt < attempts:
                 logger.info("Inferno 503 for %s (attempt %s/%s)", url, attempt, attempts)
-                # Re-check engine readiness between retries so cold starts recover.
                 try:
                     await self._wait_for_engine(timeout=30.0)
                 except TimeoutError:
@@ -112,7 +116,7 @@ class InfernoClient:
             self._loaded_igs.add(_ig_key(package_id, version))
             self._loaded_igs.add(package_id)
         if result:
-            resp_pid = str(result.get("package_id") or result.get("packageId") or "").strip()
+            resp_pid = str(result.get("package_id") or result.get("packageId") or result.get("id") or "").strip()
             resp_ver = str(result.get("version") or "").strip() or None
             if resp_pid:
                 self._loaded_igs.add(_ig_key(resp_pid, resp_ver))
@@ -128,18 +132,6 @@ class InfernoClient:
             return any(key.startswith(prefix) for key in self._loaded_igs)
         return False
 
-    async def _sync_loaded_igs_from_server(self) -> None:
-        igs = await self.get_igs()
-        if not isinstance(igs, dict):
-            return
-        for package_id, meta in igs.items():
-            if not package_id:
-                continue
-            version = None
-            if isinstance(meta, dict):
-                version = str(meta.get("version") or "").strip() or None
-            self._register_loaded_ig(package_id, version)
-
     async def ensure_ready(self) -> None:
         if self._ready.is_set() and self._engine_warm:
             return
@@ -153,8 +145,8 @@ class InfernoClient:
             except TimeoutError as exc:
                 logger.warning("%s — validation will retry until Inferno is ready", exc)
 
-            await self._sync_loaded_igs_from_server()
-
+            # Always upload bundled default IGs. GET /igs is a package catalog and
+            # must not be treated as "already loaded into the validation engine".
             for ig_spec in settings.default_igs_list:
                 package_id, version = _split_ig_spec(ig_spec)
                 if self._is_ig_loaded(package_id, version):
@@ -164,39 +156,41 @@ class InfernoClient:
                 except Exception as exc:
                     logger.warning("Unable to load default IG %s: %s", _ig_key(package_id, version), exc)
 
-            await self._sync_loaded_igs_from_server()
             self._ready.set()
-            logger.info("Inferno validator ready (%s IGs tracked)", len(self._loaded_igs))
+            logger.info("Inferno validator ready (%s IGs loaded by this process)", len(self._loaded_igs))
 
     @staticmethod
     def _content_type_for_resource(resource: str) -> str:
-        # Match Inferno hosted validator: XML must not be sent as application/json.
+        # Match Inferno hosted / wrapper defaults used by parity checks.
         if is_valid_xml(resource):
             return "application/fhir+xml"
-        return "application/fhir+json"
+        return "application/json"
 
     async def validate_resource(self, resource: str, profiles: list[str]) -> dict[str, Any]:
         await self.ensure_ready()
-        if not self._engine_warm:
-            await self._wait_for_engine(timeout=120.0)
 
-        await self._ensure_igs_for_meta_profiles(resource)
+        # Serialize engine work: concurrent batch calls queue here instead of
+        # contending inside the Java validator (which is much slower).
+        async with self._validate_lock:
+            if not self._engine_warm:
+                await self._wait_for_engine(timeout=120.0)
 
-        headers = {"Content-Type": self._content_type_for_resource(resource)}
-        params = {"profile": ",".join(profiles)} if profiles else None
-        # Send UTF-8 bytes so large JSON/XML payloads are handled consistently.
-        body = resource.encode("utf-8") if isinstance(resource, str) else resource
+            await self._ensure_igs_for_meta_profiles(resource)
 
-        response = await self._request(
-            "POST",
-            f"{self.base_url}/validate",
-            startup=not self._engine_warm,
-            content=body,
-            headers=headers,
-            params=params,
-        )
-        response.raise_for_status()
-        return response.json()
+            headers = {"Content-Type": self._content_type_for_resource(resource)}
+            params = {"profile": ",".join(profiles)} if profiles else None
+            body = resource.encode("utf-8") if isinstance(resource, str) else resource
+
+            response = await self._request(
+                "POST",
+                f"{self.base_url}/validate",
+                startup=not self._engine_warm,
+                content=body,
+                headers=headers,
+                params=params,
+            )
+            response.raise_for_status()
+            return response.json()
 
     async def get_profiles(self) -> list[str]:
         client = await self._get_client()

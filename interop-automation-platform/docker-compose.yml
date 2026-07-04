@@ -10,11 +10,11 @@ services:
     volumes:
       - ./igs:/home/igs
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4567/version"]
-      interval: 30s
+      test: ["CMD", "curl", "-f", "http://localhost:4567/profiles"]
+      interval: 15s
       timeout: 10s
-      retries: 3
-      start_period: 40s
+      retries: 20
+      start_period: 90s
     networks:
       - interop_network
     restart: unless-stopped
