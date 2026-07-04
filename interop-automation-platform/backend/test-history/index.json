@@ -6631,5 +6631,16 @@
     "info_count": 0,
     "summary": "Validation failed with 1 error(s)",
     "folder": "runs/2026-07-04_04-20_Frontend-Validation-Patient---Invalid"
+  },
+  {
+    "id": "2026-07-04_04-27_Frontend-Validation-Observation---Invalid",
+    "timestamp": "2026-07-04T04:27:49",
+    "name": "Frontend Validation: Observation - Invalid",
+    "valid": false,
+    "error_count": 1,
+    "warning_count": 4,
+    "info_count": 0,
+    "summary": "Validation failed with 1 error(s) | Missing required: Observation",
+    "folder": "runs/2026-07-04_04-27_Frontend-Validation-Observation---Invalid"
   }
 ]
