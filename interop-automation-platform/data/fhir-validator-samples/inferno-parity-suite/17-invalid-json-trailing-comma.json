@@ -1,0 +1,11 @@
+{
+  "resourceType": "Patient",
+  "id": "parity-trailing-comma",
+  "name": [
+    {
+      "family": "Syntax",
+      "given": ["Error"]
+    }
+  ],
+  "gender": "male",
+}

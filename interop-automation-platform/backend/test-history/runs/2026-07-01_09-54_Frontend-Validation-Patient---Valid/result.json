@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "id": "2026-07-01_09-54_Frontend-Validation-Patient---Valid",
+    "name": "Frontend Validation: Patient - Valid",
+    "timestamp": "2026-07-01T09:54:26"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "1",
+      "name": [
+        {
+          "family": "Smith",
+          "given": [
+            "John"
+          ]
+        }
+      ]
+    },
+    "profiles": [],
+    "resource_type": null
+  },
+  "response": {
+    "valid": true,
+    "resource_type": "Patient",
+    "profiles": [],
+    "summary": "Validation successful with 1 warning(s) and 0 information message(s)",
+    "error_count": 0,
+    "warning_count": 1,
+    "info_count": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Patient",
+        "line": 1,
+        "column": 89
+      }
+    ]
+  }
+}

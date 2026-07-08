@@ -1,0 +1,168 @@
+{
+  "meta": {
+    "id": "2026-07-04_03-45_Frontend-Validation-Bundle---Invalid",
+    "name": "Frontend Validation: Bundle - Invalid",
+    "timestamp": "2026-07-04T03:45:40"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "parity-bundle-example-url",
+      "type": "collection",
+      "entry": [
+        {
+          "fullUrl": "http://example.org/fhir/Patient/example",
+          "resource": {
+            "resourceType": "Patient",
+            "id": "example-url-patient",
+            "identifier": [
+              {
+                "system": "http://example.org/fhir/identifier/mrn",
+                "value": "12345"
+              }
+            ],
+            "name": [
+              {
+                "family": "Example",
+                "given": [
+                  "Patient"
+                ]
+              }
+            ],
+            "gender": "female"
+          }
+        }
+      ]
+    },
+    "profiles": [],
+    "resource_type": "Bundle"
+  },
+  "response": {
+    "valid": false,
+    "resource_type": "Bundle",
+    "profiles": [],
+    "summary": "Validation failed with 2 error(s)",
+    "error_count": 2,
+    "warning_count": 1,
+    "info_count": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "invalid",
+        "message": "The fullUrl 'http://example.org/fhir/Patient/example' looks like a RESTful server URL, so it must end with the correct type and id (/Patient/example-url-patient)",
+        "location": "Bundle.entry[0]",
+        "line": 6,
+        "column": 6
+      },
+      {
+        "severity": "error",
+        "code": "invalid",
+        "message": "Example URLs are not allowed in this context (http://example.org/fhir/identifier/mrn)",
+        "location": "Bundle.entry[0].resource/*Patient/example-url-patient*/.identifier[0].system",
+        "line": 13,
+        "column": 63
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Bundle.entry[0].resource/*Patient/example-url-patient*/",
+        "line": 8,
+        "column": 8
+      }
+    ],
+    "operation_outcome": {
+      "resourceType": "OperationOutcome",
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>error</td><td>Bundle.entry[0]</td><td>invalid</td><td>The fullUrl 'http://example.org/fhir/Patient/example' looks like a RESTful server URL, so it must end with the correct type and id (/Patient/example-url-patient)</td><td/><td>InstanceValidator</td></tr><tr><td>error</td><td>Bundle.entry[0].resource/*Patient/example-url-patient*/.identifier[0].system</td><td>invalid</td><td>Example URLs are not allowed in this context (http://example.org/fhir/identifier/mrn)</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Bundle.entry[0].resource/*Patient/example-url-patient*/</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "issue": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 6
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 6
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "BUNDLE_ENTRY_URL_MATCHES_TYPE_ID"
+            }
+          ],
+          "severity": "error",
+          "code": "invalid",
+          "details": {
+            "text": "The fullUrl 'http://example.org/fhir/Patient/example' looks like a RESTful server URL, so it must end with the correct type and id (/Patient/example-url-patient)"
+          },
+          "expression": [
+            "Bundle.entry[0]"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 13
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 63
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE"
+            }
+          ],
+          "severity": "error",
+          "code": "invalid",
+          "details": {
+            "text": "Example URLs are not allowed in this context (http://example.org/fhir/identifier/mrn)"
+          },
+          "expression": [
+            "Bundle.entry[0].resource/*Patient/example-url-patient*/.identifier[0].system"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "Bundle.entry[0].resource/*Patient/example-url-patient*/"
+          ]
+        }
+      ]
+    }
+  }
+}

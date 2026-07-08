@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from app.api.v1.fhir_validator.schemas import (
@@ -6,7 +7,11 @@ from app.api.v1.fhir_validator.schemas import (
     ValidationResult,
 )
 from app.services.fhir_validator.inferno_client import inferno_client
-from app.utils.fhir_helpers import detect_resource_type, parse_operation_outcome
+from app.utils.fhir_helpers import (
+    count_issue_severities,
+    detect_resource_type,
+    parse_operation_outcome,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -23,11 +28,8 @@ class ValidationService:
 
         try:
             operation_outcome = await inferno_client.validate_resource(resource, profiles)
-            is_valid, issues = parse_operation_outcome(operation_outcome)
-
-            error_count = sum(1 for issue in issues if issue["severity"] in {"error", "fatal"})
-            warning_count = sum(1 for issue in issues if issue["severity"] == "warning")
-            info_count = sum(1 for issue in issues if issue["severity"] == "information")
+            is_valid, issues = parse_operation_outcome(operation_outcome, resource)
+            is_valid, error_count, warning_count, info_count = count_issue_severities(issues)
 
             return ValidationResult(
                 valid=is_valid,
@@ -64,9 +66,12 @@ class ValidationService:
         resources: list[str],
         profiles: list[str],
     ) -> BatchValidationResult:
-        results = [await self.validate_resource(resource, profiles) for resource in resources]
+        await inferno_client.ensure_ready()
+        # Parallel validates (semaphore inside client) — terminology I/O benefits.
+        results = await asyncio.gather(
+            *[self.validate_resource(resource, profiles) for resource in resources]
+        )
         valid_count = sum(1 for result in results if result.valid)
-
         return BatchValidationResult(
             results=results,
             total=len(results),

@@ -1,0 +1,27 @@
+{
+  "resourceType": "Bundle",
+  "id": "parity-bundle-example-url",
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "http://example.org/fhir/Patient/example",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "example-url-patient",
+        "identifier": [
+          {
+            "system": "http://example.org/fhir/identifier/mrn",
+            "value": "12345"
+          }
+        ],
+        "name": [
+          {
+            "family": "Example",
+            "given": ["Patient"]
+          }
+        ],
+        "gender": "female"
+      }
+    }
+  ]
+}

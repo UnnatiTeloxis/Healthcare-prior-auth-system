@@ -1,0 +1,21 @@
+{
+  "resourceType": "Bundle",
+  "id": "parity-bundle-bad-uuid",
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:Patient-UPPERCASE-UUID",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "bad-uuid-patient",
+        "name": [
+          {
+            "family": "UuidTest",
+            "given": ["Upper"]
+          }
+        ],
+        "gender": "male"
+      }
+    }
+  ]
+}

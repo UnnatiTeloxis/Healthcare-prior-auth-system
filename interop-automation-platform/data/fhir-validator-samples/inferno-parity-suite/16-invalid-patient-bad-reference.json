@@ -1,0 +1,14 @@
+{
+  "resourceType": "Patient",
+  "id": "parity-invalid-reference",
+  "name": [
+    {
+      "family": "BadRef",
+      "given": ["Test"]
+    }
+  ],
+  "gender": "male",
+  "managingOrganization": {
+    "reference": "Organization/not-a-valid-reference-format!!!"
+  }
+}

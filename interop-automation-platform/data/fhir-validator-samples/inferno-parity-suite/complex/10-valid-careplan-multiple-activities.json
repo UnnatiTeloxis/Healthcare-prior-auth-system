@@ -1,0 +1,95 @@
+{
+  "resourceType": "CarePlan",
+  "id": "complex-careplan-activities",
+  "status": "active",
+  "intent": "plan",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/careplan-category",
+          "code": "assess-plan",
+          "display": "Assessment and Plan of Treatment"
+        }
+      ],
+      "text": "Assessment and Plan of Treatment"
+    }
+  ],
+  "title": "Diabetes management plan",
+  "description": "Comprehensive care plan for type 2 diabetes including medication, diet, and monitoring.",
+  "subject": {
+    "reference": "Patient/parity-patient-minimal"
+  },
+  "period": {
+    "start": "2024-01-01",
+    "end": "2024-12-31"
+  },
+  "careTeam": [
+    {
+      "reference": "CareTeam/diabetes-team-1"
+    }
+  ],
+  "addresses": [
+    {
+      "reference": "Condition/parity-condition-diabetes"
+    }
+  ],
+  "goal": [
+    {
+      "reference": "Goal/hba1c-target"
+    }
+  ],
+  "activity": [
+    {
+      "detail": {
+        "kind": "MedicationRequest",
+        "status": "in-progress",
+        "doNotPerform": false,
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "860975",
+              "display": "Metformin 500 MG"
+            }
+          ]
+        },
+        "scheduledTiming": {
+          "repeat": {
+            "frequency": 2,
+            "period": 1,
+            "periodUnit": "d"
+          }
+        },
+        "description": "Metformin 500mg twice daily"
+      }
+    },
+    {
+      "detail": {
+        "kind": "ServiceRequest",
+        "status": "scheduled",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4",
+              "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+            }
+          ]
+        },
+        "scheduledPeriod": {
+          "start": "2024-06-01",
+          "end": "2024-06-30"
+        },
+        "description": "HbA1c lab every 3 months"
+      }
+    },
+    {
+      "detail": {
+        "kind": "Task",
+        "status": "in-progress",
+        "description": "Patient education: carbohydrate counting and glucose monitoring"
+      }
+    }
+  ]
+}

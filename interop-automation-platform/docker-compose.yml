@@ -5,16 +5,19 @@ services:
     ports:
       - "4567:4567"
     environment:
-      DISABLE_TX: "true"
+      # Match inferno.healthit.gov/validator defaults for result parity.
+      TX_SERVER_URL: "https://tx.fhir.org/r4"
       DISPLAY_ISSUES_ARE_WARNINGS: "true"
     volumes:
-      - ./igs:/home/igs
+      # Auto-load US Core at engine start (do NOT replace entire /home/igs).
+      - ./backend/fhir_packages/us-core.tgz:/home/igs/us-core.tgz:ro
+      - fhir_package_cache:/root/.fhir
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4567/version"]
-      interval: 30s
+      test: ["CMD", "curl", "-f", "http://localhost:4567/profiles"]
+      interval: 10s
       timeout: 10s
-      retries: 3
-      start_period: 40s
+      retries: 36
+      start_period: 180s
     networks:
       - interop_network
     restart: unless-stopped
@@ -64,11 +67,15 @@ services:
       DATABASE_URL: postgresql://interop:interop123@postgres:5432/interop
       REDIS_URL: redis://redis:6379
       INFERNO_VALIDATOR_URL: http://fhir-validator-wrapper:4567
+      FHIR_PACKAGES_PATH: /app/fhir_packages
       DEFAULT_IGS: hl7.fhir.us.core#6.1.0
       CORS_ORIGINS: "*"
       PYTHONUNBUFFERED: "1"
+      # Avoid watchfiles I/O crashes on Windows Docker bind mounts (uvicorn --reload).
+      WATCHFILES_FORCE_POLLING: "true"
     volumes:
       - ./backend:/app
+      - ./frontend/public:/app/frontend/public:ro
       - ./data:/app/data:ro
     depends_on:
       postgres:
@@ -112,3 +119,4 @@ networks:
 volumes:
   postgres_data:
   redis_data:
+  fhir_package_cache:

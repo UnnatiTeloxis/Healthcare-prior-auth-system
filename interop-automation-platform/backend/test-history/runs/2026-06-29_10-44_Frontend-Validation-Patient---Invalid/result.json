@@ -1,0 +1,164 @@
+{
+  "meta": {
+    "id": "2026-06-29_10-44_Frontend-Validation-Patient---Invalid",
+    "name": "Frontend Validation: Patient - Invalid",
+    "timestamp": "2026-06-29T10:44:36"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "invalid-birthdate-format",
+      "meta": {
+        "profile": [
+          "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+        ]
+      },
+      "identifier": [
+        {
+          "system": "http://hospital.example.org/mrn",
+          "value": "MRN-BadDate"
+        }
+      ],
+      "name": [
+        {
+          "family": "BadDate",
+          "given": [
+            "Test"
+          ]
+        }
+      ],
+      "gender": "male",
+      "birthDate": "15-03-1986"
+    },
+    "profiles": [],
+    "resource_type": null
+  },
+  "response": {
+    "valid": false,
+    "resource_type": "Patient",
+    "profiles": [],
+    "summary": "Validation failed with 2 error(s)",
+    "error_count": 2,
+    "warning_count": 1,
+    "info_count": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "invalid",
+        "message": "Example URLs are not allowed in this context (http://hospital.example.org/mrn)",
+        "location": "Patient.identifier[0].system",
+        "line": 9,
+        "column": 50
+      },
+      {
+        "severity": "error",
+        "code": "invalid",
+        "message": "Not a valid date ('15-03-1986' doesn't meet format requirements for date)",
+        "location": "Patient.birthDate",
+        "line": 20,
+        "column": 28
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Patient",
+        "line": 1,
+        "column": 2
+      }
+    ],
+    "operation_outcome": {
+      "resourceType": "OperationOutcome",
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>error</td><td>Patient.identifier[0].system</td><td>invalid</td><td>Example URLs are not allowed in this context (http://hospital.example.org/mrn)</td><td/><td>InstanceValidator</td></tr><tr><td>error</td><td>Patient.birthDate</td><td>invalid</td><td>Not a valid date ('15-03-1986' doesn't meet format requirements for date)</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Patient</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "issue": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 9
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 50
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE"
+            }
+          ],
+          "severity": "error",
+          "code": "invalid",
+          "details": {
+            "text": "Example URLs are not allowed in this context (http://hospital.example.org/mrn)"
+          },
+          "expression": [
+            "Patient.identifier[0].system"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 20
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 28
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Type_Specific_Checks_DT_Date_Valid"
+            }
+          ],
+          "severity": "error",
+          "code": "invalid",
+          "details": {
+            "text": "Not a valid date ('15-03-1986' doesn't meet format requirements for date)"
+          },
+          "expression": [
+            "Patient.birthDate"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "Patient"
+          ]
+        }
+      ]
+    }
+  }
+}

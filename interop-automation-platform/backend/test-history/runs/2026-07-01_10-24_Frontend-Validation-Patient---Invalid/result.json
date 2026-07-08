@@ -1,0 +1,44 @@
+{
+  "meta": {
+    "id": "2026-07-01_10-24_Frontend-Validation-Patient---Invalid",
+    "name": "Frontend Validation: Patient - Invalid",
+    "timestamp": "2026-07-01T10:24:22"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "parity-patient-minimal",
+      "name": [
+        {
+          "family": "Smith",
+          "given": [
+            "Jane"
+          ]
+        }
+      ],
+      "gender": "female"
+    },
+    "profiles": [],
+    "resource_type": "Patient"
+  },
+  "response": {
+    "valid": false,
+    "resource_type": "Patient",
+    "profiles": [],
+    "summary": "Validation failed: Server error '503 Service Unavailable' for url 'http://fhir-validator-wrapper:4567/validate'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503",
+    "error_count": 1,
+    "warning_count": 0,
+    "info_count": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "validation-service-error",
+        "message": "Validation service error: Server error '503 Service Unavailable' for url 'http://fhir-validator-wrapper:4567/validate'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503",
+        "location": null,
+        "line": null,
+        "column": null
+      }
+    ],
+    "operation_outcome": null
+  }
+}

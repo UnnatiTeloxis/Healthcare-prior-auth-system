@@ -1,0 +1,81 @@
+{
+  "resourceType": "Patient",
+  "id": "complex-patient-contained-org",
+  "name": [
+    {
+      "use": "official",
+      "family": "Contained",
+      "given": ["Case"]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1975-03-20",
+  "contained": [
+    {
+      "resourceType": "Organization",
+      "id": "managing-org",
+      "active": true,
+      "type": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+              "code": "prov",
+              "display": "Healthcare Provider"
+            }
+          ]
+        }
+      ],
+      "name": "Metro Community Health Center",
+      "telecom": [
+        {
+          "system": "phone",
+          "value": "555-0200",
+          "use": "work"
+        }
+      ],
+      "address": [
+        {
+          "line": ["100 Main Street"],
+          "city": "Chicago",
+          "state": "IL",
+          "postalCode": "60601",
+          "country": "US"
+        }
+      ]
+    },
+    {
+      "resourceType": "Practitioner",
+      "id": "gp",
+      "name": [
+        {
+          "family": "Adams",
+          "given": ["Gregory"],
+          "prefix": ["Dr."]
+        }
+      ],
+      "qualification": [
+        {
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0360",
+                "code": "MD"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "generalPractitioner": [
+    {
+      "reference": "#gp",
+      "display": "Dr. Gregory Adams"
+    }
+  ],
+  "managingOrganization": {
+    "reference": "#managing-org",
+    "display": "Metro Community Health Center"
+  }
+}

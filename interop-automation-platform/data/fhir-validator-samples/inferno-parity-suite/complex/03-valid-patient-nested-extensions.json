@@ -1,0 +1,84 @@
+{
+  "resourceType": "Patient",
+  "id": "complex-patient-extensions",
+  "name": [
+    {
+      "use": "official",
+      "family": "Extension",
+      "given": ["Nested"]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1995-11-08",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/patient-nationality",
+      "extension": [
+        {
+          "url": "code",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US",
+                "display": "United States of America"
+              }
+            ]
+          }
+        },
+        {
+          "url": "period",
+          "valuePeriod": {
+            "start": "1995-11-08"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/patient-birthPlace",
+      "valueAddress": {
+        "city": "Boston",
+        "state": "MA",
+        "country": "US"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/patient-disability",
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "228158008",
+            "display": "Visual impairment"
+          }
+        ],
+        "text": "Visual impairment"
+      }
+    }
+  ],
+  "communication": [
+    {
+      "language": {
+        "coding": [
+          {
+            "system": "urn:ietf:bcp:47",
+            "code": "en-US",
+            "display": "English (United States)"
+          }
+        ]
+      },
+      "preferred": true
+    },
+    {
+      "language": {
+        "coding": [
+          {
+            "system": "urn:ietf:bcp:47",
+            "code": "es",
+            "display": "Spanish"
+          }
+        ]
+      }
+    }
+  ]
+}
