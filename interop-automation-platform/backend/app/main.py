@@ -64,6 +64,29 @@ def _resolve_fhir_validator_html() -> Path | None:
 FHIR_VALIDATOR_HTML = _resolve_fhir_validator_html()
 
 
+def _resolve_fhir_validator_public_dir() -> Path | None:
+    env_path = os.getenv("FHIR_VALIDATOR_PUBLIC_PATH", "").strip()
+    if env_path:
+        candidate = Path(env_path)
+        if candidate.is_dir():
+            return candidate
+
+    candidates = [
+        Path("/app/frontend/public"),
+        Path(__file__).resolve().parent.parent / "frontend" / "public",
+    ]
+    if FHIR_VALIDATOR_HTML:
+        candidates.insert(0, FHIR_VALIDATOR_HTML.parent)
+
+    for candidate in candidates:
+        if candidate.is_dir():
+            return candidate
+    return None
+
+
+FHIR_VALIDATOR_PUBLIC = _resolve_fhir_validator_public_dir()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Warm Inferno + run a probe validate in the background so user requests stay fast.
@@ -102,6 +125,15 @@ if FHIR_VALIDATOR_HTML:
     @app.get("/fhir-validator.html")
     async def serve_fhir_validator_page():
         return FileResponse(FHIR_VALIDATOR_HTML)
+
+    if FHIR_VALIDATOR_PUBLIC:
+        worker_js = FHIR_VALIDATOR_PUBLIC / "fhir-validator-worker.js"
+        if worker_js.is_file():
+            logger.info("FHIR validator worker available at /fhir-validator-worker.js")
+
+            @app.get("/fhir-validator-worker.js")
+            async def serve_fhir_validator_worker():
+                return FileResponse(worker_js, media_type="application/javascript")
 
 
 @app.get("/health")

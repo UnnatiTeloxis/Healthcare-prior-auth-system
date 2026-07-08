@@ -2411,7 +2411,7 @@
 
     function getJsonWorker() {
       if (!jsonWorker) {
-        jsonWorker = new Worker('fhir-validator-worker.js');
+        jsonWorker = new Worker(new URL('/fhir-validator-worker.js', window.location.origin));
       }
       return jsonWorker;
     }
@@ -2432,12 +2432,14 @@
     }
 
     function parseJsonAsync(raw) {
-      const text = String(raw || '');
+      const text = String(raw || '').replace(/^\uFEFF/, '');
       if (!text) return Promise.reject(new Error('Empty content'));
       if (text.length < PERF.JSON_WORKER_THRESHOLD) {
         return Promise.resolve(JSON.parse(text));
       }
-      return runWorkerTask('parseJson', text).then(result => result.parsed);
+      return runWorkerTask('parseJson', text)
+        .then(result => result.parsed)
+        .catch(() => JSON.parse(text));
     }
 
     function isLargeContent(content) {
@@ -2499,14 +2501,10 @@
       const raw = state.inputData || document.getElementById('jsonInput').value;
       if (!raw || !String(raw).trim()) return;
       try {
-        let parsed;
-        if (String(raw).length >= PERF.JSON_WORKER_THRESHOLD) {
-          parsed = await parseJsonAsync(raw);
-        } else {
-          parsed = JSON.parse(raw);
-        }
-        state.parsedCache = parsed;
-        const profile = resolveProfileForResource(parsed);
+        const outcome = await parseResourceTextAsync(raw);
+        if (outcome.error && !outcome.isXml) return;
+        state.parsedCache = outcome.parsed;
+        const profile = resolveProfileForResource(outcome.parsed || { resourceType: 'Resource' });
         state.activeProfile = profile;
         renderProfileInfo(profile);
       } catch (_) {
@@ -3333,21 +3331,22 @@
           : 'Please enter FHIR JSON data.');
         return null;
       }
-      try {
-        const parsed = raw.length >= PERF.JSON_WORKER_THRESHOLD
-          ? await parseJsonAsync(raw)
-          : JSON.parse(raw);
-        document.getElementById('jsonInput').classList.remove('invalid');
-        document.getElementById('jsonError').style.display = 'none';
-        state.inputData = raw;
-        state.parsedCache = parsed;
-        return parsed;
-      } catch (e) {
-        showJsonError('Invalid JSON: ' + e.message);
+
+      const outcome = await parseResourceTextAsync(raw);
+      if (outcome.error && !outcome.isXml) {
+        showJsonError(outcome.error.startsWith('Invalid JSON:')
+          ? outcome.error
+          : 'Invalid JSON: ' + outcome.error);
         document.getElementById('jsonInput').classList.add('invalid');
         state.parsedCache = null;
         return null;
       }
+
+      document.getElementById('jsonInput').classList.remove('invalid');
+      document.getElementById('jsonError').style.display = 'none';
+      state.inputData = raw;
+      state.parsedCache = outcome.parsed;
+      return outcome.parsed;
     }
 
     function parseJsonInput() {
@@ -4013,14 +4012,24 @@
     }
 
     function extractXmlResourceType(text) {
-      const match = String(text || '').match(/<\s*([A-Za-z][A-Za-z0-9:-]*)\b/);
+      // Avoid literal "<?" / "<!--" sequences in this HTML file (breaks editor/HTML parsers).
+      const piOpen = '<' + '?';
+      const commentOpen = '<' + '!--';
+      const xmlPiRe = new RegExp(piOpen.replace('?', '\\?') + '[^?]*\\?>', 'g');
+      const xmlCommentRe = new RegExp(commentOpen + '[\\s\\S]*?--' + '>', 'g');
+      const tagRe = new RegExp('<\\s*([A-Za-z][A-Za-z0-9:-]*)\\b');
+      const stripped = String(text || '')
+        .replace(xmlPiRe, '')
+        .replace(xmlCommentRe, '')
+        .trim();
+      const match = stripped.match(tagRe);
       if (!match) return null;
       const raw = match[1] || '';
       return raw.includes(':') ? raw.split(':').pop() : raw;
     }
 
     function parseResourceText(text) {
-      const raw = String(text || '').trim();
+      const raw = String(text || '').replace(/^\uFEFF/, '').trim();
       if (!raw) return { parsed: null, error: 'Empty file content.' };
       if (raw.startsWith('<')) {
         const resourceType = extractXmlResourceType(raw);
@@ -5472,6 +5481,15 @@
             document.getElementById('jsonInput').value = content;
             scheduleLineNumbersUpdate();
           }
+        } else if (file.name.endsWith('.xml')) {
+          clearLargeFilePreview();
+          const textarea = document.getElementById('jsonInput');
+          state.largeFilePreview = true;
+          textarea.value = '';
+          textarea.placeholder =
+            `XML file "${file.name}" loaded (${formatFileSize(content.length)}). `
+            + 'Preview hidden — validation uses the uploaded content.';
+          document.getElementById('lineNumbers').innerHTML = '1';
         }
         document.getElementById('jsonInput').classList.remove('invalid');
         document.getElementById('jsonError').style.display = 'none';

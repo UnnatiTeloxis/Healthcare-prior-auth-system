@@ -71,6 +71,8 @@ services:
       DEFAULT_IGS: hl7.fhir.us.core#6.1.0
       CORS_ORIGINS: "*"
       PYTHONUNBUFFERED: "1"
+      # Avoid watchfiles I/O crashes on Windows Docker bind mounts (uvicorn --reload).
+      WATCHFILES_FORCE_POLLING: "true"
     volumes:
       - ./backend:/app
       - ./frontend/public:/app/frontend/public:ro
