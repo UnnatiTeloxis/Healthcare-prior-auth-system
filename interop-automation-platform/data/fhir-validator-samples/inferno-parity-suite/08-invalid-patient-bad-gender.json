@@ -1,0 +1,11 @@
+{
+  "resourceType": "Patient",
+  "id": "parity-invalid-gender",
+  "name": [
+    {
+      "family": "BadGender",
+      "given": ["Test"]
+    }
+  ],
+  "gender": "unknown-gender-value"
+}

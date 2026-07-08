@@ -1,0 +1,369 @@
+{
+  "meta": {
+    "id": "2026-06-29_10-34_Frontend-Validation-Observation---Invalid",
+    "name": "Frontend Validation: Observation - Invalid",
+    "timestamp": "2026-06-29T10:34:45"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Observation",
+      "id": "parity-obs-bad-value-type",
+      "status": "final",
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "8310-5",
+            "display": "Body temperature"
+          }
+        ]
+      },
+      "subject": {
+        "reference": "Patient/parity-patient-minimal"
+      },
+      "valueQuantity": "not-a-quantity-object"
+    },
+    "profiles": [],
+    "resource_type": null
+  },
+  "response": {
+    "valid": false,
+    "resource_type": "Observation",
+    "profiles": [],
+    "summary": "Validation failed with 5 error(s) | Missing required: Observation",
+    "error_count": 5,
+    "warning_count": 3,
+    "info_count": 1,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "invalid",
+        "message": "The property valueQuantity must be an Object, not a Primitive property (at Observation.value[x])",
+        "location": "Observation.value[x]",
+        "line": 17,
+        "column": 43
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "message": "Observation.category: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/bodytemp|4.0.1)",
+        "location": "Observation",
+        "line": 1,
+        "column": 2
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "message": "Observation.effective[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/bodytemp|4.0.1)",
+        "location": "Observation",
+        "line": 1,
+        "column": 2
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "message": "Slice 'Observation.category:VSCat': a matching slice is required, but not found (from http://hl7.org/fhir/StructureDefinition/bodytemp|4.0.1). Note that other slices are allowed in addition to this required slice",
+        "location": "Observation",
+        "line": 1,
+        "column": 2
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "message": "Constraint failed: vs-2: 'If there is no component or hasMember element then either a value[x] or a data absent reason must be present.' (defined in http://hl7.org/fhir/StructureDefinition/vitalsigns)",
+        "location": "Observation",
+        "line": 1,
+        "column": 2
+      },
+      {
+        "severity": "information",
+        "code": "informational",
+        "message": "Validate Observation against the Body temperature profile (http://hl7.org/fhir/StructureDefinition/bodytemp) which is required by the FHIR specification because the LOINC code 8310-5 was found",
+        "location": "Observation",
+        "line": 1,
+        "column": 2
+      },
+      {
+        "severity": "warning",
+        "code": "invalid",
+        "message": "Best Practice Recommendation: In general, all observations should have a performer",
+        "location": "Observation",
+        "line": 1,
+        "column": 2
+      },
+      {
+        "severity": "warning",
+        "code": "invalid",
+        "message": "Best Practice Recommendation: In general, all observations should have an effective[x] ()",
+        "location": "Observation",
+        "line": 1,
+        "column": 2
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Observation",
+        "line": 1,
+        "column": 2
+      }
+    ],
+    "operation_outcome": {
+      "resourceType": "OperationOutcome",
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>error</td><td>Observation.value[x]</td><td>invalid</td><td>The property valueQuantity must be an Object, not a Primitive property (at Observation.value[x])</td><td/><td>InstanceValidator</td></tr><tr><td>error</td><td>Observation</td><td>structure</td><td>Observation.category: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/bodytemp|4.0.1)</td><td/><td>InstanceValidator</td></tr><tr><td>error</td><td>Observation</td><td>structure</td><td>Observation.effective[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/bodytemp|4.0.1)</td><td/><td>InstanceValidator</td></tr><tr><td>error</td><td>Observation</td><td>structure</td><td>Slice 'Observation.category:VSCat': a matching slice is required, but not found (from http://hl7.org/fhir/StructureDefinition/bodytemp|4.0.1). Note that other slices are allowed in addition to this required slice</td><td/><td>InstanceValidator</td></tr><tr><td>error</td><td>Observation</td><td>invariant</td><td>Constraint failed: vs-2: 'If there is no component or hasMember element then either a value[x] or a data absent reason must be present.' (defined in http://hl7.org/fhir/StructureDefinition/vitalsigns)</td><td/><td>InstanceValidator</td></tr><tr><td>information</td><td>Observation</td><td>informational</td><td>Validate Observation against the Body temperature profile (http://hl7.org/fhir/StructureDefinition/bodytemp) which is required by the FHIR specification because the LOINC code 8310-5 was found</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Observation</td><td>invalid</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Observation</td><td>invalid</td><td>Best Practice Recommendation: In general, all observations should have an effective[x] ()</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Observation</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "issue": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 17
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 43
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            }
+          ],
+          "severity": "error",
+          "code": "invalid",
+          "details": {
+            "text": "The property valueQuantity must be an Object, not a Primitive property (at Observation.value[x])"
+          },
+          "expression": [
+            "Observation.value[x]"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Validation_VAL_Profile_Minimum"
+            }
+          ],
+          "severity": "error",
+          "code": "structure",
+          "details": {
+            "text": "Observation.category: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/bodytemp|4.0.1)"
+          },
+          "expression": [
+            "Observation"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Validation_VAL_Profile_Minimum"
+            }
+          ],
+          "severity": "error",
+          "code": "structure",
+          "details": {
+            "text": "Observation.effective[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/bodytemp|4.0.1)"
+          },
+          "expression": [
+            "Observation"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Validation_VAL_Profile_Minimum_SLICE"
+            }
+          ],
+          "severity": "error",
+          "code": "structure",
+          "details": {
+            "text": "Slice 'Observation.category:VSCat': a matching slice is required, but not found (from http://hl7.org/fhir/StructureDefinition/bodytemp|4.0.1). Note that other slices are allowed in addition to this required slice"
+          },
+          "expression": [
+            "Observation"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/vitalsigns#vs-2"
+            }
+          ],
+          "severity": "error",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: vs-2: 'If there is no component or hasMember element then either a value[x] or a data absent reason must be present.' (defined in http://hl7.org/fhir/StructureDefinition/vitalsigns)"
+          },
+          "expression": [
+            "Observation"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "VALIDATION_VAL_PROFILE_SIGNPOST_OBS"
+            }
+          ],
+          "severity": "information",
+          "code": "informational",
+          "details": {
+            "text": "Validate Observation against the Body temperature profile (http://hl7.org/fhir/StructureDefinition/bodytemp) which is required by the FHIR specification because the LOINC code 8310-5 was found"
+          },
+          "expression": [
+            "Observation"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "All_observations_should_have_a_performer"
+            }
+          ],
+          "severity": "warning",
+          "code": "invalid",
+          "details": {
+            "text": "Best Practice Recommendation: In general, all observations should have a performer"
+          },
+          "expression": [
+            "Observation"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "All_observations_should_have_an_effectiveDateTime_or_an_effectivePeriod"
+            }
+          ],
+          "severity": "warning",
+          "code": "invalid",
+          "details": {
+            "text": "Best Practice Recommendation: In general, all observations should have an effective[x] ()"
+          },
+          "expression": [
+            "Observation"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "Observation"
+          ]
+        }
+      ]
+    }
+  }
+}

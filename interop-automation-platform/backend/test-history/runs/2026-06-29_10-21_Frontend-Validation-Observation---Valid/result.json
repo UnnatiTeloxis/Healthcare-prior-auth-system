@@ -1,0 +1,248 @@
+{
+  "meta": {
+    "id": "2026-06-29_10-21_Frontend-Validation-Observation---Valid",
+    "name": "Frontend Validation: Observation - Valid",
+    "timestamp": "2026-06-29T10:21:59"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Observation",
+      "id": "valid-observation-lab",
+      "meta": {
+        "profile": [
+          "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab"
+        ]
+      },
+      "status": "final",
+      "category": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+              "code": "laboratory",
+              "display": "Laboratory"
+            }
+          ]
+        }
+      ],
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "2339-0",
+            "display": "Glucose [Mass/volume] in Blood"
+          }
+        ],
+        "text": "Glucose"
+      },
+      "subject": {
+        "reference": "Patient/valid-basic-patient"
+      },
+      "effectiveDateTime": "2024-03-15T08:00:00Z",
+      "valueQuantity": {
+        "value": 95,
+        "unit": "mg/dL",
+        "system": "http://unitsofmeasure.org",
+        "code": "mg/dL"
+      }
+    },
+    "profiles": [],
+    "resource_type": null
+  },
+  "response": {
+    "valid": true,
+    "resource_type": "Observation",
+    "profiles": [],
+    "summary": "Validation successful with 3 warning(s) and 2 information message(s)",
+    "error_count": 0,
+    "warning_count": 3,
+    "info_count": 2,
+    "issues": [
+      {
+        "severity": "information",
+        "code": "business-rule",
+        "message": "Reference to draft CodeSystem http://unitsofmeasure.org|2.1.1",
+        "location": "Observation.value.ofType(Quantity)",
+        "line": 33,
+        "column": 4
+      },
+      {
+        "severity": "information",
+        "code": "invalid",
+        "message": "Canonical URL 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab' does not resolve",
+        "location": "Observation.meta.profile[0]",
+        "line": 5,
+        "column": 90
+      },
+      {
+        "severity": "warning",
+        "code": "invalid",
+        "message": "Best Practice Recommendation: In general, all observations should have a performer",
+        "location": "Observation",
+        "line": 1,
+        "column": 2
+      },
+      {
+        "severity": "warning",
+        "code": "structure",
+        "message": "Profile reference 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab' has not been checked because it could not be found, and the validator is set to not fetch unknown profiles",
+        "location": "Observation.meta.profile[0]",
+        "line": 1,
+        "column": 2
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Observation",
+        "line": 1,
+        "column": 2
+      }
+    ],
+    "operation_outcome": {
+      "resourceType": "OperationOutcome",
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>information</td><td>Observation.value.ofType(Quantity)</td><td>business-rule</td><td>Reference to draft CodeSystem http://unitsofmeasure.org|2.1.1</td><td/><td>TerminologyEngine</td></tr><tr><td>information</td><td>Observation.meta.profile[0]</td><td>invalid</td><td>Canonical URL 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab' does not resolve</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Observation</td><td>invalid</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Observation.meta.profile[0]</td><td>structure</td><td>Profile reference 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab' has not been checked because it could not be found, and the validator is set to not fetch unknown profiles</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Observation</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "issue": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 33
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 4
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            }
+          ],
+          "severity": "information",
+          "code": "business-rule",
+          "details": {
+            "text": "Reference to draft CodeSystem http://unitsofmeasure.org|2.1.1"
+          },
+          "expression": [
+            "Observation.value.ofType(Quantity)"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 5
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 90
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "TYPE_SPECIFIC_CHECKS_DT_CANONICAL_RESOLVE"
+            }
+          ],
+          "severity": "information",
+          "code": "invalid",
+          "details": {
+            "text": "Canonical URL 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab' does not resolve"
+          },
+          "expression": [
+            "Observation.meta.profile[0]"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "All_observations_should_have_a_performer"
+            }
+          ],
+          "severity": "warning",
+          "code": "invalid",
+          "details": {
+            "text": "Best Practice Recommendation: In general, all observations should have a performer"
+          },
+          "expression": [
+            "Observation"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY"
+            }
+          ],
+          "severity": "warning",
+          "code": "structure",
+          "details": {
+            "text": "Profile reference 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab' has not been checked because it could not be found, and the validator is set to not fetch unknown profiles"
+          },
+          "expression": [
+            "Observation.meta.profile[0]"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "Observation"
+          ]
+        }
+      ]
+    }
+  }
+}

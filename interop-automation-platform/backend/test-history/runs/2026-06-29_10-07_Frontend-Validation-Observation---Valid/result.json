@@ -1,0 +1,238 @@
+{
+  "meta": {
+    "id": "2026-06-29_10-07_Frontend-Validation-Observation---Valid",
+    "name": "Frontend Validation: Observation - Valid",
+    "timestamp": "2026-06-29T10:07:52"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Observation",
+      "id": "complex-bp-panel",
+      "status": "final",
+      "category": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+              "code": "vital-signs",
+              "display": "Vital Signs"
+            }
+          ]
+        }
+      ],
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "85354-9",
+            "display": "Blood pressure panel with all children optional"
+          }
+        ],
+        "text": "Blood pressure"
+      },
+      "subject": {
+        "reference": "Patient/parity-patient-minimal"
+      },
+      "effectiveDateTime": "2024-06-01T09:15:00Z",
+      "performer": [
+        {
+          "reference": "Practitioner/parity-practitioner-basic"
+        }
+      ],
+      "component": [
+        {
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "8480-6",
+                "display": "Systolic blood pressure"
+              }
+            ]
+          },
+          "valueQuantity": {
+            "value": 128,
+            "unit": "mmHg",
+            "system": "http://unitsofmeasure.org",
+            "code": "mm[Hg]"
+          }
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "8462-4",
+                "display": "Diastolic blood pressure"
+              }
+            ]
+          },
+          "valueQuantity": {
+            "value": 82,
+            "unit": "mmHg",
+            "system": "http://unitsofmeasure.org",
+            "code": "mm[Hg]"
+          }
+        }
+      ]
+    },
+    "profiles": [],
+    "resource_type": null
+  },
+  "response": {
+    "valid": true,
+    "resource_type": "Observation",
+    "profiles": [],
+    "summary": "Validation successful with 1 warning(s) and 3 information message(s)",
+    "error_count": 0,
+    "warning_count": 1,
+    "info_count": 3,
+    "issues": [
+      {
+        "severity": "information",
+        "code": "business-rule",
+        "message": "Reference to draft CodeSystem http://unitsofmeasure.org|2.1.1",
+        "location": "Observation.component[0].value.ofType(Quantity)",
+        "line": 46,
+        "column": 8
+      },
+      {
+        "severity": "information",
+        "code": "business-rule",
+        "message": "Reference to draft CodeSystem http://unitsofmeasure.org|2.1.1",
+        "location": "Observation.component[1].value.ofType(Quantity)",
+        "line": 63,
+        "column": 8
+      },
+      {
+        "severity": "information",
+        "code": "informational",
+        "message": "Validate Observation against the Blood pressure systolic and diastolic profile (http://hl7.org/fhir/StructureDefinition/bp) which is required by the FHIR specification because the LOINC code 85354-9 was found",
+        "location": "Observation",
+        "line": 1,
+        "column": 2
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Observation",
+        "line": 1,
+        "column": 2
+      }
+    ],
+    "operation_outcome": {
+      "resourceType": "OperationOutcome",
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>information</td><td>Observation.component[0].value.ofType(Quantity)</td><td>business-rule</td><td>Reference to draft CodeSystem http://unitsofmeasure.org|2.1.1</td><td/><td>TerminologyEngine</td></tr><tr><td>information</td><td>Observation.component[1].value.ofType(Quantity)</td><td>business-rule</td><td>Reference to draft CodeSystem http://unitsofmeasure.org|2.1.1</td><td/><td>TerminologyEngine</td></tr><tr><td>information</td><td>Observation</td><td>informational</td><td>Validate Observation against the Blood pressure systolic and diastolic profile (http://hl7.org/fhir/StructureDefinition/bp) which is required by the FHIR specification because the LOINC code 85354-9 was found</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Observation</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "issue": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 46
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            }
+          ],
+          "severity": "information",
+          "code": "business-rule",
+          "details": {
+            "text": "Reference to draft CodeSystem http://unitsofmeasure.org|2.1.1"
+          },
+          "expression": [
+            "Observation.component[0].value.ofType(Quantity)"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 63
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            }
+          ],
+          "severity": "information",
+          "code": "business-rule",
+          "details": {
+            "text": "Reference to draft CodeSystem http://unitsofmeasure.org|2.1.1"
+          },
+          "expression": [
+            "Observation.component[1].value.ofType(Quantity)"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "VALIDATION_VAL_PROFILE_SIGNPOST_OBS"
+            }
+          ],
+          "severity": "information",
+          "code": "informational",
+          "details": {
+            "text": "Validate Observation against the Blood pressure systolic and diastolic profile (http://hl7.org/fhir/StructureDefinition/bp) which is required by the FHIR specification because the LOINC code 85354-9 was found"
+          },
+          "expression": [
+            "Observation"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "Observation"
+          ]
+        }
+      ]
+    }
+  }
+}

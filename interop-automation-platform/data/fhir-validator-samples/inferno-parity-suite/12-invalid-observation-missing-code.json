@@ -1,0 +1,14 @@
+{
+  "resourceType": "Observation",
+  "id": "parity-obs-no-code",
+  "status": "final",
+  "subject": {
+    "reference": "Patient/parity-patient-minimal"
+  },
+  "valueQuantity": {
+    "value": 98.6,
+    "unit": "F",
+    "system": "http://unitsofmeasure.org",
+    "code": "[degF]"
+  }
+}

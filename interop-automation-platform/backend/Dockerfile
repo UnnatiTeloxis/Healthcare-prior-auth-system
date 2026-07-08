@@ -1,12 +1,13 @@
+# Development / docker-compose backend image (API only, hot reload via compose command)
 FROM python:3.11-slim
 
 WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app
+    PYTHONPATH=/app \
+    FHIR_PACKAGES_PATH=/app/fhir_packages
 
-# curl for healthcheck; libpq for psycopg2
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     libpq5 \

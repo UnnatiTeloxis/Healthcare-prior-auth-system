@@ -1,0 +1,11 @@
+{
+  "resourceType": "Patient",
+  "id": "parity-patient-minimal",
+  "name": [
+    {
+      "family": "Smith",
+      "given": ["Jane"]
+    }
+  ],
+  "gender": "female"
+}
