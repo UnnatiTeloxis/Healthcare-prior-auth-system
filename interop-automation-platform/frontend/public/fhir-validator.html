@@ -1,4 +1,11 @@
 <!DOCTYPE html>
+
+
+
+
+
+
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -13,24 +20,30 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" crossorigin="anonymous"></script>
   <style>
     :root {
-      --primary: #1a56db;
-      --primary-dark: #1544b0;
-      --secondary: #3b82f6;
-      --accent: #06b6d4;
+      /* Premium healthcare palette */
+      --primary: #0f172a;
+      --primary-dark: #0b1220;
+      /* Light-blue forward accents (requested) */
+      --secondary: #60a5fa;   /* light blue */
+      --accent: #38bdf8;      /* sky */
+      --accent-2: #8b5cf6;    /* purple */
       --success: #10b981;
       --warning: #f59e0b;
       --error: #ef4444;
       --info: #3b82f6;
-      --bg: #f0f4f8;
-      --card: #ffffff;
+      --bg: #f1f5f9;
+      --card: rgba(255,255,255,0.72);
+      --card-solid: #ffffff;
+      --glass: rgba(255,255,255,0.7);
       --text: #1e293b;
       --text-muted: #64748b;
       --border: #e2e8f0;
-      --shadow: 0 4px 20px rgba(26, 86, 219, 0.08);
-      --shadow-lg: 0 8px 32px rgba(26, 86, 219, 0.12);
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 22px 60px rgba(15, 23, 42, 0.16);
       --radius: 16px;
       --radius-sm: 12px;
-      --transition: 0.3s ease;
+      --transition: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      --focus: 0 0 0 4px rgba(37, 99, 235, 0.22);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -43,9 +56,41 @@
       min-height: 100vh;
     }
 
+    /* Premium animated background */
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      inset: -40vmax;
+      pointer-events: none;
+      z-index: -2;
+    }
+    body::before {
+      background:
+        radial-gradient(closest-side at 25% 20%, rgba(6,182,212,0.22), transparent 60%),
+        radial-gradient(closest-side at 75% 30%, rgba(139,92,246,0.20), transparent 62%),
+        radial-gradient(closest-side at 55% 75%, rgba(37,99,235,0.18), transparent 58%),
+        radial-gradient(closest-side at 20% 85%, rgba(15,23,42,0.08), transparent 60%);
+      filter: blur(18px);
+      transform: translate3d(0,0,0);
+      animation: driftBg 16s ease-in-out infinite alternate;
+    }
+    body::after {
+      background-image:
+        radial-gradient(rgba(15,23,42,0.08) 1px, transparent 1px);
+      background-size: 18px 18px;
+      opacity: 0.55;
+      mask-image: radial-gradient(circle at 35% 20%, rgba(0,0,0,1), transparent 62%);
+    }
+    @keyframes driftBg {
+      0%   { transform: translate3d(-2%, -1%, 0) scale(1); }
+      50%  { transform: translate3d(3%, 2%, 0) scale(1.03); }
+      100% { transform: translate3d(-1%, 3%, 0) scale(1.02); }
+    }
+
     /* Header */
     .header {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+      background: linear-gradient(120deg, var(--primary) 0%, #0b1b3a 35%, var(--secondary) 70%, var(--accent) 110%);
       color: #fff;
       padding: 1.5rem 1.25rem 1.75rem;
       position: relative;
@@ -56,7 +101,10 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 50%);
+      background:
+        radial-gradient(circle at 22% 20%, rgba(6,182,212,0.22) 0%, transparent 52%),
+        radial-gradient(circle at 76% 25%, rgba(139,92,246,0.18) 0%, transparent 55%),
+        radial-gradient(circle at 60% 90%, rgba(255,255,255,0.10) 0%, transparent 55%);
       pointer-events: none;
     }
     .header-inner {
@@ -81,30 +129,80 @@
     .logo-icon {
       width: 48px;
       height: 48px;
-      background: rgba(255,255,255,0.2);
-      backdrop-filter: blur(8px);
+      background: rgba(255,255,255,0.18);
+      backdrop-filter: blur(12px);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 1.5rem;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+      border: 1px solid rgba(255,255,255,0.25);
     }
     .logo h1 {
       font-size: 1.35rem;
       font-weight: 800;
       letter-spacing: -0.02em;
     }
+    /* Light blue gradient title (premium look) */
+    .logo h1 {
+      background: linear-gradient(90deg, #e0f2fe 0%, var(--secondary) 38%, var(--accent) 78%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 10px 30px rgba(0,0,0,0.20);
+    }
     .logo p {
       font-size: 0.85rem;
       opacity: 0.9;
     }
     .step-badge {
-      background: rgba(255,255,255,0.2);
-      backdrop-filter: blur(8px);
+      background: rgba(255,255,255,0.16);
+      backdrop-filter: blur(12px);
       padding: 0.5rem 1rem;
       border-radius: 999px;
       font-size: 0.875rem;
       font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.24);
+    }
+
+    /* Premium header actions */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-left: auto;
+    }
+    .header-action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.85rem;
+      border-radius: 999px;
+      color: rgba(255,255,255,0.92);
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.22);
+      backdrop-filter: blur(12px);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all var(--transition);
+      text-decoration: none;
+      user-select: none;
+    }
+    .header-action-btn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.18); }
+    .header-action-btn:active { transform: translateY(0); }
+    .header-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(6,182,212,0.9), rgba(139,92,246,0.9));
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      box-shadow: 0 14px 38px rgba(0,0,0,0.18);
+      border: 1px solid rgba(255,255,255,0.22);
     }
 
     /* Step indicator */
@@ -116,8 +214,8 @@
       z-index: 2;
     }
     .steps-card {
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(12px);
+      background: rgba(255,255,255,0.72);
+      backdrop-filter: blur(14px);
       border-radius: var(--radius);
       box-shadow: var(--shadow-lg);
       padding: 1.25rem 1.5rem;
@@ -162,13 +260,15 @@
       z-index: 2;
       cursor: pointer;
       min-width: 0;
+      transition: transform var(--transition);
     }
+    .step-item:hover { transform: translateY(-2px); }
     .step-item:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; border-radius: 8px; }
     .step-num {
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      background: var(--card);
+      background: rgba(255,255,255,0.78);
       border: 2px solid var(--border);
       display: flex;
       align-items: center;
@@ -180,10 +280,10 @@
     }
     .step-item.active .step-num,
     .step-item.completed .step-num {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      background: linear-gradient(135deg, var(--secondary), var(--accent));
       border-color: transparent;
       color: #fff;
-      box-shadow: 0 4px 12px rgba(26,86,219,0.35);
+      box-shadow: 0 0 0 6px rgba(37,99,235,0.15), 0 14px 40px rgba(37,99,235,0.30);
     }
     .step-item.completed .step-num { background: var(--success); }
     .step-label {
@@ -201,6 +301,69 @@
       margin: 0 auto;
       padding: 2rem 1.25rem 4rem;
     }
+
+    /* Glass cards (global) */
+    .card,
+    .reports-list-container,
+    .reports-table-container,
+    .batch-file-results,
+    .modal {
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.55);
+      box-shadow: var(--shadow);
+    }
+    .card { border-radius: var(--radius); }
+
+    /* Buttons (premium micro-interactions) */
+    .btn { transition: all var(--transition); }
+    .btn:focus-visible { outline: none; box-shadow: var(--focus); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--secondary), var(--accent));
+      box-shadow: 0 16px 40px rgba(37,99,235,0.22);
+    }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 22px 60px rgba(37,99,235,0.28); }
+    .btn-primary:active:not(:disabled) { transform: scale(0.98); }
+    .btn-secondary:hover:not(:disabled),
+    .btn-ghost:hover:not(:disabled) { transform: translateY(-2px); }
+
+    /* JSON editor (light glassy surface requested) */
+    .json-editor-wrap {
+      background: rgba(255,255,255,0.68);
+      border: 1px solid rgba(255,255,255,0.65);
+      box-shadow: 0 24px 70px rgba(15,23,42,0.14);
+    }
+    .json-editor-header {
+      background: linear-gradient(90deg, rgba(96,165,250,0.25), rgba(56,189,248,0.18), rgba(139,92,246,0.12));
+      border-bottom: 1px solid rgba(15,23,42,0.08);
+      color: rgba(15,23,42,0.92);
+    }
+    .json-textarea {
+      background: transparent;
+      color: rgba(15,23,42,0.92);
+    }
+    .line-numbers {
+      background: rgba(15,23,42,0.04);
+      color: rgba(100,116,139,0.95);
+      border-right: 1px solid rgba(15,23,42,0.08);
+    }
+
+    /* Drop zone premium */
+    .drop-zone {
+      border: 2px dashed rgba(37,99,235,0.35);
+      background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0.25));
+      transition: all var(--transition);
+    }
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: rgba(6,182,212,0.70);
+      background: linear-gradient(180deg, rgba(6,182,212,0.10), rgba(139,92,246,0.08));
+      transform: translateY(-2px);
+      box-shadow: 0 24px 70px rgba(15,23,42,0.12);
+    }
+
+    /* Reports: premium table hover */
+    .reports-table tr:hover { background: rgba(15,23,42,0.04); }
     .step-stage {
       position: relative;
       transition: min-height 0.4s cubic-bezier(0.22, 1, 0.36, 1);
@@ -383,6 +546,170 @@
       color: var(--secondary);
       font-family: Consolas, Monaco, monospace;
     }
+
+    /* IG Selector Dropdown */
+    .ig-selector-wrap {
+      margin-bottom: 1.25rem;
+    }
+    .ig-selector-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    .ig-selector-label i { color: var(--secondary); }
+    .ig-selector-container {
+      position: relative;
+    }
+    .ig-selector-trigger {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card);
+      font-family: inherit;
+      font-size: 0.9375rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .ig-selector-trigger:hover { border-color: var(--secondary); }
+    .ig-selector-trigger:focus {
+      outline: none;
+      border-color: var(--secondary);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    }
+    .ig-selector-trigger .ig-trigger-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .ig-selector-trigger .ig-trigger-name {
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+    .ig-selector-trigger .ig-trigger-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .ig-selector-trigger .ig-trigger-chevron {
+      transition: transform 0.2s ease;
+      color: var(--text-muted);
+    }
+    .ig-selector-container.open .ig-trigger-chevron {
+      transform: rotate(180deg);
+    }
+    .ig-dropdown-panel {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: var(--card-solid);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-lg);
+      max-height: 280px;
+      overflow: hidden;
+      flex-direction: column;
+    }
+    .ig-selector-container.open .ig-dropdown-panel {
+      display: flex;
+    }
+    .ig-search-input {
+      width: 100%;
+      padding: 0.65rem 0.85rem 0.65rem 2.2rem;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      font-family: inherit;
+      font-size: 0.875rem;
+      background: transparent;
+      outline: none;
+    }
+    .ig-search-wrap {
+      position: relative;
+    }
+    .ig-search-wrap i {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .ig-options-list {
+      overflow-y: auto;
+      max-height: 220px;
+      padding: 0.25rem 0;
+    }
+    .ig-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 0.85rem;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      font-size: 0.875rem;
+    }
+    .ig-option:hover { background: rgba(59,130,246,0.06); }
+    .ig-option.selected {
+      background: rgba(59,130,246,0.1);
+      font-weight: 600;
+    }
+    .ig-option .ig-opt-icon {
+      width: 20px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--secondary);
+    }
+    .ig-option .ig-opt-details {
+      flex: 1;
+      min-width: 0;
+    }
+    .ig-option .ig-opt-title {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ig-option .ig-opt-package {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .ig-option .ig-opt-version {
+      font-size: 0.7rem;
+      background: rgba(59,130,246,0.1);
+      color: var(--secondary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .ig-loading-indicator {
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--secondary);
+    }
+    .ig-loading-indicator.visible { display: flex; }
+    .ig-loading-indicator .ig-spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(59,130,246,0.2);
+      border-top-color: var(--secondary);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     /* Tabs */
     .tabs {
@@ -1494,9 +1821,11 @@
     }
     .nav-item:hover { background: rgba(26,86,219,0.06); color: var(--primary); }
     .nav-item.active {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(26,86,219,0.3);
+      background: linear-gradient(135deg, rgba(96,165,250,0.28), rgba(56,189,248,0.20));
+      color: var(--primary);
+      box-shadow: 0 16px 40px rgba(37,99,235,0.14);
+      border: 1px solid rgba(255,255,255,0.7);
+      backdrop-filter: blur(12px);
     }
     .nav-icon { font-size: 1rem; }
 
@@ -1713,6 +2042,15 @@
             <p>Interop Automation Platform</p>
           </div>
         </div>
+        <div class="header-actions" aria-label="Quick actions">
+          <button type="button" class="header-action-btn" data-nav="dashboard" aria-label="Open dashboard">
+            <i class="fas fa-chart-line" aria-hidden="true"></i> Dashboard
+          </button>
+          <button type="button" class="header-action-btn" data-nav="reports" aria-label="Open reports">
+            <i class="fas fa-clipboard-list" aria-hidden="true"></i> Reports
+          </button>
+          <span class="header-avatar" aria-label="User">IA</span>
+        </div>
         <div class="step-badge" id="stepBadge" aria-live="polite" style="display:none;">Step 1 of 4: Provide Data</div>
       </div>
     </div>
@@ -1721,6 +2059,42 @@
   <nav class="main-nav" id="mainNav" aria-label="Main navigation">
     <div class="main-nav-inner" id="mainNavInner"></div>
   </nav>
+
+  <div id="page-dashboard" class="app-page">
+    <main class="main">
+      <div class="page-header">
+        <h1 style="font-weight:900;letter-spacing:-0.03em;">
+          <span style="background:linear-gradient(90deg,var(--secondary),var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent;">
+            FHIR Conformance
+          </span>
+          <span style="color:var(--primary);"> Insights</span>
+        </h1>
+        <p class="page-subtitle">A modern validation workspace with history, quick actions, and a memorable healthcare visual identity.</p>
+      </div>
+
+      <div class="summary-grid" id="dashboardStats" style="margin-top:1rem;"></div>
+
+      <div class="card" style="margin-top:1.25rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+          <div>
+            <h2 class="card-title" style="margin:0;">Quick Actions</h2>
+            <p class="card-subtitle" style="margin:0.25rem 0 0;">Jump straight into validation workflows.</p>
+          </div>
+          <div class="btn-row" style="margin-top:0;">
+            <button type="button" class="btn btn-primary" id="dashNewValidationBtn"><i class="fas fa-play"></i> New Validation</button>
+            <button type="button" class="btn btn-secondary" id="dashUploadBtn"><i class="fas fa-upload"></i> Upload</button>
+            <button type="button" class="btn btn-secondary" id="dashReportsBtn"><i class="fas fa-chart-bar"></i> Reports</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1.25rem;">
+        <h2 class="card-title" style="margin:0 0 0.75rem;">Recent Activity</h2>
+        <div id="dashboardRecent" class="issue-list"></div>
+        <p class="results-hint" style="margin-top:0.75rem;">Tip: click a recent item to open its full report.</p>
+      </div>
+    </main>
+  </div>
 
   <div id="page-validator" class="app-page active">
   <nav class="steps-nav" id="validatorStepsNav" aria-label="Validation steps">
@@ -1739,6 +2113,34 @@
       <div class="card">
         <h2 class="card-title" id="step2Title">Provide FHIR Resource Data</h2>
         <p class="card-subtitle">Paste JSON or upload a file (.json / .xml).</p>
+
+        <!-- IG Selector -->
+        <div class="ig-selector-wrap" id="igSelectorWrap">
+          <label class="ig-selector-label"><i class="fas fa-book-medical"></i> Implementation Guide</label>
+          <div class="ig-selector-container" id="igSelectorContainer">
+            <button type="button" class="ig-selector-trigger" id="igSelectorTrigger" aria-haspopup="listbox">
+              <span class="ig-trigger-text">
+                <span class="ig-trigger-name" id="igTriggerName">Base FHIR R4 (No IG)</span>
+                <span class="ig-trigger-meta" id="igTriggerMeta">Validates against base FHIR StructureDefinitions</span>
+              </span>
+              <i class="fas fa-chevron-down ig-trigger-chevron"></i>
+            </button>
+            <div class="ig-dropdown-panel" id="igDropdownPanel" role="listbox">
+              <div class="ig-search-wrap">
+                <i class="fas fa-search"></i>
+                <input type="text" class="ig-search-input" id="igSearchInput" placeholder="Search Implementation Guides..." autocomplete="off" />
+              </div>
+              <div class="ig-options-list" id="igOptionsList">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+          </div>
+          <div class="ig-loading-indicator" id="igLoadingIndicator">
+            <div class="ig-spinner"></div>
+            <span id="igLoadingText">Loading IG...</span>
+          </div>
+        </div>
+
         <div class="mode-selector" id="modeSelector">
           <button class="mode-btn active" type="button" data-mode="single">Single File</button>
           <button class="mode-btn" type="button" data-mode="batch">Batch Mode</button>
@@ -2163,10 +2565,40 @@
     function resolveProfileForResource(resource) {
       const resourceType = resource?.resourceType || ACTIVE_PROFILE.resourceType;
 
-      // Always validate against the base FHIR StructureDefinition (no forced profile).
-      // This matches Inferno's hosted validator behavior: the validator engine itself
-      // decides what to check based on the resource type. Sending no profile parameter
-      // produces the same results as inferno.healthit.gov/validator.
+      // If an IG is selected, try to find a matching profile for this resource type
+      if (igState.selected) {
+        const profiles = igGetSelectedProfiles();
+        const matchingProfile = profiles.find(url => {
+          const lower = url.toLowerCase();
+          return lower.includes(resourceType.toLowerCase()) ||
+                 lower.includes(resourceType.replace(/([A-Z])/g, '-$1').toLowerCase().slice(1));
+        });
+        if (matchingProfile) {
+          return {
+            id: `ig-${igState.selected.name}-${resourceType}`,
+            name: `${resourceType} (${igState.selected.title || igState.selected.name})`,
+            icon: '📋',
+            resourceType,
+            description: `Validates against ${igState.selected.title || igState.selected.name} v${igState.selected.version} profile.`,
+            requiredFields: [],
+            supportFields: [],
+            profile: matchingProfile
+          };
+        }
+        // IG selected but no specific profile for this resource type — still load the IG
+        return {
+          id: `ig-${igState.selected.name}-base-${resourceType}`,
+          name: `${resourceType} (${igState.selected.title || igState.selected.name})`,
+          icon: '📦',
+          resourceType,
+          description: `Validates ${resourceType} with ${igState.selected.title || igState.selected.name} loaded.`,
+          requiredFields: [],
+          supportFields: [],
+          profile: ''
+        };
+      }
+
+      // No IG selected: validate against base FHIR StructureDefinition.
       return baseProfileForType(resourceType);
     }
 
@@ -2325,13 +2757,14 @@
     const REPORTS_PAGE_SIZE = 10;
 
     const NAV_PAGES = [
+      { id: 'dashboard', label: 'Dashboard', icon: '✨' },
       { id: 'validator', label: 'Validator', icon: '🔍' },
       { id: 'reports', label: 'Reports', icon: '📊' }
     ];
 
     const state = {
       currentStep: 1,
-      currentPage: 'validator',
+      currentPage: 'dashboard',
       inputData: SAMPLE_PATIENT,
       inputMethod: 'paste',
       mode: 'single',
@@ -2368,6 +2801,194 @@
     let jsonWorker = null;
     let lineNumbersTimer = null;
     let batchProgressScheduled = false;
+
+    /* ─── IG Selector State & Logic ─── */
+    const igState = {
+      available: [],
+      selected: null,
+      loadedProfiles: {},
+      isLoading: false,
+      isOpen: false
+    };
+
+    async function igFetchAvailable() {
+      try {
+        const res = await fetch('/api/v1/igs/available');
+        if (!res.ok) return;
+        const data = await res.json();
+        igState.available = data.igs || [];
+        igRenderOptions(igState.available);
+        // Pre-warm US Core (auto-loaded, instant)
+        const usCore = igState.available.find(ig => ig.name.includes('us.core'));
+        if (usCore) {
+          const key = `${usCore.name}#${usCore.version}`;
+          fetch('/api/v1/igs/load', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ package_name: usCore.name, version: usCore.version })
+          }).then(r => r.ok ? r.json() : null).then(data => {
+            if (data?.ig?.profiles) igState.loadedProfiles[key] = data.ig.profiles;
+          }).catch(() => {});
+        }
+      } catch (e) {
+        console.warn('Failed to fetch available IGs:', e);
+      }
+    }
+
+    function igRenderOptions(igs) {
+      const list = document.getElementById('igOptionsList');
+      if (!list) return;
+      let html = `<div class="ig-option ${!igState.selected ? 'selected' : ''}" data-ig-name="" data-ig-version="">
+        <span class="ig-opt-icon"><i class="fas fa-cube"></i></span>
+        <span class="ig-opt-details">
+          <span class="ig-opt-title">Base FHIR R4 (No IG)</span>
+          <span class="ig-opt-package">Validates against base StructureDefinitions</span>
+        </span>
+      </div>`;
+      for (const ig of igs) {
+        const sel = igState.selected && igState.selected.name === ig.name ? 'selected' : '';
+        html += `<div class="ig-option ${sel}" data-ig-name="${ig.name}" data-ig-version="${ig.version}">
+          <span class="ig-opt-icon"><i class="fas fa-book-medical"></i></span>
+          <span class="ig-opt-details">
+            <span class="ig-opt-title">${ig.title || ig.name}</span>
+            <span class="ig-opt-package">${ig.name}</span>
+          </span>
+          <span class="ig-opt-version">${ig.version}</span>
+        </div>`;
+      }
+      list.innerHTML = html;
+    }
+
+    function igToggleDropdown(open) {
+      const container = document.getElementById('igSelectorContainer');
+      if (open === undefined) open = !igState.isOpen;
+      igState.isOpen = open;
+      container.classList.toggle('open', open);
+      if (open) {
+        document.getElementById('igSearchInput').value = '';
+        igRenderOptions(igState.available);
+        document.getElementById('igSearchInput').focus();
+      }
+    }
+
+    function igFilterOptions(query) {
+      const q = query.toLowerCase().trim();
+      if (!q) { igRenderOptions(igState.available); return; }
+      const filtered = igState.available.filter(ig =>
+        (ig.title || '').toLowerCase().includes(q) ||
+        (ig.name || '').toLowerCase().includes(q) ||
+        (ig.description || '').toLowerCase().includes(q)
+      );
+      igRenderOptions(filtered);
+    }
+
+    async function igSelectOption(name, version) {
+      igToggleDropdown(false);
+      const trigger = document.getElementById('igTriggerName');
+      const meta = document.getElementById('igTriggerMeta');
+      const indicator = document.getElementById('igLoadingIndicator');
+
+      if (!name) {
+        igState.selected = null;
+        trigger.textContent = 'Base FHIR R4 (No IG)';
+        meta.textContent = 'Validates against base FHIR StructureDefinitions';
+        return;
+      }
+
+      const ig = igState.available.find(i => i.name === name && i.version === version);
+      igState.selected = ig || { name, version, title: name };
+      trigger.textContent = ig ? (ig.title || ig.name) : name;
+      meta.textContent = `${name} v${version}`;
+
+      const cacheKey = `${name}#${version}`;
+      if (igState.loadedProfiles[cacheKey]) {
+        indicator.classList.add('visible');
+        document.getElementById('igLoadingText').textContent = `✓ Ready`;
+        setTimeout(() => indicator.classList.remove('visible'), 800);
+        return;
+      }
+
+      igState.isLoading = true;
+      indicator.classList.add('visible');
+      const isUsCore = name.includes('us.core');
+      document.getElementById('igLoadingText').textContent = isUsCore
+        ? `Loading ${ig?.title || name}...`
+        : `Loading ${ig?.title || name} (first time may take 10-20s)...`;
+
+      try {
+        const loadIg = async () => {
+          const r = await fetch('/api/v1/igs/load', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ package_name: name, version })
+          });
+          return r.ok ? (await r.json()).ig : null;
+        };
+
+        let igResult = await loadIg();
+
+        if (igResult && igResult.status === 'loading') {
+          document.getElementById('igLoadingText').textContent = `Loading ${ig?.title || name}...`;
+          for (let i = 0; i < 10; i++) {
+            await new Promise(r => setTimeout(r, 2000));
+            igResult = await loadIg();
+            if (!igResult || igResult.status !== 'loading') break;
+          }
+        }
+
+        if (igResult && igResult.status === 'ready' && igResult.profiles?.length > 0) {
+          igState.loadedProfiles[cacheKey] = igResult.profiles;
+          document.getElementById('igLoadingText').textContent =
+            `✓ ${igResult.profiles.length} profiles loaded`;
+          setTimeout(() => indicator.classList.remove('visible'), 1200);
+        } else {
+          // IG selected but profiles not fully loaded — validation still works with base rules
+          igState.loadedProfiles[cacheKey] = [];
+          document.getElementById('igLoadingText').textContent = '✓ Selected — validation ready';
+          setTimeout(() => indicator.classList.remove('visible'), 1500);
+        }
+      } catch (e) {
+        document.getElementById('igLoadingText').textContent = 'Load error — using base FHIR';
+        setTimeout(() => indicator.classList.remove('visible'), 2500);
+      } finally {
+        igState.isLoading = false;
+      }
+    }
+
+    function igGetSelectedProfiles() {
+      if (!igState.selected) return [];
+      const key = `${igState.selected.name}#${igState.selected.version}`;
+      return igState.loadedProfiles[key] || [];
+    }
+
+    function igInitListeners() {
+      const trigger = document.getElementById('igSelectorTrigger');
+      const searchInput = document.getElementById('igSearchInput');
+      const optionsList = document.getElementById('igOptionsList');
+
+      if (trigger) {
+        trigger.addEventListener('click', (e) => { e.stopPropagation(); igToggleDropdown(); });
+      }
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => igFilterOptions(e.target.value));
+        searchInput.addEventListener('click', (e) => e.stopPropagation());
+      }
+      if (optionsList) {
+        optionsList.addEventListener('click', (e) => {
+          const option = e.target.closest('.ig-option');
+          if (option) {
+            igSelectOption(option.dataset.igName, option.dataset.igVersion);
+          }
+        });
+      }
+      document.addEventListener('click', (e) => {
+        const container = document.getElementById('igSelectorContainer');
+        if (igState.isOpen && container && !container.contains(e.target)) {
+          igToggleDropdown(false);
+        }
+      });
+      igFetchAvailable();
+    }
 
     const uiBatch = {
       pendingProgress: null,
@@ -2527,7 +3148,8 @@
       updateModePanels();
       renderBatchFileList();
       renderValidateSummary();
-      navigateTo('validator', false);
+      igInitListeners();
+      navigateTo('dashboard', false);
     }
 
     function renderMainNav() {
@@ -2556,11 +3178,92 @@
       if (stepBadge) stepBadge.style.display = pageId === 'validator' ? '' : 'none';
 
       renderMainNav();
+      if (pageId === 'dashboard') {
+        renderDashboard();
+      }
       if (pageId === 'reports') {
         state.reportsPage = 1;
         renderReports();
       }
       if (scroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderDashboard() {
+      const reports = getReports();
+      const total = reports.length;
+      const passed = reports.filter(r => r.status === 'PASSED').length;
+      const failed = reports.filter(r => r.status === 'FAILED').length;
+      const passRate = total ? Math.round((passed / total) * 100) : 0;
+      const avgScore = total
+        ? Math.round(reports.reduce((sum, r) => sum + (Number(r.score || 0)), 0) / total)
+        : 0;
+
+      const stats = document.getElementById('dashboardStats');
+      if (stats) {
+        stats.innerHTML = `
+          <div class="stat-card">
+            <span class="stat-number">${total}</span>
+            <span class="stat-label">Total Reports</span>
+          </div>
+          <div class="stat-card passed">
+            <span class="stat-number">${passed}</span>
+            <span class="stat-label">✅ Passed</span>
+          </div>
+          <div class="stat-card failed">
+            <span class="stat-number">${failed}</span>
+            <span class="stat-label">❌ Failed</span>
+          </div>
+          <div class="stat-card warning">
+            <span class="stat-number">${passRate}%</span>
+            <span class="stat-label">Pass Rate</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number">${avgScore}%</span>
+            <span class="stat-label">Avg Compliance</span>
+          </div>
+        `;
+      }
+
+      const recent = document.getElementById('dashboardRecent');
+      if (!recent) return;
+      if (!reports.length) {
+        recent.innerHTML = `
+          <div class="empty-state" style="padding:2rem 1.25rem;">
+            <div class="empty-icon">🧾</div>
+            <h3>No validations yet</h3>
+            <p>Run your first validation to populate your dashboard activity.</p>
+            <button type="button" class="btn btn-primary" data-dash-nav="validator">Start Validation</button>
+          </div>
+        `;
+        recent.querySelector('[data-dash-nav]')?.addEventListener('click', () => navigateTo('validator'));
+        return;
+      }
+
+      const items = reports.slice(0, 6);
+      recent.innerHTML = items.map(r => `
+        <div class="issue-card" data-dash-report="${escapeHtml(r.id)}" role="button" tabindex="0" style="cursor:pointer;">
+          <div class="issue-header" style="align-items:center;">
+            <span class="issue-severity ${r.status === 'PASSED' ? 'information' : 'error'}">
+              ${r.status === 'PASSED' ? 'PASSED' : 'FAILED'}
+            </span>
+            <div style="min-width:0;">
+              <h4 class="issue-title" style="margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                ${escapeHtml(r.resourceType || (r.batch ? 'Batch' : 'Resource'))} • ${escapeHtml(r.profile || 'FHIR base')}
+              </h4>
+              <p class="issue-message" style="margin:0.15rem 0 0;">${escapeHtml(r.formattedDate || r.timestamp || '')}</p>
+            </div>
+            <div style="margin-left:auto;font-weight:800;color:var(--primary);">${Number(r.score || 0)}%</div>
+          </div>
+        </div>
+      `).join('');
+
+      recent.querySelectorAll('[data-dash-report]').forEach(el => {
+        const open = () => openReportDetail(el.dataset.dashReport);
+        el.addEventListener('click', open);
+        el.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+        });
+      });
     }
 
     function setMode(mode) {
@@ -2721,6 +3424,14 @@
 
     function persistReports(reports) {
       let list = reports.map(slimStoredReport).slice(0, PERF.MAX_STORED_REPORTS);
+      if (!list.length) {
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+          return true;
+        } catch (_) {
+          return false;
+        }
+      }
       while (list.length > 0) {
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
@@ -2755,10 +3466,19 @@
 
     function clearAllReports() {
       if (!confirm('Are you sure you want to delete all reports? This cannot be undone.')) return;
-      saveReports([]);
+      const cleared = persistReports([]);
+      if (!cleared) {
+        try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+      }
       state.reportsPage = 1;
+      state.selectedReportId = null;
+      document.getElementById('reportDetailModal')?.classList.remove('show');
       renderReports();
-      showToast('All reports cleared', 'info');
+      if (!getReports().length) {
+        showToast('All reports cleared', 'info');
+      } else {
+        showToast('Could not clear reports from browser storage.', 'error');
+      }
     }
 
     function buildStoredReport(results) {
@@ -3249,7 +3969,8 @@
 
       if (animate && fromPanel && toPanel && stage) {
         const fromHeight = fromPanel.offsetHeight;
-        stage.style.minHeight = `${Math.max(fromHeight, toPanel.scrollHeight || fromHeight)}px`;
+        // Stabilize container height to avoid sudden jumps.
+        stage.style.minHeight = `${fromHeight}px`;
 
         // Place panels off-screen first, then animate in on the next frame.
         toPanel.classList.add('active', 'is-entering');
@@ -3270,11 +3991,19 @@
         toPanel.classList.remove('is-entering-from-left');
         fromPanel.classList.remove('is-leaving-to-right');
 
+        // Transition minHeight to the incoming panel height for a smoother "settle".
+        const toHeight = toPanel.offsetHeight || toPanel.scrollHeight || fromHeight;
+        stage.style.minHeight = `${Math.max(fromHeight, toHeight)}px`;
+
         await delay(PERF.STEP_TRANSITION_MS);
 
         fromPanel.classList.remove('active', 'is-leaving', 'is-leaving-to-right', 'is-entering', 'is-entering-from-left');
         toPanel.classList.remove('is-entering', 'is-entering-from-left', 'is-leaving', 'is-leaving-to-right');
         toPanel.classList.add('active');
+
+        // Let the height transition finish before clearing.
+        stage.style.minHeight = `${toHeight}px`;
+        await new Promise(resolve => requestAnimationFrame(resolve));
         stage.style.minHeight = '';
       } else {
         document.querySelectorAll('.step-panel').forEach(panel => {
@@ -4382,27 +5111,43 @@
         resource_type: parsed.resourceType || profileUsed.resourceType
       };
 
+      const maxRetries = 3;
       let lastError = null;
-      for (const endpoint of VALIDATION_ENDPOINTS) {
-        try {
-          const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(request)
-          });
 
-          if (response.status === 404) {
-            lastError = new Error(`Endpoint not found: ${endpoint}`);
-            continue;
-          }
+      for (let retry = 0; retry < maxRetries; retry++) {
+        for (const endpoint of VALIDATION_ENDPOINTS) {
+          try {
+            const response = await fetch(endpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(request)
+            });
 
-          const payload = await response.json().catch(() => null);
-          if (!response.ok) {
-            throw new Error(payload?.detail || payload?.message || `Validation API returned HTTP ${response.status}`);
+            if (response.status === 404) {
+              lastError = new Error(`Endpoint not found: ${endpoint}`);
+              continue;
+            }
+
+            if (response.status === 503) {
+              lastError = new Error('Validator engine is warming up. Retrying...');
+              await new Promise(r => setTimeout(r, 3000));
+              break;
+            }
+
+            const payload = await response.json().catch(() => null);
+            if (!response.ok) {
+              const msg = payload?.detail || payload?.message || `HTTP ${response.status}`;
+              if (msg.includes('initializing') || msg.includes('warming')) {
+                lastError = new Error(msg);
+                await new Promise(r => setTimeout(r, 3000));
+                break;
+              }
+              throw new Error(msg);
+            }
+            return payload;
+          } catch (error) {
+            lastError = error;
           }
-          return payload;
-        } catch (error) {
-          lastError = error;
         }
       }
 
@@ -5294,6 +6039,21 @@
     }
 
     function bindEvents() {
+      document.querySelectorAll('.header-action-btn[data-nav]').forEach(btn => {
+        btn.addEventListener('click', () => navigateTo(btn.dataset.nav));
+      });
+
+      document.getElementById('dashNewValidationBtn')?.addEventListener('click', () => {
+        navigateTo('validator');
+        resetValidation();
+      });
+      document.getElementById('dashUploadBtn')?.addEventListener('click', () => {
+        navigateTo('validator');
+        goToStep(1, { animate: true });
+        document.getElementById('tabUploadBtn')?.click();
+      });
+      document.getElementById('dashReportsBtn')?.addEventListener('click', () => navigateTo('reports'));
+
       document.getElementById('step2Next').addEventListener('click', async () => {
         if (state.mode === 'batch') {
           if (!state.batchFiles.length) {

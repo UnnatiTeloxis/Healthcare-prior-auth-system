@@ -66,7 +66,6 @@ class ValidationService:
         resources: list[str],
         profiles: list[str],
     ) -> BatchValidationResult:
-        await inferno_client.ensure_ready()
         # Parallel validates (semaphore inside client) — terminology I/O benefits.
         results = await asyncio.gather(
             *[self.validate_resource(resource, profiles) for resource in resources]

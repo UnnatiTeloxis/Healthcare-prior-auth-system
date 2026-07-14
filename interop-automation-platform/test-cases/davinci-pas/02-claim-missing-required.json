@@ -1,0 +1,14 @@
+{
+  "resourceType": "Claim",
+  "id": "pas-claim-missing-required",
+  "status": "active",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/claim-type",
+        "code": "professional"
+      }
+    ]
+  },
+  "use": "preauthorization"
+}

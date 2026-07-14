@@ -1,0 +1,73 @@
+{
+  "resourceType": "QuestionnaireResponse",
+  "id": "dtr-qr-valid",
+  "meta": {
+    "profile": ["http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse"]
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Prior Auth Documentation - Completed</p></div>"
+  },
+  "questionnaire": "http://example.org/Questionnaire/home-oxygen-therapy",
+  "status": "completed",
+  "subject": {
+    "reference": "Patient/us-core-patient-valid",
+    "display": "John Smith"
+  },
+  "authored": "2024-03-15T14:30:00Z",
+  "author": {
+    "reference": "Practitioner/pract-1",
+    "display": "Dr. Jane Wilson"
+  },
+  "item": [
+    {
+      "linkId": "1",
+      "text": "Patient Diagnosis",
+      "answer": [
+        {
+          "valueCoding": {
+            "system": "http://snomed.info/sct",
+            "code": "78275009",
+            "display": "Obstructive sleep apnea syndrome"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "2",
+      "text": "Severity Level",
+      "answer": [
+        {
+          "valueString": "Moderate - AHI 15-30 events per hour"
+        }
+      ]
+    },
+    {
+      "linkId": "3",
+      "text": "Previous Treatment Tried",
+      "answer": [
+        {
+          "valueBoolean": true
+        }
+      ]
+    },
+    {
+      "linkId": "4",
+      "text": "Treatment Start Date",
+      "answer": [
+        {
+          "valueDate": "2024-02-01"
+        }
+      ]
+    },
+    {
+      "linkId": "5",
+      "text": "Expected Duration (months)",
+      "answer": [
+        {
+          "valueInteger": 12
+        }
+      ]
+    }
+  ]
+}

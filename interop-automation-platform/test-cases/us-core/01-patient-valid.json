@@ -1,0 +1,97 @@
+{
+  "resourceType": "Patient",
+  "id": "us-core-patient-valid",
+  "meta": {
+    "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>John Smith, Male, DOB: 1985-03-15</p></div>"
+  },
+  "identifier": [
+    {
+      "system": "http://hl7.org/fhir/sid/us-ssn",
+      "value": "999-88-7777"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "Smith",
+      "given": ["John", "Michael"]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1985-03-15",
+  "address": [
+    {
+      "use": "home",
+      "line": ["123 Main Street"],
+      "city": "Anytown",
+      "state": "CA",
+      "postalCode": "90210",
+      "country": "US"
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "555-123-4567",
+      "use": "home"
+    },
+    {
+      "system": "email",
+      "value": "john.smith@email.com"
+    }
+  ],
+  "communication": [
+    {
+      "language": {
+        "coding": [
+          {
+            "system": "urn:ietf:bcp:47",
+            "code": "en",
+            "display": "English"
+          }
+        ]
+      },
+      "preferred": true
+    }
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+      "extension": [
+        {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2106-3",
+            "display": "White"
+          }
+        },
+        {
+          "url": "text",
+          "valueString": "White"
+        }
+      ]
+    },
+    {
+      "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+      "extension": [
+        {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2186-5",
+            "display": "Not Hispanic or Latino"
+          }
+        },
+        {
+          "url": "text",
+          "valueString": "Not Hispanic or Latino"
+        }
+      ]
+    }
+  ]
+}

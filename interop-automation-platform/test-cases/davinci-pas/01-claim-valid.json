@@ -1,0 +1,97 @@
+{
+  "resourceType": "Claim",
+  "id": "pas-claim-valid",
+  "meta": {
+    "profile": ["http://hl7.org/fhir/us/davinci-pas/StructureDefinition/profile-claim"]
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Prior Authorization Request - MRI Brain</p></div>"
+  },
+  "status": "active",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/claim-type",
+        "code": "professional",
+        "display": "Professional"
+      }
+    ]
+  },
+  "use": "preauthorization",
+  "patient": {
+    "reference": "Patient/us-core-patient-valid",
+    "display": "John Smith"
+  },
+  "created": "2024-03-01",
+  "insurer": {
+    "reference": "Organization/org-payer-1",
+    "display": "Blue Cross Blue Shield"
+  },
+  "provider": {
+    "reference": "Organization/org-provider-1",
+    "display": "City General Hospital"
+  },
+  "priority": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/processpriority",
+        "code": "normal"
+      }
+    ]
+  },
+  "insurance": [
+    {
+      "sequence": 1,
+      "focal": true,
+      "coverage": {
+        "reference": "Coverage/crd-coverage-valid"
+      }
+    }
+  ],
+  "diagnosis": [
+    {
+      "sequence": 1,
+      "diagnosisCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/sid/icd-10-cm",
+            "code": "R51.9",
+            "display": "Headache, unspecified"
+          }
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "sequence": 1,
+      "productOrService": {
+        "coding": [
+          {
+            "system": "http://www.ama-assn.org/go/cpt",
+            "code": "70551",
+            "display": "MRI brain without contrast"
+          }
+        ]
+      },
+      "servicedDate": "2024-03-15",
+      "locationCodeableConcept": {
+        "coding": [
+          {
+            "system": "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set",
+            "code": "22",
+            "display": "On Campus-Outpatient Hospital"
+          }
+        ]
+      },
+      "unitPrice": {
+        "value": 1500.00,
+        "currency": "USD"
+      },
+      "quantity": {
+        "value": 1
+      }
+    }
+  ]
+}

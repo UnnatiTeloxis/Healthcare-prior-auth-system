@@ -1,0 +1,29 @@
+{
+  "resourceType": "QuestionnaireResponse",
+  "id": "dtr-qr-incomplete",
+  "meta": {
+    "profile": ["http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse"]
+  },
+  "questionnaire": "http://example.org/Questionnaire/home-oxygen-therapy",
+  "status": "in-progress",
+  "subject": {
+    "reference": "Patient/us-core-patient-valid",
+    "display": "John Smith"
+  },
+  "authored": "2024-03-15T10:00:00Z",
+  "item": [
+    {
+      "linkId": "1",
+      "text": "Patient Diagnosis",
+      "answer": [
+        {
+          "valueCoding": {
+            "system": "http://snomed.info/sct",
+            "code": "78275009",
+            "display": "Obstructive sleep apnea"
+          }
+        }
+      ]
+    }
+  ]
+}

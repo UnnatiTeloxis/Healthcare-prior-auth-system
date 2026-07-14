@@ -1,0 +1,13 @@
+{
+  "resourceType": "Task",
+  "id": "dtr-task-invalid",
+  "meta": {
+    "profile": ["http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-task"]
+  },
+  "status": "invalid-status",
+  "intent": "invalid-intent",
+  "for": {
+    "display": "No reference provided"
+  },
+  "authoredOn": "not-a-date"
+}
