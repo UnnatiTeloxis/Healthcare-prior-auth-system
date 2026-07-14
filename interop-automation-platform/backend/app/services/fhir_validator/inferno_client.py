@@ -12,12 +12,12 @@ from app.utils.fhir_helpers import extract_meta_profiles, is_valid_xml
 
 logger = logging.getLogger(__name__)
 
-_ENGINE_POLL_INTERVAL = 0.5
+_ENGINE_POLL_INTERVAL = 2.0
 _ENGINE_POLL_TIMEOUT = 300.0
 _STARTUP_503_RETRIES = 90
 _STARTUP_503_INTERVAL = 1.0
-_RUNTIME_503_RETRIES = 2
-_RUNTIME_503_INTERVAL = 0.25
+_RUNTIME_503_RETRIES = 15
+_RUNTIME_503_INTERVAL = 2.0
 _RESULT_CACHE_TTL_S = 3600.0
 _US_CORE_PATIENT_PROFILE = (
     "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
@@ -159,11 +159,11 @@ class InfernoClient:
                 logger.warning("%s — validation will retry until Inferno is ready", exc)
                 return
 
-            # Prefer packages auto-loaded from /home/igs (fast). Only POST upload if missing.
-            if await self._us_core_profiles_loaded():
-                self._register_loaded_ig("hl7.fhir.us.core", None)
-                logger.info("US Core profiles already present in Inferno engine")
-            else:
+            # Detect ALL IGs auto-loaded from /home/igs at engine start.
+            await self._detect_preloaded_igs()
+
+            # Fallback: if no IGs detected, try uploading defaults.
+            if not self._loaded_igs:
                 for ig_spec in settings.default_igs_list:
                     package_id, version = _split_ig_spec(ig_spec)
                     if self._is_ig_loaded(package_id, version):
@@ -179,6 +179,26 @@ class InfernoClient:
 
             self._ready.set()
             logger.info("Inferno validator ready (%s IGs tracked)", len(self._loaded_igs))
+
+    async def _detect_preloaded_igs(self) -> None:
+        """Detect IGs loaded in Inferno by scanning profile URLs."""
+        try:
+            profiles = await self.get_profiles()
+            ig_patterns = {
+                "hl7.fhir.us.core": "/us/core/",
+                "hl7.fhir.us.davinci-crd": "/davinci-crd/",
+                "hl7.fhir.us.davinci-dtr": "/davinci-dtr/",
+                "hl7.fhir.us.davinci-pas": "/davinci-pas/",
+            }
+            profiles_lower = [p.lower() for p in profiles]
+            for pid, pattern in ig_patterns.items():
+                if any(pattern in p for p in profiles_lower):
+                    self._register_loaded_ig(pid, None)
+            logger.info("Detected %d pre-loaded IGs from profiles", len(self._loaded_igs))
+        except Exception as exc:
+            logger.warning("Failed to detect pre-loaded IGs: %s", exc)
+            if await self._us_core_profiles_loaded():
+                self._register_loaded_ig("hl7.fhir.us.core", None)
 
     @staticmethod
     def _content_type_for_resource(resource: str) -> str:
@@ -228,22 +248,15 @@ class InfernoClient:
         if cached is not None:
             return cached
 
-        # Fast path: engine already warm — skip startup locks/waits.
-        if not (self._ready.is_set() and self._engine_warm):
-            await self.ensure_ready()
-
         async with self._validate_sem:
             cached = self._cache_get(cache_key)
             if cached is not None:
                 return cached
 
-            await self._ensure_igs_for_meta_profiles(resource)
-
             headers = {"Content-Type": self._content_type_for_resource(resource)}
             params = {"profile": ",".join(profiles)} if profiles else None
             body = resource.encode("utf-8") if isinstance(resource, str) else resource
 
-            # Single-shot when warm (no long 503 retry loops on the hot path).
             response = await self._request(
                 "POST",
                 f"{self.base_url}/validate",
@@ -252,8 +265,25 @@ class InfernoClient:
                 headers=headers,
                 params=params,
             )
+            if response.status_code == 503:
+                raise RuntimeError("Validator engine is still initializing. Please wait and try again.")
+
+            # If profile validation fails (500 = unresolved profile), retry without profile
+            if response.status_code == 500 and profiles:
+                logger.warning("Profile validation failed, retrying with base FHIR: %s", profiles)
+                response = await self._request(
+                    "POST",
+                    f"{self.base_url}/validate",
+                    startup=False,
+                    content=body,
+                    headers=headers,
+                )
+                if response.status_code == 503:
+                    raise RuntimeError("Validator engine is still initializing.")
+
             response.raise_for_status()
             payload = response.json()
+            self._engine_warm = True
             self._cache_set(cache_key, payload)
             return payload
 

@@ -1,0 +1,9 @@
+{
+  "resourceType": "ServiceRequest",
+  "id": "crd-service-request-invalid",
+  "status": "invalid-status",
+  "intent": "not-a-real-intent",
+  "subject": {
+    "display": "Missing reference"
+  }
+}

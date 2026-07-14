@@ -1,0 +1,22 @@
+{
+  "resourceType": "NutritionOrder",
+  "id": "crd-nutrition-order-invalid",
+  "status": "bogus-status",
+  "intent": "bogus-intent",
+  "patient": {
+    "reference": "Patient/does-not-exist"
+  },
+  "dateTime": "not-a-valid-datetime",
+  "oralDiet": {
+    "type": [
+      {
+        "coding": [
+          {
+            "system": "http://invalid-system.example.com",
+            "code": "FAKE"
+          }
+        ]
+      }
+    ]
+  }
+}

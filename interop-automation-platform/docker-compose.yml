@@ -5,15 +5,20 @@ services:
     ports:
       - "4567:4567"
     environment:
-      # Match inferno.healthit.gov/validator defaults for result parity.
-      TX_SERVER_URL: "https://tx.fhir.org/r4"
       DISPLAY_ISSUES_ARE_WARNINGS: "true"
+      DISABLE_TX: "true"
+      # Force offline mode — prevents hanging when packages.fhir.org is unreachable
+      JAVA_TOOL_OPTIONS: "-DfhirOffline=true -Xmx4g"
     volumes:
-      # Auto-load US Core at engine start (do NOT replace entire /home/igs).
-      - ./backend/fhir_packages/us-core.tgz:/home/igs/us-core.tgz:ro
-      - fhir_package_cache:/root/.fhir
+      # Override built-in /home/igs with empty dir for instant startup (no IG loading at boot).
+      # All IGs loaded on-demand via POST /igs after engine is ready.
+      - ./backend/fhir_packages/empty:/home/igs:ro
+      # Make IG packages accessible for on-demand upload
+      - ./backend/fhir_packages:/app/igs:ro
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4567/profiles"]
+      # /profiles returns 503 until the validation engine is fully initialized (and may never
+      # succeed when terminology is unreachable). /version confirms the service is up.
+      test: ["CMD", "curl", "-f", "http://localhost:4567/version"]
       interval: 10s
       timeout: 10s
       retries: 36
@@ -119,4 +124,3 @@ networks:
 volumes:
   postgres_data:
   redis_data:
-  fhir_package_cache:

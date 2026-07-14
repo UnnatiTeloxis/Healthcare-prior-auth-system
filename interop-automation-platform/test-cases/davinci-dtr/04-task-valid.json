@@ -1,0 +1,49 @@
+{
+  "resourceType": "Task",
+  "id": "dtr-task-valid",
+  "meta": {
+    "profile": ["http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-task"]
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Complete DTR questionnaire for CPAP device</p></div>"
+  },
+  "status": "requested",
+  "intent": "order",
+  "code": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/us/davinci-dtr/CodeSystem/temp",
+        "code": "complete-questionnaire",
+        "display": "Complete Questionnaire"
+      }
+    ]
+  },
+  "for": {
+    "reference": "Patient/us-core-patient-valid",
+    "display": "John Smith"
+  },
+  "authoredOn": "2024-03-14T08:00:00Z",
+  "requester": {
+    "reference": "Organization/org-payer-1",
+    "display": "Blue Cross Blue Shield"
+  },
+  "owner": {
+    "reference": "Practitioner/pract-1",
+    "display": "Dr. Jane Wilson"
+  },
+  "input": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/us/davinci-dtr/CodeSystem/temp",
+            "code": "questionnaire",
+            "display": "Questionnaire"
+          }
+        ]
+      },
+      "valueCanonical": "http://example.org/Questionnaire/home-oxygen-therapy"
+    }
+  ]
+}

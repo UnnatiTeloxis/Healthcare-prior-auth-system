@@ -1,0 +1,41 @@
+{
+  "resourceType": "Claim",
+  "id": "pas-claim-invalid-values",
+  "status": "invalid-claim-status",
+  "type": {
+    "coding": [
+      {
+        "system": "http://wrong-system.example.org",
+        "code": "fake-type"
+      }
+    ]
+  },
+  "use": "not-a-valid-use",
+  "patient": {
+    "display": "Missing reference"
+  },
+  "created": "not-a-date",
+  "insurer": {
+    "display": "Missing reference"
+  },
+  "provider": {
+    "display": "Missing reference"
+  },
+  "priority": {
+    "coding": [
+      {
+        "system": "http://wrong-system.org",
+        "code": "invalid"
+      }
+    ]
+  },
+  "insurance": [
+    {
+      "sequence": 1,
+      "focal": true,
+      "coverage": {
+        "display": "No reference"
+      }
+    }
+  ]
+}

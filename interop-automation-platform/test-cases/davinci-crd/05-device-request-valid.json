@@ -1,0 +1,48 @@
+{
+  "resourceType": "DeviceRequest",
+  "id": "crd-device-request-valid",
+  "meta": {
+    "profile": ["http://hl7.org/fhir/us/davinci-crd/StructureDefinition/profile-devicerequest"]
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>CPAP Machine Request</p></div>"
+  },
+  "status": "active",
+  "intent": "order",
+  "codeCodeableConcept": {
+    "coding": [
+      {
+        "system": "https://www.hcpcs.codes/",
+        "code": "E0601",
+        "display": "Continuous positive airway pressure (CPAP) device"
+      }
+    ],
+    "text": "CPAP Machine"
+  },
+  "subject": {
+    "reference": "Patient/us-core-patient-valid",
+    "display": "John Smith"
+  },
+  "authoredOn": "2024-03-10",
+  "requester": {
+    "reference": "Practitioner/pract-1",
+    "display": "Dr. Jane Wilson"
+  },
+  "insurance": [
+    {
+      "reference": "Coverage/crd-coverage-valid"
+    }
+  ],
+  "reasonCode": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "78275009",
+          "display": "Obstructive sleep apnea syndrome"
+        }
+      ]
+    }
+  ]
+}

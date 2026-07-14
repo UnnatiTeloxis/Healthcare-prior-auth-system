@@ -1,0 +1,15 @@
+{
+  "resourceType": "Bundle",
+  "id": "pas-bundle-invalid",
+  "type": "invalid-bundle-type",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Claim",
+        "id": "claim-bad",
+        "status": "fake-status",
+        "use": "fake-use"
+      }
+    }
+  ]
+}

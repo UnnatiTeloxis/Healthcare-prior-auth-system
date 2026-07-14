@@ -89,8 +89,8 @@ FHIR_VALIDATOR_PUBLIC = _resolve_fhir_validator_public_dir()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Warm Inferno + run a probe validate in the background so user requests stay fast.
-    preload_task = asyncio.create_task(inferno_client.warm_up())
+    # Warm Inferno + pre-register all IGs so dropdown selection is instant.
+    preload_task = asyncio.create_task(_warm_and_register_igs())
     try:
         yield
     finally:
@@ -98,6 +98,15 @@ async def lifespan(app: FastAPI):
         with asyncio.suppress(asyncio.CancelledError):
             await preload_task
         await inferno_client.close()
+
+
+async def _warm_and_register_igs():
+    """Warm up Inferno engine. IGs loaded on-demand when selected."""
+    try:
+        await inferno_client.warm_up()
+        logger.info("Inferno engine warmed up, validation ready")
+    except Exception as exc:
+        logger.warning("Warm-up incomplete: %s — validation will retry on request", exc)
 
 
 app = FastAPI(

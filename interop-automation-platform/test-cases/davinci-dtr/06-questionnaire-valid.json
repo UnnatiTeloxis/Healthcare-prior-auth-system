@@ -1,0 +1,52 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "dtr-questionnaire-valid",
+  "meta": {
+    "profile": ["http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaire-adapt"]
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Home Oxygen Therapy Documentation</p></div>"
+  },
+  "url": "http://example.org/Questionnaire/home-oxygen-therapy",
+  "version": "1.0.0",
+  "name": "HomeOxygenTherapy",
+  "title": "Home Oxygen Therapy Prior Authorization Documentation",
+  "status": "active",
+  "subjectType": ["Patient"],
+  "date": "2024-01-01",
+  "publisher": "Example Payer",
+  "item": [
+    {
+      "linkId": "1",
+      "text": "Patient Diagnosis",
+      "type": "choice",
+      "required": true,
+      "answerValueSet": "http://example.org/ValueSet/respiratory-diagnoses"
+    },
+    {
+      "linkId": "2",
+      "text": "Severity Level",
+      "type": "string",
+      "required": true
+    },
+    {
+      "linkId": "3",
+      "text": "Previous Treatment Tried",
+      "type": "boolean",
+      "required": true
+    },
+    {
+      "linkId": "4",
+      "text": "Treatment Start Date",
+      "type": "date",
+      "required": false
+    },
+    {
+      "linkId": "5",
+      "text": "Expected Duration (months)",
+      "type": "integer",
+      "required": false
+    }
+  ]
+}

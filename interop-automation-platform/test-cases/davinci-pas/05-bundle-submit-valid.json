@@ -1,0 +1,110 @@
+{
+  "resourceType": "Bundle",
+  "id": "pas-bundle-submit-valid",
+  "meta": {
+    "profile": ["http://hl7.org/fhir/us/davinci-pas/StructureDefinition/profile-pas-request-bundle"]
+  },
+  "type": "collection",
+  "timestamp": "2024-03-01T10:00:00Z",
+  "entry": [
+    {
+      "fullUrl": "http://example.org/fhir/Claim/pas-claim-valid",
+      "resource": {
+        "resourceType": "Claim",
+        "id": "pas-claim-valid",
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/claim-type",
+              "code": "professional"
+            }
+          ]
+        },
+        "use": "preauthorization",
+        "patient": {
+          "reference": "Patient/us-core-patient-valid"
+        },
+        "created": "2024-03-01",
+        "insurer": {
+          "reference": "Organization/org-payer-1"
+        },
+        "provider": {
+          "reference": "Organization/org-provider-1"
+        },
+        "priority": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/processpriority",
+              "code": "normal"
+            }
+          ]
+        },
+        "insurance": [
+          {
+            "sequence": 1,
+            "focal": true,
+            "coverage": {
+              "reference": "Coverage/crd-coverage-valid"
+            }
+          }
+        ],
+        "item": [
+          {
+            "sequence": 1,
+            "productOrService": {
+              "coding": [
+                {
+                  "system": "http://www.ama-assn.org/go/cpt",
+                  "code": "70551",
+                  "display": "MRI brain without contrast"
+                }
+              ]
+            },
+            "servicedDate": "2024-03-15",
+            "quantity": {
+              "value": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://example.org/fhir/Patient/us-core-patient-valid",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "us-core-patient-valid",
+        "identifier": [
+          {
+            "system": "http://hospital.example.org/patients",
+            "value": "PAT-12345"
+          }
+        ],
+        "name": [
+          {
+            "family": "Smith",
+            "given": ["John"]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1985-03-15"
+      }
+    },
+    {
+      "fullUrl": "http://example.org/fhir/Coverage/crd-coverage-valid",
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "crd-coverage-valid",
+        "status": "active",
+        "beneficiary": {
+          "reference": "Patient/us-core-patient-valid"
+        },
+        "payor": [
+          {
+            "reference": "Organization/org-payer-1"
+          }
+        ]
+      }
+    }
+  ]
+}
