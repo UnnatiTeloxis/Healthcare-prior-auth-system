@@ -1,6 +1,6 @@
 import json
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from app.api.v1.fhir_validator.schemas import (
     BatchValidationRequest,
@@ -10,10 +10,35 @@ from app.api.v1.fhir_validator.schemas import (
 )
 from app.services.fhir_validator.inferno_client import inferno_client
 from app.services.fhir_validator.history_service import history_service
-from app.services.fhir_validator.validator import validation_service
+from app.services.fhir_validator.validator import ProfileResolutionError, validation_service
 from app.utils.fhir_helpers import detect_resource_type, is_valid_json
 
+
+def _profile_resolution_http_error(exc: ProfileResolutionError) -> HTTPException:
+    detail: dict[str, object] = {"message": exc.message}
+    if exc.candidates:
+        detail["candidates"] = exc.candidates
+    return HTTPException(status_code=422, detail=detail)
+
 router = APIRouter()
+
+
+def _result_history_payload(result: ValidationResult) -> dict:
+    return {
+        "valid": result.valid,
+        "resource_type": result.resource_type,
+        "profiles": result.profiles,
+        "summary": result.summary,
+        "error_count": result.error_count,
+        "warning_count": result.warning_count,
+        "info_count": result.info_count,
+        "issues": [issue.model_dump() if hasattr(issue, "model_dump") else issue.dict() for issue in result.issues],
+        "operation_outcome": result.operation_outcome,
+        "selected_ig": result.selected_ig,
+        "resolved_profile": result.resolved_profile,
+        "package_id": result.package_id,
+        "package_version": result.package_version,
+    }
 
 
 @router.get("/health")
@@ -30,11 +55,16 @@ async def fhir_health():
 @router.post("/", response_model=ValidationResult)
 @router.post("/validate", response_model=ValidationResult)
 async def validate_resource(request: ValidationRequest):
-    result = await validation_service.validate_resource(
-        resource=request.resource,
-        profiles=request.profiles,
-        resource_type=request.resource_type,
-    )
+    try:
+        result = await validation_service.validate_resource(
+            resource=request.resource,
+            profiles=request.profiles,
+            resource_type=request.resource_type,
+            ig=request.ig,
+            profile=request.profile,
+        )
+    except ProfileResolutionError as exc:
+        raise _profile_resolution_http_error(exc) from exc
     try:
         if is_valid_json(request.resource):
             resource_json = json.loads(request.resource)
@@ -46,21 +76,14 @@ async def validate_resource(request: ValidationRequest):
             }
         request_data = {
             "resource": resource_json,
-            "profiles": request.profiles or [],
+            "profiles": result.profiles or request.profiles or [],
+            "profile": request.profile,
+            "ig": request.ig or result.selected_ig,
             "resource_type": request.resource_type,
+            "selected_ig": result.selected_ig,
+            "resolved_profile": result.resolved_profile,
         }
-        response_data = {
-            "valid": result.valid,
-            "resource_type": result.resource_type,
-            "profiles": result.profiles,
-            "summary": result.summary,
-            "error_count": result.error_count,
-            "warning_count": result.warning_count,
-            "info_count": result.info_count,
-            "issues": [issue.dict() for issue in result.issues],
-            "operation_outcome": result.operation_outcome,
-        }
-        history_service.save_validation_run(request_data, response_data)
+        history_service.save_validation_run(request_data, _result_history_payload(result))
     except Exception as exc:
         print(f"Warning: Failed to save validation run to history: {exc}")
 
@@ -69,10 +92,15 @@ async def validate_resource(request: ValidationRequest):
 
 @router.post("/batch", response_model=BatchValidationResult)
 async def validate_batch(request: BatchValidationRequest):
-    result = await validation_service.validate_batch(
-        resources=request.resources,
-        profiles=request.profiles,
-    )
+    try:
+        result = await validation_service.validate_batch(
+            resources=request.resources,
+            profiles=request.profiles,
+            ig=request.ig,
+            profile=request.profile,
+        )
+    except ProfileResolutionError as exc:
+        raise _profile_resolution_http_error(exc) from exc
     try:
         for idx, validation_result in enumerate(result.results):
             resource_payload = request.resources[idx]
@@ -88,21 +116,18 @@ async def validate_batch(request: BatchValidationRequest):
                 resource_json = resource_payload
             request_data = {
                 "resource": resource_json,
-                "profiles": request.profiles or [],
-            }
-            response_data = {
-                "valid": validation_result.valid,
-                "resource_type": validation_result.resource_type,
-                "profiles": validation_result.profiles,
-                "summary": validation_result.summary,
-                "error_count": validation_result.error_count,
-                "warning_count": validation_result.warning_count,
-                "info_count": validation_result.info_count,
-                "issues": [issue.dict() for issue in validation_result.issues],
-                "operation_outcome": validation_result.operation_outcome,
+                "profiles": validation_result.profiles or request.profiles or [],
+                "profile": request.profile,
+                "ig": request.ig or validation_result.selected_ig,
+                "selected_ig": validation_result.selected_ig,
+                "resolved_profile": validation_result.resolved_profile,
             }
             test_name = f"Batch Validation {idx + 1}: {validation_result.resource_type}"
-            history_service.save_validation_run(request_data, response_data, test_name)
+            history_service.save_validation_run(
+                request_data,
+                _result_history_payload(validation_result),
+                test_name,
+            )
     except Exception as exc:
         print(f"Warning: Failed to save batch validation runs to history: {exc}")
 
@@ -116,4 +141,5 @@ async def get_profiles():
 
 @router.get("/profiles/by-ig")
 async def get_profiles_by_ig():
+    """Return Inferno's profile map: {packageId[#version]: [profileUrl, ...]}."""
     return await inferno_client.get_profiles_by_ig()

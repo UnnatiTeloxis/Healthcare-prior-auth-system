@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "id": "2026-07-13_14-28_Frontend-Validation-Patient---Valid",
+    "name": "Frontend Validation: Patient - Valid",
+    "timestamp": "2026-07-13T14:28:57"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Patient",
+      "name": [
+        {
+          "family": "Doe"
+        }
+      ],
+      "gender": "female"
+    },
+    "profiles": [],
+    "resource_type": null
+  },
+  "response": {
+    "valid": true,
+    "resource_type": "Patient",
+    "profiles": [
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+    ],
+    "summary": "Validation successful - no issues found",
+    "error_count": 0,
+    "warning_count": 0,
+    "info_count": 0,
+    "issues": [],
+    "operation_outcome": {
+      "issue": []
+    }
+  }
+}

@@ -27,7 +27,7 @@ class FHIRPackageLoader:
     """
 
     def __init__(self, packages_path: str | Path | None = None) -> None:
-        raw = str(packages_path or os.getenv("FHIR_PACKAGES_PATH", "")).strip()
+        raw = str(packages_path or os.getenv("FHIR_PACKAGES_PATH", "./fhir_packages")).strip()
         self.packages_dir = Path(raw) if raw else None
         self._bytes_cache: dict[str, bytes] = {}
 
@@ -89,6 +89,32 @@ class FHIRPackageLoader:
 
         return None
 
+    def resolve_package_path(self, package_id: str, version: str | None = None) -> Path | None:
+        ref = FHIRPackageRef(package_id=package_id, version=version)
+        for path in self._candidate_paths(ref):
+            if path.is_file():
+                return path
+        return None
+
+    def package_has_index(self, package_id: str, version: str | None = None) -> bool:
+        """Inferno POST /igs requires package/.index.json inside the tarball."""
+        path = self.resolve_package_path(package_id, version)
+        if not path:
+            return False
+        try:
+            import tarfile
+
+            with tarfile.open(path, "r:gz") as tar:
+                for member in tar.getmembers():
+                    name = member.name.replace("\\", "/")
+                    if name.endswith("package/.index.json") or name.endswith("/.index.json"):
+                        return True
+                    if os.path.basename(name) == ".index.json":
+                        return True
+        except Exception as exc:
+            logger.warning("Failed inspecting package index in %s: %s", path, exc)
+        return False
+
     def iter_local_package_paths(self) -> list[Path]:
         if not self.is_enabled() or not self.packages_dir:
             return []
@@ -109,7 +135,11 @@ class FHIRPackageLoader:
         stem = path.stem
         if "#" in stem:
             package_id, version = stem.split("#", 1)
-            return FHIRPackageRef(package_id=package_id, version=version or None)
+            version = version or None
+            # Fix misnamed files like hl7.fhir.us.core.3.1.1#3.1.1.tgz
+            if version and package_id.endswith(f".{version}"):
+                package_id = package_id[: -(len(version) + 1)]
+            return FHIRPackageRef(package_id=package_id, version=version)
         return FHIRPackageRef(package_id=stem, version=None)
 
 

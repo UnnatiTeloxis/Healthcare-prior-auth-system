@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "id": "2026-07-08_09-21_Frontend-Validation-Patient---Invalid",
+    "name": "Frontend Validation: Patient - Invalid",
+    "timestamp": "2026-07-08T09:21:34"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "complex-invalid-extension-type",
+      "name": [
+        {
+          "family": "BadExtension",
+          "given": [
+            "Test"
+          ]
+        }
+      ],
+      "gender": "female",
+      "birthDate": "1990-05-15",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/patient-birthPlace",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/patient-nationality",
+          "extension": [
+            {
+              "url": "code",
+              "valueString": "US"
+            }
+          ]
+        }
+      ]
+    },
+    "profiles": [],
+    "resource_type": "Patient"
+  },
+  "response": {
+    "valid": false,
+    "resource_type": "Patient",
+    "profiles": [],
+    "summary": "Validation failed: Server error '503 Service Unavailable' for url 'http://fhir-validator-wrapper:4567/validate'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503",
+    "error_count": 1,
+    "warning_count": 0,
+    "info_count": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "validation-service-error",
+        "message": "Validation service error: Server error '503 Service Unavailable' for url 'http://fhir-validator-wrapper:4567/validate'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503",
+        "location": null,
+        "line": null,
+        "column": null
+      }
+    ],
+    "operation_outcome": null
+  }
+}

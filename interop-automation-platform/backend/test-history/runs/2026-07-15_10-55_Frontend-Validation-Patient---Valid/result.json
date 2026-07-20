@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "id": "2026-07-15_10-55_Frontend-Validation-Patient---Valid",
+    "name": "Frontend Validation: Patient - Valid",
+    "timestamp": "2026-07-15T10:55:29"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Patient",
+      "name": [
+        {
+          "family": "Doe"
+        }
+      ]
+    },
+    "profiles": [],
+    "profile": null,
+    "ig": null,
+    "resource_type": null,
+    "selected_ig": null,
+    "resolved_profile": null
+  },
+  "response": {
+    "valid": true,
+    "resource_type": "Patient",
+    "profiles": [],
+    "summary": "Validation successful - no issues found",
+    "error_count": 0,
+    "warning_count": 0,
+    "info_count": 0,
+    "issues": [],
+    "operation_outcome": {
+      "issue": []
+    },
+    "selected_ig": null,
+    "resolved_profile": null,
+    "package_id": null,
+    "package_version": null
+  }
+}

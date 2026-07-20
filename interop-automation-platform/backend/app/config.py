@@ -30,6 +30,15 @@ class Settings(BaseSettings):
     FHIR_SERVER_RETRIES: int = 3
     INFERNO_VALIDATOR_URL: str = "http://fhir-validator-wrapper:4567"
     DEFAULT_IGS: str = "hl7.fhir.us.core#6.1.0"
+    # Upload every local curated IG into Inferno on backend startup (background).
+    # First boot can take a long time; IG selection afterward is much faster.
+    PRELOAD_ALL_LOCAL_IGS: bool = False
+    # Prefer posting local .tgz packages to Inferno before network download.
+    PREFER_LOCAL_IG_UPLOAD: bool = True
+    # Max seconds to wait for a single IG install into Inferno (background load).
+    IG_INSTALL_TIMEOUT: int = 900
+    # Auto-download catalog IGs to FHIR_PACKAGES_PATH before sending to Inferno.
+    AUTO_CACHE_CATALOG_IGS: bool = True
     CORS_ORIGINS: str = "*"
 
     # Terminology Server
@@ -43,6 +52,7 @@ class Settings(BaseSettings):
     CQL_EXECUTION_TIMEOUT: int = 60
 
     # Paths
+    FHIR_PACKAGES_PATH: str = "./fhir_packages"
     PROFILES_PATH: str = "/app/data/profiles"
     QUESTIONNAIRES_PATH: str = "/app/data/questionnaires"
     CQL_LIBRARIES_PATH: str = "/app/data/cql_libraries"

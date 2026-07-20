@@ -1,4 +1,4 @@
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 import asyncio
 import logging
 import os
@@ -19,6 +19,11 @@ _RESERVED_PATHS = frozenset({
 })
 
 
+# backend/app/main.py → project root is three levels up (…/interop-automation-platform)
+_BACKEND_ROOT = Path(__file__).resolve().parent.parent
+_PROJECT_ROOT = _BACKEND_ROOT.parent
+
+
 def _resolve_frontend_dist() -> Path | None:
     env_path = os.getenv("FRONTEND_DIST_PATH", "").strip()
     if env_path:
@@ -27,7 +32,8 @@ def _resolve_frontend_dist() -> Path | None:
             return candidate
 
     candidates = [
-        Path(__file__).resolve().parent.parent / "frontend" / "dist",
+        _PROJECT_ROOT / "frontend" / "dist",
+        _BACKEND_ROOT / "frontend" / "dist",
         Path("/app/frontend/dist"),
     ]
     for candidate in candidates:
@@ -46,14 +52,17 @@ def _resolve_fhir_validator_html() -> Path | None:
         if candidate.is_file():
             return candidate
 
+    # Prefer public/ over dist/ so local UI edits are served without a rebuild.
     candidates = [
-        Path("/app/frontend/dist/fhir-validator.html"),
+        _PROJECT_ROOT / "frontend" / "public" / "fhir-validator.html",
+        _BACKEND_ROOT / "frontend" / "public" / "fhir-validator.html",
         Path("/app/frontend/public/fhir-validator.html"),
-        Path(__file__).resolve().parent.parent / "frontend" / "dist" / "fhir-validator.html",
-        Path(__file__).resolve().parent.parent / "frontend" / "public" / "fhir-validator.html",
+        _PROJECT_ROOT / "frontend" / "dist" / "fhir-validator.html",
+        _BACKEND_ROOT / "frontend" / "dist" / "fhir-validator.html",
+        Path("/app/frontend/dist/fhir-validator.html"),
     ]
     if FRONTEND_DIST:
-        candidates.insert(0, FRONTEND_DIST / "fhir-validator.html")
+        candidates.append(FRONTEND_DIST / "fhir-validator.html")
 
     for candidate in candidates:
         if candidate.is_file():
@@ -72,8 +81,9 @@ def _resolve_fhir_validator_public_dir() -> Path | None:
             return candidate
 
     candidates = [
+        _PROJECT_ROOT / "frontend" / "public",
+        _BACKEND_ROOT / "frontend" / "public",
         Path("/app/frontend/public"),
-        Path(__file__).resolve().parent.parent / "frontend" / "public",
     ]
     if FHIR_VALIDATOR_HTML:
         candidates.insert(0, FHIR_VALIDATOR_HTML.parent)
@@ -95,18 +105,39 @@ async def lifespan(app: FastAPI):
         yield
     finally:
         preload_task.cancel()
-        with asyncio.suppress(asyncio.CancelledError):
+        with suppress(asyncio.CancelledError):
             await preload_task
         await inferno_client.close()
 
 
 async def _warm_and_register_igs():
-    """Warm up Inferno engine. IGs loaded on-demand when selected."""
+    """Warm up Inferno engine, then optionally preload all local IG packages."""
+    from app.config import settings
+    from app.services.fhir_validator.ig_manager import ig_manager
+
     try:
-        await inferno_client.warm_up()
-        logger.info("Inferno engine warmed up, validation ready")
+        warmed = await inferno_client.warm_up()
     except Exception as exc:
         logger.warning("Warm-up incomplete: %s — validation will retry on request", exc)
+        warmed = False
+
+    if warmed:
+        logger.info("Inferno engine warmed up, validation ready")
+    else:
+        logger.warning(
+            "Inferno engine not ready yet — validation will retry on request. "
+            "Startup IG preload is deferred until the engine is ready."
+        )
+
+    if settings.PRELOAD_ALL_LOCAL_IGS:
+        if not inferno_client.engine_is_warm:
+            logger.info("Skipping startup IG preload until Inferno engine is ready")
+            return
+        try:
+            summary = await ig_manager.preload_all_local_igs()
+            logger.info("Startup IG preload complete: %s", summary)
+        except Exception as exc:
+            logger.warning("Startup IG preload failed: %s", exc)
 
 
 app = FastAPI(

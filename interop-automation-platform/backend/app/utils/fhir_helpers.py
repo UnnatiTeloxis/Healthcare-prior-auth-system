@@ -37,6 +37,25 @@ def is_valid_xml(resource: str) -> bool:
     return resource.strip().startswith("<")
 
 
+def profile_url_to_package_id(profile_url: str) -> str | None:
+    """Best-effort map from a StructureDefinition URL to an NPM package id."""
+    url = (profile_url or "").lower()
+    if "/us/core/" in url or "hl7.org/fhir/us/core" in url:
+        return "hl7.fhir.us.core"
+    if "/davinci-crd/" in url or "davinci.crd" in url:
+        return "hl7.fhir.us.davinci-crd"
+    if "/davinci-dtr/" in url or "davinci.dtr" in url:
+        return "hl7.fhir.us.davinci-dtr"
+    if "/davinci-pas/" in url or "davinci.pas" in url:
+        return "hl7.fhir.us.davinci-pas"
+    # Generic HL7 path: http://hl7.org/fhir/{realm}/{guide}/StructureDefinition/...
+    match = re.search(r"hl7\.org/fhir/([a-z0-9\-]+)/([a-z0-9\.\-]+)/structuredefinition/", url)
+    if match:
+        realm, guide = match.group(1), match.group(2)
+        return f"hl7.fhir.{realm}.{guide}"
+    return None
+
+
 def extract_meta_profiles(resource: str) -> list[str]:
     """Collect profile URLs from a resource or nested bundle entries (JSON or XML)."""
     text = resource.strip()

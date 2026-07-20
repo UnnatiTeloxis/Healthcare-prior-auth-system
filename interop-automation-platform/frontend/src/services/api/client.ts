@@ -14,11 +14,26 @@ export const apiClient = axios.create({
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    const detail =
-      error.response?.data?.detail ||
-      error.message ||
-      `Request failed: ${error.response?.status ?? "network error"}`;
-    return Promise.reject(new Error(typeof detail === "string" ? detail : JSON.stringify(detail)));
+    const detail = error.response?.data?.detail;
+    let message: string;
+    if (typeof detail === "string") {
+      message = detail;
+    } else if (detail && typeof detail === "object") {
+      const obj = detail as { message?: string; candidates?: string[]; msg?: string };
+      if (obj.message || obj.msg) {
+        message = obj.message || obj.msg || "";
+        if (Array.isArray(obj.candidates) && obj.candidates.length) {
+          message += ` Candidates: ${obj.candidates.slice(0, 5).join(", ")}`;
+        }
+      } else {
+        message = JSON.stringify(detail);
+      }
+    } else {
+      message =
+        error.message ||
+        `Request failed: ${error.response?.status ?? "network error"}`;
+    }
+    return Promise.reject(new Error(message));
   }
 );
 

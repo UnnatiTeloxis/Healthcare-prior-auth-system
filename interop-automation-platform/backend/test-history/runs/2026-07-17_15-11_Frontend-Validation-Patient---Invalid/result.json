@@ -1,0 +1,295 @@
+{
+  "meta": {
+    "id": "2026-07-17_15-11_Frontend-Validation-Patient---Invalid",
+    "name": "Frontend Validation: Patient - Invalid",
+    "timestamp": "2026-07-17T15:11:01"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "us-core-sample-patient",
+      "meta": {
+        "profile": [
+          "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+        ]
+      },
+      "identifier": [
+        {
+          "use": "usual",
+          "type": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                "code": "MR",
+                "display": "Medical Record Number"
+              }
+            ],
+            "text": "Medical Record Number"
+          },
+          "system": "http://hospital.smarthealthit.org",
+          "value": "1032702"
+        }
+      ],
+      "active": true,
+      "name": [
+        {
+          "use": "official",
+          "family": "Baxter",
+          "given": [
+            "Amy",
+            "V."
+          ],
+          "suffix": [
+            "PharmD"
+          ]
+        }
+      ],
+      "telecom": [
+        {
+          "system": "phone",
+          "value": "555-555-5555",
+          "use": "home"
+        },
+        {
+          "system": "email",
+          "value": "amy.baxter@example.com"
+        }
+      ],
+      "gender": "female",
+      "birthDate": "1987-02-20",
+      "address": [
+        {
+          "use": "home",
+          "line": [
+            "183 Mountain View St"
+          ],
+          "city": "Mounds",
+          "state": "OK",
+          "postalCode": "74048",
+          "country": "US"
+        }
+      ],
+      "communication": [
+        {
+          "language": {
+            "coding": [
+              {
+                "system": "urn:ietf:bcp:47",
+                "code": "en-US",
+                "display": "English (United States)"
+              }
+            ],
+            "text": "English"
+          },
+          "preferred": true
+        }
+      ]
+    },
+    "profiles": [
+      "http://hl7.org/fhir/us/cdmh/StructureDefinition/cdmh-patient"
+    ],
+    "profile": "http://hl7.org/fhir/us/cdmh/StructureDefinition/cdmh-patient",
+    "ig": "hl7.fhir.us.cdmh#1.0.0",
+    "resource_type": "Patient",
+    "selected_ig": "hl7.fhir.us.cdmh#1.0.0",
+    "resolved_profile": "http://hl7.org/fhir/us/cdmh/StructureDefinition/cdmh-patient"
+  },
+  "response": {
+    "valid": false,
+    "resource_type": "Patient",
+    "profiles": [
+      "http://hl7.org/fhir/us/cdmh/StructureDefinition/cdmh-patient"
+    ],
+    "summary": "Validation failed with 2 error(s)",
+    "error_count": 2,
+    "warning_count": 3,
+    "info_count": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "code-invalid",
+        "message": "java.net.SocketTimeoutException: timeout",
+        "location": "Patient.communication[0].language.coding[0]",
+        "line": 58,
+        "column": 8
+      },
+      {
+        "severity": "error",
+        "code": "too-costly",
+        "message": "The value set 'http://hl7.org/fhir/us/core/ValueSet/simple-language|4.0.0' validation (local) took too long to process (>60sec)",
+        "location": "Patient.communication[0].language",
+        "line": 58,
+        "column": 8
+      },
+      {
+        "severity": "warning",
+        "code": "code-invalid",
+        "message": "The value provided ('OK') was not found in the value set 'USPS Two Letter Alphabetic Codes' (http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state|4.0.0), and a code should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable)  (error message = The System URI could not be determined for the code 'OK' in the ValueSet 'http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state|4.0.0': include #0 has system https://www.usps.com/ which could not be found, and the server returned error [Error from http://tx.fhir.org/r4: Error: The cache '1d24ebae-c93c-4cc7-a934-21b592a872cb' is not known to this server. Caches are created with $cache-control?mode=start; this one was never created, or has expired or been released]; The System URI could not be determined for the code 'OK' in the ValueSet 'http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state|4.0.0')",
+        "location": "Patient.address[0].state",
+        "line": 51,
+        "column": 20
+      },
+      {
+        "severity": "warning",
+        "code": "code-invalid",
+        "message": "None of the codings provided are in the value set 'Language codes with language and optionally a region modifier' (http://hl7.org/fhir/us/core/ValueSet/simple-language|4.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = urn:ietf:bcp:47#en-US)",
+        "location": "Patient.communication[0].language",
+        "line": 58,
+        "column": 8
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Patient",
+        "line": 1,
+        "column": 2
+      }
+    ],
+    "operation_outcome": {
+      "resourceType": "OperationOutcome",
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>error</td><td>Patient.communication[0].language.coding[0]</td><td>code-invalid</td><td>java.net.SocketTimeoutException: timeout</td><td/><td>TerminologyEngine</td></tr><tr><td>error</td><td>Patient.communication[0].language</td><td>too-costly</td><td>The value set 'http://hl7.org/fhir/us/core/ValueSet/simple-language|4.0.0' validation (local) took too long to process (&gt;60sec)</td><td/><td>TerminologyEngine</td></tr><tr><td>warning</td><td>Patient.address[0].state</td><td>code-invalid</td><td>The value provided ('OK') was not found in the value set 'USPS Two Letter Alphabetic Codes' (http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state|4.0.0), and a code should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable)  (error message = The System URI could not be determined for the code 'OK' in the ValueSet 'http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state|4.0.0': include #0 has system https://www.usps.com/ which could not be found, and the server returned error [Error from http://tx.fhir.org/r4: Error: The cache '1d24ebae-c93c-4cc7-a934-21b592a872cb' is not known to this server. Caches are created with $cache-control?mode=start; this one was never created, or has expired or been released]; The System URI could not be determined for the code 'OK' in the ValueSet 'http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state|4.0.0')</td><td/><td>TerminologyEngine</td></tr><tr><td>warning</td><td>Patient.communication[0].language</td><td>code-invalid</td><td>None of the codings provided are in the value set 'Language codes with language and optionally a region modifier' (http://hl7.org/fhir/us/core/ValueSet/simple-language|4.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = urn:ietf:bcp:47#en-US)</td><td/><td>TerminologyEngine</td></tr><tr><td>warning</td><td>Patient</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "issue": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 58
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            }
+          ],
+          "severity": "error",
+          "code": "code-invalid",
+          "details": {
+            "text": "java.net.SocketTimeoutException: timeout"
+          },
+          "expression": [
+            "Patient.communication[0].language.coding[0]"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 58
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            }
+          ],
+          "severity": "error",
+          "code": "too-costly",
+          "details": {
+            "text": "The value set 'http://hl7.org/fhir/us/core/ValueSet/simple-language|4.0.0' validation (local) took too long to process (>60sec)"
+          },
+          "expression": [
+            "Patient.communication[0].language"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 51
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 20
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Terminology_TX_NoValid_17"
+            }
+          ],
+          "severity": "warning",
+          "code": "code-invalid",
+          "details": {
+            "text": "The value provided ('OK') was not found in the value set 'USPS Two Letter Alphabetic Codes' (http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state|4.0.0), and a code should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable)  (error message = The System URI could not be determined for the code 'OK' in the ValueSet 'http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state|4.0.0': include #0 has system https://www.usps.com/ which could not be found, and the server returned error [Error from http://tx.fhir.org/r4: Error: The cache '1d24ebae-c93c-4cc7-a934-21b592a872cb' is not known to this server. Caches are created with $cache-control?mode=start; this one was never created, or has expired or been released]; The System URI could not be determined for the code 'OK' in the ValueSet 'http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state|4.0.0')"
+          },
+          "expression": [
+            "Patient.address[0].state"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 58
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 8
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Terminology_TX_NoValid_2_CC"
+            }
+          ],
+          "severity": "warning",
+          "code": "code-invalid",
+          "details": {
+            "text": "None of the codings provided are in the value set 'Language codes with language and optionally a region modifier' (http://hl7.org/fhir/us/core/ValueSet/simple-language|4.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = urn:ietf:bcp:47#en-US)"
+          },
+          "expression": [
+            "Patient.communication[0].language"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "Patient"
+          ]
+        }
+      ]
+    },
+    "selected_ig": "hl7.fhir.us.cdmh#1.0.0",
+    "resolved_profile": "http://hl7.org/fhir/us/cdmh/StructureDefinition/cdmh-patient",
+    "package_id": "hl7.fhir.us.cdmh",
+    "package_version": "1.0.0"
+  }
+}

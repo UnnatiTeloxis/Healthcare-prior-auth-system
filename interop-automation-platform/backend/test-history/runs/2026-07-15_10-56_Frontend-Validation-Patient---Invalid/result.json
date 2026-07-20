@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "id": "2026-07-15_10-56_Frontend-Validation-Patient---Invalid",
+    "name": "Frontend Validation: Patient - Invalid",
+    "timestamp": "2026-07-15T10:56:39"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Patient",
+      "gender": "female"
+    },
+    "profiles": [
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+    ],
+    "profile": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient",
+    "ig": "hl7.fhir.us.core#6.1.0",
+    "resource_type": null,
+    "selected_ig": "hl7.fhir.us.core#6.1.0",
+    "resolved_profile": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+  },
+  "response": {
+    "valid": false,
+    "resource_type": "Patient",
+    "profiles": [
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+    ],
+    "summary": "Validation failed for profile(s): profile boom",
+    "error_count": 1,
+    "warning_count": 0,
+    "info_count": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "profile-validation-error",
+        "message": "profile boom",
+        "location": null,
+        "line": null,
+        "column": null
+      }
+    ],
+    "operation_outcome": null,
+    "selected_ig": "hl7.fhir.us.core#6.1.0",
+    "resolved_profile": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient",
+    "package_id": "hl7.fhir.us.core",
+    "package_version": "6.1.0"
+  }
+}

@@ -5,16 +5,22 @@ services:
     ports:
       - "4567:4567"
     environment:
+      # Match hosted Inferno (inferno.healthit.gov/validator) for result parity.
       DISPLAY_ISSUES_ARE_WARNINGS: "true"
-      DISABLE_TX: "true"
-      # Force offline mode — prevents hanging when packages.fhir.org is unreachable
-      JAVA_TOOL_OPTIONS: "-DfhirOffline=true -Xmx4g"
+      # Hosted Inferno uses http://tx.fhir.org/r4 (see OperationOutcome diagnostics).
+      TX_SERVER_URL: "http://tx.fhir.org/r4"
+      # Do not set DISABLE_TX — its presence turns off terminology validation.
+      # Keep validator sessions alive so installed IGs stay loaded between requests.
+      SESSION_CACHE_DURATION: "-1"
+      # Online mode enabled — allows downloading IGs from packages.fhir.org on-demand
+      JAVA_TOOL_OPTIONS: "-Xmx4g"
     volumes:
-      # Override built-in /home/igs with empty dir for instant startup (no IG loading at boot).
-      # All IGs loaded on-demand via POST /igs after engine is ready.
+      # Fast startup: do not auto-load IGs at Inferno boot (backend preloads on demand).
       - ./backend/fhir_packages/empty:/home/igs:ro
-      # Make IG packages accessible for on-demand upload
-      - ./backend/fhir_packages:/app/igs:ro
+      # IG packages on D: (download via scripts/download-igs.ps1)
+      - D:/fhir_packages:/app/igs:ro
+      # Persist downloaded dependency packages across container restarts.
+      - fhir_validator_cache:/home/ktor/.fhir
     healthcheck:
       # /profiles returns 503 until the validation engine is fully initialized (and may never
       # succeed when terminology is unreachable). /version confirms the service is up.
@@ -73,6 +79,9 @@ services:
       REDIS_URL: redis://redis:6379
       INFERNO_VALIDATOR_URL: http://fhir-validator-wrapper:4567
       FHIR_PACKAGES_PATH: /app/fhir_packages
+      # false: keep API responsive; IGs load on demand when selected in the UI
+      PRELOAD_ALL_LOCAL_IGS: "false"
+      PREFER_LOCAL_IG_UPLOAD: "true"
       DEFAULT_IGS: hl7.fhir.us.core#6.1.0
       CORS_ORIGINS: "*"
       PYTHONUNBUFFERED: "1"
@@ -80,6 +89,7 @@ services:
       WATCHFILES_FORCE_POLLING: "true"
     volumes:
       - ./backend:/app
+      - D:/fhir_packages:/app/fhir_packages:ro
       - ./frontend/public:/app/frontend/public:ro
       - ./data:/app/data:ro
     depends_on:
@@ -124,3 +134,4 @@ networks:
 volumes:
   postgres_data:
   redis_data:
+  fhir_validator_cache:

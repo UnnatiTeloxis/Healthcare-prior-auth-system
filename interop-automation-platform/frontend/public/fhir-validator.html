@@ -692,6 +692,25 @@
       font-weight: 600;
       white-space: nowrap;
     }
+    .ig-option .ig-opt-badge {
+      font-size: 0.65rem;
+      background: rgba(234,179,8,0.15);
+      color: #b45309;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      white-space: nowrap;
+      margin-left: 0.35rem;
+    }
+    .ig-option .ig-opt-badge.cached {
+      background: rgba(16,185,129,0.12);
+      color: #047857;
+    }
+    .ig-option .ig-opt-badge.catalog {
+      background: rgba(59,130,246,0.12);
+      color: #1d4ed8;
+    }
+    .ig-option.non-profile { opacity: 0.88; }
     .ig-loading-indicator {
       display: none;
       align-items: center;
@@ -701,6 +720,51 @@
       color: var(--secondary);
     }
     .ig-loading-indicator.visible { display: flex; }
+    .ig-loading-indicator.error { color: var(--error); }
+    .ig-loading-indicator.loading .ig-status-icon { display: none; }
+    .ig-loading-indicator:not(.loading) .ig-spinner { display: none; }
+    .ig-status-icon {
+      flex-shrink: 0;
+      width: 14px;
+      text-align: center;
+      font-size: 0.85rem;
+      line-height: 1;
+    }
+    .profile-selector-wrap {
+      margin-bottom: 1.25rem;
+    }
+    .profile-selector-wrap.disabled {
+      opacity: 0.55;
+      pointer-events: none;
+    }
+    .profile-select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card);
+      font-family: inherit;
+      font-size: 0.875rem;
+      color: var(--text);
+    }
+    .profile-select:focus {
+      outline: none;
+      border-color: var(--secondary);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    }
+    .validation-context-banner {
+      display: none;
+      margin: 0 0 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-sm);
+      background: rgba(59,130,246,0.08);
+      border: 1px solid rgba(59,130,246,0.2);
+      font-size: 0.8125rem;
+      color: var(--text);
+      line-height: 1.45;
+    }
+    .validation-context-banner.visible { display: block; }
+    .validation-context-banner strong { color: var(--secondary); }
     .ig-loading-indicator .ig-spinner {
       width: 14px;
       height: 14px;
@@ -2128,7 +2192,7 @@
             <div class="ig-dropdown-panel" id="igDropdownPanel" role="listbox">
               <div class="ig-search-wrap">
                 <i class="fas fa-search"></i>
-                <input type="text" class="ig-search-input" id="igSearchInput" placeholder="Search Implementation Guides..." autocomplete="off" />
+                <input type="text" class="ig-search-input" id="igSearchInput" placeholder="Search Inferno IG catalog (US Core, CARIN, Da Vinci...)" autocomplete="off" />
               </div>
               <div class="ig-options-list" id="igOptionsList">
                 <!-- Populated by JS -->
@@ -2136,9 +2200,23 @@
             </div>
           </div>
           <div class="ig-loading-indicator" id="igLoadingIndicator">
-            <div class="ig-spinner"></div>
+            <span class="ig-status-icon" id="igStatusIcon" aria-hidden="true"></span>
+            <div class="ig-spinner" id="igSpinner"></div>
             <span id="igLoadingText">Loading IG...</span>
           </div>
+        </div>
+
+        <!-- Profile Selector (populated after IG load) -->
+        <div class="profile-selector-wrap disabled" id="profileSelectorWrap">
+          <label class="ig-selector-label" for="profileSelect">
+            <i class="fas fa-sitemap"></i> Profile
+          </label>
+          <select class="profile-select" id="profileSelect" aria-label="StructureDefinition profile">
+            <option value="">Select an Implementation Guide first</option>
+          </select>
+          <p style="margin-top:0.4rem;font-size:0.75rem;color:var(--text-muted);" id="profileHint">
+            Profiles come from the loaded IG. meta.profile is used when it belongs to that IG.
+          </p>
         </div>
 
         <div class="mode-selector" id="modeSelector">
@@ -2254,6 +2332,7 @@
             <div>
               <div class="status-badge failed" id="statusBadge"><i class="fas fa-times-circle"></i> FAILED</div>
               <p style="margin-top:0.75rem;color:var(--text-muted);font-size:0.875rem;" id="resultMeta"></p>
+              <div class="validation-context-banner" id="validationContextBanner"></div>
             </div>
           </div>
           <div class="summary-grid" id="summaryGrid"></div>
@@ -2562,43 +2641,70 @@
       };
     }
 
+    function profileSlug(url) {
+      return String(url || '').split('/').pop().split('|')[0].toLowerCase();
+    }
+
+    function resourceTypeToKebab(resourceType) {
+      return String(resourceType || '').replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+    }
+
+    function profilesForResourceType(profiles, resourceType) {
+      const compact = String(resourceType || '').toLowerCase();
+      const kebab = resourceTypeToKebab(resourceType);
+      const exact = [];
+      const loose = [];
+      for (const url of profiles || []) {
+        const slug = profileSlug(url);
+        const slugCompact = slug.replace(/-/g, '');
+        const last = slug.split('-').pop();
+        if (last === compact || slug.endsWith(`-${kebab}`) || slug === compact || slug === kebab) {
+          exact.push(url);
+        } else if (slugCompact.includes(compact) || slug.includes(kebab)) {
+          loose.push(url);
+        }
+      }
+      return exact.length ? exact : loose;
+    }
+
     function resolveProfileForResource(resource) {
       const resourceType = resource?.resourceType || ACTIVE_PROFILE.resourceType;
 
-      // If an IG is selected, try to find a matching profile for this resource type
       if (igState.selected) {
         const profiles = igGetSelectedProfiles();
-        const matchingProfile = profiles.find(url => {
-          const lower = url.toLowerCase();
-          return lower.includes(resourceType.toLowerCase()) ||
-                 lower.includes(resourceType.replace(/([A-Z])/g, '-$1').toLowerCase().slice(1));
-        });
-        if (matchingProfile) {
-          return {
-            id: `ig-${igState.selected.name}-${resourceType}`,
-            name: `${resourceType} (${igState.selected.title || igState.selected.name})`,
-            icon: '📋',
-            resourceType,
-            description: `Validates against ${igState.selected.title || igState.selected.name} v${igState.selected.version} profile.`,
-            requiredFields: [],
-            supportFields: [],
-            profile: matchingProfile
-          };
+        const metaProfile = extractMetaProfile(resource);
+        let chosen = igState.selectedProfile || '';
+
+        if (chosen && profiles.length && !profiles.includes(chosen)) {
+          chosen = '';
         }
-        // IG selected but no specific profile for this resource type — still load the IG
+        if (!chosen && metaProfile && profiles.includes(metaProfile)) {
+          chosen = metaProfile;
+        }
+        if (!chosen) {
+          const candidates = profilesForResourceType(profiles, resourceType);
+          if (candidates.length === 1) chosen = candidates[0];
+        }
+
+        const label = chosen ? profileSlug(chosen) : resourceType;
         return {
-          id: `ig-${igState.selected.name}-base-${resourceType}`,
-          name: `${resourceType} (${igState.selected.title || igState.selected.name})`,
-          icon: '📦',
+          id: `ig-${igState.selected.name}-${resourceType}`,
+          name: chosen
+            ? `${label} (${igState.selected.title || igState.selected.name})`
+            : `${resourceType} (${igState.selected.title || igState.selected.name})`,
+          icon: '📋',
           resourceType,
-          description: `Validates ${resourceType} with ${igState.selected.title || igState.selected.name} loaded.`,
+          description: chosen
+            ? `Validates against ${chosen}`
+            : `Select a profile from ${igState.selected.title || igState.selected.name} before validating.`,
           requiredFields: [],
           supportFields: [],
-          profile: ''
+          profile: chosen,
+          requiresProfileSelection: !chosen,
+          candidates: profilesForResourceType(profiles, resourceType)
         };
       }
 
-      // No IG selected: validate against base FHIR StructureDefinition.
       return baseProfileForType(resourceType);
     }
 
@@ -2806,38 +2912,156 @@
     const igState = {
       available: [],
       selected: null,
+      selectedProfile: '',
       loadedProfiles: {},
+      loadCache: {},
       isLoading: false,
-      isOpen: false
+      isOpen: false,
+      loadError: null
     };
+
+    function igIsProfileIg(ig) {
+      if (!ig) return true;
+      if (typeof ig.is_profile_ig === 'boolean') return ig.is_profile_ig;
+      if (typeof ig.structure_definition_count === 'number') return ig.structure_definition_count > 0;
+      return true;
+    }
+
+    function igTerminologyMessage(name) {
+      const lower = (name || '').toLowerCase();
+      if (lower.includes('ccda') || lower.includes('c-cda')) {
+        return (
+          `${name} loaded, but this package has no StructureDefinition profiles ` +
+          '(C-CDA on FHIR is primarily ConceptMaps/examples). Choose US Core for profile validation.'
+        );
+      }
+      return (
+        `${name} is not a profile IG — the package contains no StructureDefinitions ` +
+        '(terminology/CodeSystem content only). Choose US Core (hl7.fhir.us.core) for profile validation.'
+      );
+    }
+
+    function igSortAvailable(igs) {
+      return [...(igs || [])].sort((a, b) => {
+        const aProfile = igIsProfileIg(a) ? 0 : 1;
+        const bProfile = igIsProfileIg(b) ? 0 : 1;
+        if (aProfile !== bProfile) return aProfile - bProfile;
+        return (a.title || igPackageId(a)).localeCompare(b.title || igPackageId(b));
+      });
+    }
+
+    function igPackageId(ig) {
+      return ig?.package_id || ig?.name || '';
+    }
+
+    function igKey(name, version) {
+      return version ? `${name}#${version}` : name;
+    }
+
+    /** Pick profile URLs from Inferno GET /profiles-by-ig map for a package. */
+    function igProfilesFromByIgMap(byIg, packageId, version) {
+      if (!byIg || typeof byIg !== 'object' || !packageId) return [];
+      const exact = version ? `${packageId}#${version}` : packageId;
+      if (Array.isArray(byIg[exact]) && byIg[exact].length) return byIg[exact];
+      if (Array.isArray(byIg[packageId]) && byIg[packageId].length) return byIg[packageId];
+      const prefix = `${packageId}#`;
+      for (const [key, profiles] of Object.entries(byIg)) {
+        if (key.startsWith(prefix) && Array.isArray(profiles) && profiles.length) {
+          return profiles;
+        }
+      }
+      return [];
+    }
+
+    function setValidateControlsEnabled(enabled) {
+      const step2Next = document.getElementById('step2Next');
+      const runBtn = document.getElementById('runValidationBtn');
+      if (step2Next) step2Next.disabled = !enabled;
+      if (runBtn) runBtn.disabled = !enabled;
+    }
+
+    function igSetProfileOptions(profiles, preferredUrl) {
+      const wrap = document.getElementById('profileSelectorWrap');
+      const select = document.getElementById('profileSelect');
+      const hint = document.getElementById('profileHint');
+      if (!select || !wrap) return;
+
+      if (!igState.selected) {
+        wrap.classList.add('disabled');
+        select.innerHTML = '<option value="">Select an Implementation Guide first</option>';
+        igState.selectedProfile = '';
+        if (hint) hint.textContent = 'Profiles come from the loaded IG. meta.profile is used when it belongs to that IG.';
+        return;
+      }
+
+      wrap.classList.remove('disabled');
+      const urls = profiles || [];
+      if (!urls.length) {
+        select.innerHTML = '<option value="">No profiles — pick a profile IG (e.g. US Core)</option>';
+        igState.selectedProfile = '';
+        if (hint) {
+          hint.textContent = igState.loadError ||
+            'This package has no StructureDefinition profiles. Select hl7.fhir.us.core instead.';
+        }
+        return;
+      }
+
+      let html = '<option value="">Auto (meta.profile or best resource-type match)</option>';
+      for (const url of urls) {
+        html += `<option value="${escapeHtml(url)}">${escapeHtml(profileSlug(url))} — ${escapeHtml(url)}</option>`;
+      }
+      select.innerHTML = html;
+
+      const preferred = preferredUrl && urls.includes(preferredUrl) ? preferredUrl : '';
+      select.value = preferred;
+      igState.selectedProfile = preferred;
+      if (hint) {
+        hint.textContent = preferred
+          ? `Selected profile: ${preferred}`
+          : `${urls.length} profiles available. Choose one or leave Auto.`;
+      }
+    }
 
     async function igFetchAvailable() {
       try {
-        const res = await fetch('/api/v1/igs/available');
-        if (!res.ok) return;
+        const res = await fetch('/api/v1/igs/available?limit=2000&source=all');
+        if (!res.ok) {
+          showToast('Could not load Implementation Guide catalog.', 'warning');
+          return;
+        }
         const data = await res.json();
-        igState.available = data.igs || [];
+        igState.available = igSortAvailable(data.igs || []);
+        if (!igState.available.length) {
+          showToast('No IG packages found in catalog or fhir_packages.', 'warning');
+        } else {
+          const cached = igState.available.filter(ig => ig.cached).length;
+          const total = data.total || igState.available.length;
+          console.info(`IG catalog: showing ${igState.available.length} of ${total} (cached locally: ${cached})`);
+        }
         igRenderOptions(igState.available);
-        // Pre-warm US Core (auto-loaded, instant)
-        const usCore = igState.available.find(ig => ig.name.includes('us.core'));
+        // Pre-warm US Core when present (profile IG only)
+        const usCore = igState.available.find(ig => igPackageId(ig).includes('us.core') && igIsProfileIg(ig));
         if (usCore) {
-          const key = `${usCore.name}#${usCore.version}`;
+          const name = igPackageId(usCore);
+          const key = igKey(name, usCore.version);
           fetch('/api/v1/igs/load', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ package_name: usCore.name, version: usCore.version })
+            body: JSON.stringify({ package_name: name, version: usCore.version })
           }).then(r => r.ok ? r.json() : null).then(data => {
             if (data?.ig?.profiles) igState.loadedProfiles[key] = data.ig.profiles;
           }).catch(() => {});
         }
       } catch (e) {
         console.warn('Failed to fetch available IGs:', e);
+        showToast('IG catalog unavailable — check that the API is running.', 'error');
       }
     }
 
     function igRenderOptions(igs) {
       const list = document.getElementById('igOptionsList');
       if (!list) return;
+      const sorted = igSortAvailable(igs);
       let html = `<div class="ig-option ${!igState.selected ? 'selected' : ''}" data-ig-name="" data-ig-version="">
         <span class="ig-opt-icon"><i class="fas fa-cube"></i></span>
         <span class="ig-opt-details">
@@ -2845,15 +3069,25 @@
           <span class="ig-opt-package">Validates against base StructureDefinitions</span>
         </span>
       </div>`;
-      for (const ig of igs) {
-        const sel = igState.selected && igState.selected.name === ig.name ? 'selected' : '';
-        html += `<div class="ig-option ${sel}" data-ig-name="${ig.name}" data-ig-version="${ig.version}">
-          <span class="ig-opt-icon"><i class="fas fa-book-medical"></i></span>
+      for (const ig of sorted) {
+        const name = igPackageId(ig);
+        const profileIg = igIsProfileIg(ig);
+        const sel = igState.selected && igPackageId(igState.selected) === name && igState.selected.version === ig.version ? 'selected' : '';
+        let badge = '';
+        if (!profileIg) {
+          badge = '<span class="ig-opt-badge" title="Terminology package — no profiles">Terminology</span>';
+        } else if (ig.cached) {
+          badge = '<span class="ig-opt-badge cached" title="Cached under fhir_packages">Cached</span>';
+        } else {
+          badge = '<span class="ig-opt-badge catalog" title="From Inferno package catalog — downloads on first select">Catalog</span>';
+        }
+        html += `<div class="ig-option ${sel} ${profileIg ? '' : 'non-profile'}" data-ig-name="${escapeHtml(name)}" data-ig-version="${escapeHtml(ig.version || '')}">
+          <span class="ig-opt-icon"><i class="fas fa-${profileIg ? 'book-medical' : 'database'}"></i></span>
           <span class="ig-opt-details">
-            <span class="ig-opt-title">${ig.title || ig.name}</span>
-            <span class="ig-opt-package">${ig.name}</span>
+            <span class="ig-opt-title">${escapeHtml(ig.title || name)}</span>
+            <span class="ig-opt-package">${escapeHtml(name)}${ig.fhir_version ? ` · FHIR ${escapeHtml(ig.fhir_version)}` : ''}${profileIg && ig.structure_definition_count ? ` · ${ig.structure_definition_count} profiles` : ''}</span>
           </span>
-          <span class="ig-opt-version">${ig.version}</span>
+          <span class="ig-opt-version">${escapeHtml(ig.version || '')}</span>${badge}
         </div>`;
       }
       list.innerHTML = html;
@@ -2876,10 +3110,26 @@
       if (!q) { igRenderOptions(igState.available); return; }
       const filtered = igState.available.filter(ig =>
         (ig.title || '').toLowerCase().includes(q) ||
-        (ig.name || '').toLowerCase().includes(q) ||
+        (igPackageId(ig) || '').toLowerCase().includes(q) ||
         (ig.description || '').toLowerCase().includes(q)
       );
       igRenderOptions(filtered);
+    }
+
+    function igSyncProfileFromResource() {
+      if (!igState.selected) return;
+      let parsed = state.parsedCache;
+      if (!parsed) {
+        try { parsed = JSON.parse(state.inputData || '{}'); } catch (_) { parsed = null; }
+      }
+      const profiles = igGetSelectedProfiles();
+      const meta = parsed ? extractMetaProfile(parsed) : null;
+      const preferred = (meta && profiles.includes(meta))
+        ? meta
+        : (profilesForResourceType(profiles, parsed?.resourceType || 'Resource')[0] || '');
+      if (!igState.selectedProfile) {
+        igSetProfileOptions(profiles, preferred);
+      }
     }
 
     async function igSelectOption(name, version) {
@@ -2887,77 +3137,226 @@
       const trigger = document.getElementById('igTriggerName');
       const meta = document.getElementById('igTriggerMeta');
       const indicator = document.getElementById('igLoadingIndicator');
+      const statusIcon = document.getElementById('igStatusIcon');
+      const hint = document.getElementById('profileHint');
+      igState.loadError = null;
+
+      const showIgStatus = (text, { error = false, keepVisible = true, icon = null } = {}) => {
+        if (!indicator) return;
+        indicator.classList.add('visible');
+        indicator.classList.remove('loading');
+        indicator.classList.toggle('error', !!error);
+        if (statusIcon) {
+          statusIcon.textContent = icon || (error ? '⚠' : '✓');
+        }
+        document.getElementById('igLoadingText').textContent = text;
+        if (!keepVisible) {
+          setTimeout(() => {
+            indicator.classList.remove('visible', 'error', 'loading');
+            if (statusIcon) statusIcon.textContent = '';
+          }, 1400);
+        }
+      };
+
+      const startIgLoading = (text) => {
+        if (!indicator) return;
+        indicator.classList.add('visible', 'loading');
+        indicator.classList.remove('error');
+        if (statusIcon) statusIcon.textContent = '';
+        document.getElementById('igLoadingText').textContent = text;
+      };
+
+      const applyLoadResult = (cacheKey, igResult, { instant = false } = {}) => {
+        if (igResult?.status === 'ready' || igResult?.status === 'failed') {
+          igState.loadCache[cacheKey] = igResult;
+        }
+        if (igResult.profiles?.length) {
+          igState.loadedProfiles[cacheKey] = igResult.profiles;
+        } else if (igResult?.status === 'ready' || igResult?.status === 'failed') {
+          igState.loadedProfiles[cacheKey] = [];
+        }
+
+        if (igResult.status === 'failed') {
+          igState.loadError = igResult.error || 'Failed to load IG';
+          showIgStatus(igState.loadError, { error: true, icon: '⚠' });
+          igSetProfileOptions([]);
+          if (hint) hint.textContent = igState.loadError;
+          setValidateControlsEnabled(false);
+          if (!instant) showToast(igState.loadError, 'error');
+          return;
+        }
+
+        if (igResult.profiles?.length > 0) {
+          showIgStatus(
+            `✓ ${igResult.profiles.length} profiles` +
+            (igResult.load_time_ms ? ` (${igResult.load_time_ms}ms)` : ''),
+            { keepVisible: !instant, icon: '✓' }
+          );
+          igSyncProfileFromResource();
+          igSetProfileOptions(igResult.profiles, igState.selectedProfile);
+          setValidateControlsEnabled(true);
+          return;
+        }
+
+        // Loaded into Inferno but no StructureDefinitions (mapping/terminology IGs).
+        const msg = igResult.error || igTerminologyMessage(name);
+        igState.loadError = msg;
+        showIgStatus(msg, { error: true, icon: '⚠' });
+        igSetProfileOptions([]);
+        if (hint) hint.textContent = msg + ' You can still validate against base FHIR R4.';
+        setValidateControlsEnabled(true);
+        if (!instant) showToast(msg, 'warning');
+      };
 
       if (!name) {
         igState.selected = null;
+        igState.selectedProfile = '';
         trigger.textContent = 'Base FHIR R4 (No IG)';
         meta.textContent = 'Validates against base FHIR StructureDefinitions';
+        indicator?.classList.remove('visible', 'error', 'loading');
+        if (statusIcon) statusIcon.textContent = '';
+        igSetProfileOptions([]);
+        setValidateControlsEnabled(true);
         return;
       }
 
-      const ig = igState.available.find(i => i.name === name && i.version === version);
-      igState.selected = ig || { name, version, title: name };
-      trigger.textContent = ig ? (ig.title || ig.name) : name;
-      meta.textContent = `${name} v${version}`;
+      const ig = igState.available.find(i => igPackageId(i) === name && i.version === version);
+      igState.selected = ig || { name, package_id: name, version, title: name };
+      igState.selectedProfile = '';
+      trigger.textContent = ig ? (ig.title || igPackageId(ig)) : name;
+      meta.textContent = `${name}#${version || ''}`;
 
-      const cacheKey = `${name}#${version}`;
-      if (igState.loadedProfiles[cacheKey]) {
-        indicator.classList.add('visible');
-        document.getElementById('igLoadingText').textContent = `✓ Ready`;
-        setTimeout(() => indicator.classList.remove('visible'), 800);
+      const cacheKey = igKey(name, version);
+
+      if (igState.loadCache[cacheKey] && igState.loadCache[cacheKey].status !== 'failed') {
+        applyLoadResult(cacheKey, igState.loadCache[cacheKey], { instant: true });
+        return;
+      }
+
+      if (ig && !igIsProfileIg(ig)) {
+        const msg = igTerminologyMessage(name);
+        applyLoadResult(cacheKey, {
+          package_id: name,
+          version: version || '',
+          profiles: [],
+          status: 'ready',
+          error: msg,
+          load_time_ms: 0
+        }, { instant: true });
+        return;
+      }
+
+      if (igState.loadedProfiles[cacheKey]?.length) {
+        applyLoadResult(cacheKey, {
+          package_id: name,
+          version: version || '',
+          profiles: igState.loadedProfiles[cacheKey],
+          status: 'ready',
+          load_time_ms: 0
+        }, { instant: true });
         return;
       }
 
       igState.isLoading = true;
-      indicator.classList.add('visible');
-      const isUsCore = name.includes('us.core');
-      document.getElementById('igLoadingText').textContent = isUsCore
-        ? `Loading ${ig?.title || name}...`
-        : `Loading ${ig?.title || name} (first time may take 10-20s)...`;
+      setValidateControlsEnabled(false);
+      const displayName = ig?.title || name;
+      const startedAt = Date.now();
+      let tickTimer = null;
+      const updateLoadingText = () => {
+        const secs = Math.max(1, Math.round((Date.now() - startedAt) / 1000));
+        startIgLoading(
+          `Loading ${displayName} into Inferno… ${secs}s` +
+          (name.includes('davinci') || name.includes('us.core')
+            ? ' — first install can take 5–15 minutes; later picks are instant'
+            : ' — first load can take 1–5 minutes; later picks are instant')
+        );
+      };
+      updateLoadingText();
+      tickTimer = setInterval(updateLoadingText, 1000);
 
       try {
-        const loadIg = async () => {
+        const loadIg = async (retry = false) => {
           const r = await fetch('/api/v1/igs/load', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ package_name: name, version })
+            body: JSON.stringify({ package_name: name, version: version || null, retry })
           });
-          return r.ok ? (await r.json()).ig : null;
+          const payload = await r.json().catch(() => null);
+          if (!r.ok) {
+            const detail = payload?.detail || `HTTP ${r.status}`;
+            throw new Error(typeof detail === 'string' ? detail : (detail.message || JSON.stringify(detail)));
+          }
+          return payload?.ig || null;
         };
 
-        let igResult = await loadIg();
+        let igResult = await loadIg(false);
 
+        // Backend returns "loading" quickly while Inferno digests the package.
+        // Poll up to ~15 minutes (Da Vinci / first-time installs download dependencies).
         if (igResult && igResult.status === 'loading') {
-          document.getElementById('igLoadingText').textContent = `Loading ${ig?.title || name}...`;
-          for (let i = 0; i < 10; i++) {
+          for (let i = 0; i < 450; i++) {
             await new Promise(r => setTimeout(r, 2000));
-            igResult = await loadIg();
+            igResult = await loadIg(false);
             if (!igResult || igResult.status !== 'loading') break;
           }
         }
 
-        if (igResult && igResult.status === 'ready' && igResult.profiles?.length > 0) {
-          igState.loadedProfiles[cacheKey] = igResult.profiles;
-          document.getElementById('igLoadingText').textContent =
-            `✓ ${igResult.profiles.length} profiles loaded`;
-          setTimeout(() => indicator.classList.remove('visible'), 1200);
+        // Inferno-parity: if load succeeded but profile list is empty, ask
+        // Inferno's profiles-by-ig map (same source Inferno UI uses).
+        if (igResult && igResult.status === 'ready' && !(igResult.profiles || []).length) {
+          try {
+            const byIgResp = await fetch('/api/v1/fhir/profiles/by-ig');
+            if (byIgResp.ok) {
+              const byIg = await byIgResp.json();
+              const profiles = igProfilesFromByIgMap(byIg, name, version);
+              if (profiles.length) {
+                igResult = { ...igResult, profiles };
+              }
+            }
+          } catch (_) { /* keep empty profiles */ }
+        }
+
+        if (!igResult) {
+          applyLoadResult(cacheKey, {
+            package_id: name,
+            version: version || '',
+            profiles: [],
+            status: 'failed',
+            error: 'Unexpected response loading IG.'
+          });
+        } else if (igResult.status === 'loading') {
+          // Keep as loading tip — do not poison the cache; user can reselect.
+          showIgStatus(
+            `Still loading after ${Math.round((Date.now() - startedAt) / 1000)}s. ` +
+            'Inferno may still be installing dependencies — select the IG again in a minute.',
+            { error: true, icon: '⚠' }
+          );
+          if (hint) {
+            hint.textContent = 'IG install still in progress on Inferno. Try again shortly, or pick US Core.';
+          }
+          setValidateControlsEnabled(true);
+        } else if (igResult.status === 'failed') {
+          applyLoadResult(cacheKey, igResult);
         } else {
-          // IG selected but profiles not fully loaded — validation still works with base rules
-          igState.loadedProfiles[cacheKey] = [];
-          document.getElementById('igLoadingText').textContent = '✓ Selected — validation ready';
-          setTimeout(() => indicator.classList.remove('visible'), 1500);
+          applyLoadResult(cacheKey, igResult);
         }
       } catch (e) {
-        document.getElementById('igLoadingText').textContent = 'Load error — using base FHIR';
-        setTimeout(() => indicator.classList.remove('visible'), 2500);
+        applyLoadResult(cacheKey, {
+          package_id: name,
+          version: version || '',
+          profiles: [],
+          status: 'failed',
+          error: e.message || 'Failed to load IG'
+        });
       } finally {
+        if (tickTimer) clearInterval(tickTimer);
         igState.isLoading = false;
       }
     }
 
     function igGetSelectedProfiles() {
       if (!igState.selected) return [];
-      const key = `${igState.selected.name}#${igState.selected.version}`;
+      const key = igKey(igPackageId(igState.selected), igState.selected.version);
       return igState.loadedProfiles[key] || [];
     }
 
@@ -2965,6 +3364,7 @@
       const trigger = document.getElementById('igSelectorTrigger');
       const searchInput = document.getElementById('igSearchInput');
       const optionsList = document.getElementById('igOptionsList');
+      const profileSelect = document.getElementById('profileSelect');
 
       if (trigger) {
         trigger.addEventListener('click', (e) => { e.stopPropagation(); igToggleDropdown(); });
@@ -2981,11 +3381,25 @@
           }
         });
       }
+      if (profileSelect) {
+        profileSelect.addEventListener('change', () => {
+          igState.selectedProfile = profileSelect.value || '';
+          const hint = document.getElementById('profileHint');
+          if (hint) {
+            hint.textContent = igState.selectedProfile
+              ? `Selected profile: ${igState.selectedProfile}`
+              : 'Auto-resolve from meta.profile or resource type.';
+          }
+        });
+      }
       document.addEventListener('click', (e) => {
         const container = document.getElementById('igSelectorContainer');
         if (igState.isOpen && container && !container.contains(e.target)) {
           igToggleDropdown(false);
         }
+      });
+      document.getElementById('jsonInput')?.addEventListener('blur', () => {
+        if (igState.selected && !igState.selectedProfile) igSyncProfileFromResource();
       });
       igFetchAvailable();
     }
@@ -5104,12 +5518,33 @@
       }
     }
 
+    function formatApiDetail(detail) {
+      if (!detail) return null;
+      if (typeof detail === 'string') return detail;
+      if (Array.isArray(detail)) {
+        return detail.map(item => item?.msg || JSON.stringify(item)).join('; ');
+      }
+      if (typeof detail === 'object') {
+        const message = detail.message || detail.msg || JSON.stringify(detail);
+        if (Array.isArray(detail.candidates) && detail.candidates.length) {
+          return `${message} Candidates: ${detail.candidates.slice(0, 5).join(', ')}`;
+        }
+        return message;
+      }
+      return String(detail);
+    }
+
     async function submitValidation(resourceText, parsed, profileUsed) {
       const request = {
         resource: resourceText,
         profiles: profileUsed.profile ? [profileUsed.profile] : [],
+        profile: profileUsed.profile || null,
         resource_type: parsed.resourceType || profileUsed.resourceType
       };
+      if (igState.selected) {
+        const name = igPackageId(igState.selected);
+        request.ig = igKey(name, igState.selected.version);
+      }
 
       const maxRetries = 3;
       let lastError = null;
@@ -5136,8 +5571,11 @@
 
             const payload = await response.json().catch(() => null);
             if (!response.ok) {
-              const msg = payload?.detail || payload?.message || `HTTP ${response.status}`;
-              if (msg.includes('initializing') || msg.includes('warming')) {
+              const msg = formatApiDetail(payload?.detail) || payload?.message || `HTTP ${response.status}`;
+              if (response.status === 422) {
+                throw new Error(msg);
+              }
+              if (String(msg).includes('initializing') || String(msg).includes('warming')) {
                 lastError = new Error(msg);
                 await new Promise(r => setTimeout(r, 3000));
                 break;
@@ -5147,6 +5585,9 @@
             return payload;
           } catch (error) {
             lastError = error;
+            if (error?.message && String(error.message).includes('Select one explicitly')) {
+              throw error;
+            }
           }
         }
       }
@@ -5168,13 +5609,20 @@
       const passedTests = testCases.filter(t => t.status === 'passed').length;
       const failedTests = testCases.filter(t => t.status === 'failed').length;
       const warningTests = testCases.filter(t => t.status === 'warning').length;
+      const selectedIg = apiResult.selected_ig
+        || (igState.selected ? igKey(igPackageId(igState.selected), igState.selected.version) : null);
+      const resolvedProfile = apiResult.resolved_profile || profileUsed.profile || null;
 
       return {
         id: overrides.id || `VAL-${Date.now()}`,
         timestamp: new Date().toISOString(),
         executionTime: `${execSeconds.toFixed(3)}s`,
         profile: profileUsed.name,
-        profileUrl: profileUsed.profile,
+        profileUrl: resolvedProfile,
+        selectedIg,
+        resolvedProfile,
+        packageId: apiResult.package_id || null,
+        packageVersion: apiResult.package_version || null,
         profileResourceType: profileUsed.resourceType,
         resourceType: parsed?.resourceType || profileUsed.resourceType,
         summary: { total: errors + warnings + info, errors, warnings, info },
@@ -5378,6 +5826,19 @@
       const fileLabel = state.viewingBatchFile && r.sourceFileName ? ` · ${r.sourceFileName}` : '';
       document.getElementById('resultMeta').textContent =
         `Report ${r.id}${fileLabel} · ${new Date(r.timestamp).toLocaleString()} · ${r.executionTime} · ${r.complianceDetails?.basis || 'Compliance score'}`;
+
+      const contextBanner = document.getElementById('validationContextBanner');
+      if (contextBanner) {
+        if (r.selectedIg || r.resolvedProfile) {
+          contextBanner.classList.add('visible');
+          contextBanner.innerHTML =
+            `<strong>Implementation Guide:</strong> ${escapeHtml(r.selectedIg || 'Base FHIR')}` +
+            `<br><strong>Resolved profile:</strong> ${escapeHtml(r.resolvedProfile || '(none)')}`;
+        } else {
+          contextBanner.classList.remove('visible');
+          contextBanner.innerHTML = '';
+        }
+      }
 
       document.getElementById('summaryGrid').innerHTML = `
         <div class="summary-card"><div class="summary-value">${summary.total}</div><div class="summary-label">Total Issues</div></div>
@@ -6055,6 +6516,14 @@
       document.getElementById('dashReportsBtn')?.addEventListener('click', () => navigateTo('reports'));
 
       document.getElementById('step2Next').addEventListener('click', async () => {
+        if (igState.isLoading) {
+          showToast('Wait for the selected Implementation Guide to finish loading.', 'warning');
+          return;
+        }
+        if (igState.selected && igState.loadError) {
+          showToast(igState.loadError, 'error');
+          return;
+        }
         if (state.mode === 'batch') {
           if (!state.batchFiles.length) {
             showToast('Please add at least one file to validate.', 'warning');
@@ -6063,11 +6532,32 @@
           nextStep();
           return;
         }
-        if (await parseJsonInputAsync()) nextStep();
+        if (await parseJsonInputAsync()) {
+          if (igState.selected && !igState.selectedProfile) igSyncProfileFromResource();
+          const profileUsed = resolveProfileForResource(state.parsedCache || {});
+          if (profileUsed.requiresProfileSelection && (profileUsed.candidates || []).length !== 1) {
+            showToast(
+              (profileUsed.candidates || []).length > 1
+                ? 'Multiple profiles match this resource. Choose one in the Profile dropdown.'
+                : 'Select a profile for the chosen Implementation Guide before continuing.',
+              'warning'
+            );
+            return;
+          }
+          nextStep();
+        }
       });
 
       document.getElementById('step3Back').addEventListener('click', prevStep);
       document.getElementById('runValidationBtn').addEventListener('click', () => {
+        if (igState.isLoading) {
+          showToast('Wait for the selected Implementation Guide to finish loading.', 'warning');
+          return;
+        }
+        if (igState.selected && igState.loadError) {
+          showToast(igState.loadError, 'error');
+          return;
+        }
         if (state.mode === 'batch') {
           runBatchValidation();
         } else {

@@ -1,0 +1,358 @@
+{
+  "meta": {
+    "id": "2026-07-14_16-46_Frontend-Validation-Patient---Invalid",
+    "name": "Frontend Validation: Patient - Invalid",
+    "timestamp": "2026-07-14T16:46:07"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "us-core-patient-invalid-values",
+      "meta": {
+        "profile": [
+          "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+        ]
+      },
+      "identifier": [
+        {
+          "system": "http://hospital.example.org/patients",
+          "value": "PAT-99999"
+        }
+      ],
+      "name": [
+        {
+          "family": "Johnson",
+          "given": [
+            "Alice"
+          ]
+        }
+      ],
+      "gender": "invalid-gender-code",
+      "birthDate": "not-a-date",
+      "telecom": [
+        {
+          "system": "invalid-system",
+          "value": "555-000-1234"
+        }
+      ],
+      "address": [
+        {
+          "use": "invalid-use",
+          "state": "INVALID_STATE_TOO_LONG_NOT_A_REAL_CODE"
+        }
+      ]
+    },
+    "profiles": [
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+    ],
+    "resource_type": "Patient"
+  },
+  "response": {
+    "valid": false,
+    "resource_type": "Patient",
+    "profiles": [
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+    ],
+    "summary": "Validation failed with 5 error(s) | Invalid values in: Patient.address[0].use, Patient.gender, Patient.telecom[0].system",
+    "error_count": 5,
+    "warning_count": 2,
+    "info_count": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "code-invalid",
+        "message": "The value provided ('invalid-gender-code') was not found in the value set 'AdministrativeGender' (http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1), and a code is required from this value set  (error message = The System URI could not be determined for the code 'invalid-gender-code' in the ValueSet 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1'; The provided code '#invalid-gender-code' was not found in the value set 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1')",
+        "location": "Patient.gender",
+        "line": 19,
+        "column": 34,
+        "json_path": "$.gender",
+        "suggestion": "Add the required element or provide the allowed data-absent-reason extension.",
+        "rule_id": "us-core-patient-required",
+        "reference": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient#cardinality"
+      },
+      {
+        "severity": "error",
+        "code": "code-invalid",
+        "message": "The value provided ('invalid-system') was not found in the value set 'ContactPointSystem' (http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1), and a code is required from this value set  (error message = The System URI could not be determined for the code 'invalid-system' in the ValueSet 'http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1'; The provided code '#invalid-system' was not found in the value set 'http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1')",
+        "location": "Patient.telecom[0].system",
+        "line": 23,
+        "column": 33,
+        "json_path": "$.telecom[0].system",
+        "suggestion": "Add the required element or provide the allowed data-absent-reason extension.",
+        "rule_id": "us-core-patient-required",
+        "reference": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient#cardinality"
+      },
+      {
+        "severity": "error",
+        "code": "code-invalid",
+        "message": "The value provided ('invalid-use') was not found in the value set 'AddressUse' (http://hl7.org/fhir/ValueSet/address-use|4.0.1), and a code is required from this value set  (error message = The System URI could not be determined for the code 'invalid-use' in the ValueSet 'http://hl7.org/fhir/ValueSet/address-use|4.0.1'; The provided code '#invalid-use' was not found in the value set 'http://hl7.org/fhir/ValueSet/address-use|4.0.1')",
+        "location": "Patient.address[0].use",
+        "line": 29,
+        "column": 27,
+        "json_path": "$.address[0].use",
+        "suggestion": "Add the required element or provide the allowed data-absent-reason extension.",
+        "rule_id": "us-core-patient-required",
+        "reference": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient#cardinality"
+      },
+      {
+        "severity": "error",
+        "code": "invalid",
+        "message": "Example URLs are not allowed in this context (http://hospital.example.org/patients)",
+        "location": "Patient.identifier[0].system",
+        "line": 9,
+        "column": 55,
+        "json_path": "$.identifier[0].system",
+        "suggestion": "Update the resource and re-run validation against the selected profile.",
+        "rule_id": "us-core-patient-profile-conformance",
+        "reference": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient#invariant"
+      },
+      {
+        "severity": "error",
+        "code": "invalid",
+        "message": "Not a valid date ('not-a-date' doesn't meet format requirements for date)",
+        "location": "Patient.birthDate",
+        "line": 20,
+        "column": 28,
+        "json_path": "$.birthDate",
+        "suggestion": "Update the resource and re-run validation against the selected profile.",
+        "rule_id": "us-core-patient-datatype",
+        "reference": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient#type"
+      },
+      {
+        "severity": "warning",
+        "code": "code-invalid",
+        "message": "The value provided ('INVALID_STATE_TOO_LONG_NOT_A_REAL_CODE') was not found in the value set 'USPS Two Letter Alphabetic Codes' (http://terminology.hl7.org/ValueSet/USPS-State|1.0.0), and a code should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable)  (error message = The System URI could not be determined for the code 'INVALID_STATE_TOO_LONG_NOT_A_REAL_CODE' in the ValueSet 'http://terminology.hl7.org/ValueSet/USPS-State|1.0.0': include #0 has system https://www.usps.com/ which could not be found, and the server returned error [Error from http://tx.fhir.org/r4: Error: The cache 'bc82cb9a-8d6a-4b32-a18b-e081c050818d' is not known to this server. Caches are created with $cache-control?mode=start; this one was never created, or has expired or been released]; The System URI could not be determined for the code 'INVALID_STATE_TOO_LONG_NOT_A_REAL_CODE' in the ValueSet 'http://terminology.hl7.org/ValueSet/USPS-State|1.0.0')",
+        "location": "Patient.address[0].state",
+        "line": 30,
+        "column": 56,
+        "json_path": "$.address[0].state",
+        "suggestion": "Use a code from the value set required by the selected IG profile.",
+        "rule_id": "us-core-patient-terminology",
+        "reference": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient#terminology"
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Patient",
+        "line": 1,
+        "column": 2,
+        "json_path": "$",
+        "suggestion": "Review the warning and align the element with the IG's guidance when applicable.",
+        "rule_id": "us-core-patient-profile-conformance",
+        "reference": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient#invariant"
+      }
+    ],
+    "operation_outcome": {
+      "resourceType": "OperationOutcome",
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>error</td><td>Patient.gender</td><td>code-invalid</td><td>The value provided ('invalid-gender-code') was not found in the value set 'AdministrativeGender' (http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1), and a code is required from this value set  (error message = The System URI could not be determined for the code 'invalid-gender-code' in the ValueSet 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1'; The provided code '#invalid-gender-code' was not found in the value set 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1')</td><td/><td>TerminologyEngine</td></tr><tr><td>error</td><td>Patient.telecom[0].system</td><td>code-invalid</td><td>The value provided ('invalid-system') was not found in the value set 'ContactPointSystem' (http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1), and a code is required from this value set  (error message = The System URI could not be determined for the code 'invalid-system' in the ValueSet 'http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1'; The provided code '#invalid-system' was not found in the value set 'http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1')</td><td/><td>TerminologyEngine</td></tr><tr><td>error</td><td>Patient.address[0].use</td><td>code-invalid</td><td>The value provided ('invalid-use') was not found in the value set 'AddressUse' (http://hl7.org/fhir/ValueSet/address-use|4.0.1), and a code is required from this value set  (error message = The System URI could not be determined for the code 'invalid-use' in the ValueSet 'http://hl7.org/fhir/ValueSet/address-use|4.0.1'; The provided code '#invalid-use' was not found in the value set 'http://hl7.org/fhir/ValueSet/address-use|4.0.1')</td><td/><td>TerminologyEngine</td></tr><tr><td>error</td><td>Patient.identifier[0].system</td><td>invalid</td><td>Example URLs are not allowed in this context (http://hospital.example.org/patients)</td><td/><td>InstanceValidator</td></tr><tr><td>error</td><td>Patient.birthDate</td><td>invalid</td><td>Not a valid date ('not-a-date' doesn't meet format requirements for date)</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Patient.address[0].state</td><td>code-invalid</td><td>The value provided ('INVALID_STATE_TOO_LONG_NOT_A_REAL_CODE') was not found in the value set 'USPS Two Letter Alphabetic Codes' (http://terminology.hl7.org/ValueSet/USPS-State|1.0.0), and a code should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable)  (error message = The System URI could not be determined for the code 'INVALID_STATE_TOO_LONG_NOT_A_REAL_CODE' in the ValueSet 'http://terminology.hl7.org/ValueSet/USPS-State|1.0.0': include #0 has system https://www.usps.com/ which could not be found, and the server returned error [Error from http://tx.fhir.org/r4: Error: The cache 'bc82cb9a-8d6a-4b32-a18b-e081c050818d' is not known to this server. Caches are created with $cache-control?mode=start; this one was never created, or has expired or been released]; The System URI could not be determined for the code 'INVALID_STATE_TOO_LONG_NOT_A_REAL_CODE' in the ValueSet 'http://terminology.hl7.org/ValueSet/USPS-State|1.0.0')</td><td/><td>TerminologyEngine</td></tr><tr><td>warning</td><td>Patient</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "issue": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 19
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 34
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Terminology_TX_NoValid_16"
+            }
+          ],
+          "severity": "error",
+          "code": "code-invalid",
+          "details": {
+            "text": "The value provided ('invalid-gender-code') was not found in the value set 'AdministrativeGender' (http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1), and a code is required from this value set  (error message = The System URI could not be determined for the code 'invalid-gender-code' in the ValueSet 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1'; The provided code '#invalid-gender-code' was not found in the value set 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1')"
+          },
+          "expression": [
+            "Patient.gender"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 23
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 33
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Terminology_TX_NoValid_16"
+            }
+          ],
+          "severity": "error",
+          "code": "code-invalid",
+          "details": {
+            "text": "The value provided ('invalid-system') was not found in the value set 'ContactPointSystem' (http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1), and a code is required from this value set  (error message = The System URI could not be determined for the code 'invalid-system' in the ValueSet 'http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1'; The provided code '#invalid-system' was not found in the value set 'http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1')"
+          },
+          "expression": [
+            "Patient.telecom[0].system"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 29
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 27
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Terminology_TX_NoValid_16"
+            }
+          ],
+          "severity": "error",
+          "code": "code-invalid",
+          "details": {
+            "text": "The value provided ('invalid-use') was not found in the value set 'AddressUse' (http://hl7.org/fhir/ValueSet/address-use|4.0.1), and a code is required from this value set  (error message = The System URI could not be determined for the code 'invalid-use' in the ValueSet 'http://hl7.org/fhir/ValueSet/address-use|4.0.1'; The provided code '#invalid-use' was not found in the value set 'http://hl7.org/fhir/ValueSet/address-use|4.0.1')"
+          },
+          "expression": [
+            "Patient.address[0].use"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 9
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 55
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE"
+            }
+          ],
+          "severity": "error",
+          "code": "invalid",
+          "details": {
+            "text": "Example URLs are not allowed in this context (http://hospital.example.org/patients)"
+          },
+          "expression": [
+            "Patient.identifier[0].system"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 20
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 28
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Type_Specific_Checks_DT_Date_Valid"
+            }
+          ],
+          "severity": "error",
+          "code": "invalid",
+          "details": {
+            "text": "Not a valid date ('not-a-date' doesn't meet format requirements for date)"
+          },
+          "expression": [
+            "Patient.birthDate"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 30
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 56
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "TerminologyEngine"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Terminology_TX_NoValid_17"
+            }
+          ],
+          "severity": "warning",
+          "code": "code-invalid",
+          "details": {
+            "text": "The value provided ('INVALID_STATE_TOO_LONG_NOT_A_REAL_CODE') was not found in the value set 'USPS Two Letter Alphabetic Codes' (http://terminology.hl7.org/ValueSet/USPS-State|1.0.0), and a code should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable)  (error message = The System URI could not be determined for the code 'INVALID_STATE_TOO_LONG_NOT_A_REAL_CODE' in the ValueSet 'http://terminology.hl7.org/ValueSet/USPS-State|1.0.0': include #0 has system https://www.usps.com/ which could not be found, and the server returned error [Error from http://tx.fhir.org/r4: Error: The cache 'bc82cb9a-8d6a-4b32-a18b-e081c050818d' is not known to this server. Caches are created with $cache-control?mode=start; this one was never created, or has expired or been released]; The System URI could not be determined for the code 'INVALID_STATE_TOO_LONG_NOT_A_REAL_CODE' in the ValueSet 'http://terminology.hl7.org/ValueSet/USPS-State|1.0.0')"
+          },
+          "expression": [
+            "Patient.address[0].state"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 2
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "Patient"
+          ]
+        }
+      ]
+    },
+    "status": "FAILED",
+    "compliance_score": 44,
+    "ig_name": "hl7.fhir.us.core",
+    "ig_version": "6.1.0",
+    "profile_url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient",
+    "execution_time": "0.880s"
+  }
+}

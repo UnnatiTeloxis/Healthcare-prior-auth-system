@@ -1,0 +1,202 @@
+{
+  "meta": {
+    "id": "2026-07-14_16-09_Frontend-Validation-Patient---Invalid",
+    "name": "Frontend Validation: Patient - Invalid",
+    "timestamp": "2026-07-14T16:09:44"
+  },
+  "request": {
+    "resource": {
+      "resourceType": "Patient"
+    },
+    "profiles": [],
+    "resource_type": null
+  },
+  "response": {
+    "valid": false,
+    "resource_type": "Patient",
+    "profiles": [
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0"
+    ],
+    "summary": "Validation failed with 3 error(s) | Missing required: Patient",
+    "error_count": 3,
+    "warning_count": 1,
+    "info_count": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "message": "Patient.gender: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0)",
+        "location": "Patient",
+        "line": 1,
+        "column": 27,
+        "json_path": "$",
+        "suggestion": "Add the required element or provide the allowed data-absent-reason extension.",
+        "rule_id": "us-core-patient|6.1.0-required",
+        "reference": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0#cardinality"
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "message": "Patient.identifier: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0)",
+        "location": "Patient",
+        "line": 1,
+        "column": 27,
+        "json_path": "$",
+        "suggestion": "Add the required element or provide the allowed data-absent-reason extension.",
+        "rule_id": "us-core-patient|6.1.0-required",
+        "reference": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0#cardinality"
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "message": "Patient.name: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0)",
+        "location": "Patient",
+        "line": 1,
+        "column": 27,
+        "json_path": "$",
+        "suggestion": "Add the required element or provide the allowed data-absent-reason extension.",
+        "rule_id": "us-core-patient|6.1.0-required",
+        "reference": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0#cardinality"
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "location": "Patient",
+        "line": 1,
+        "column": 27,
+        "json_path": "$",
+        "suggestion": "Review the warning and align the element with the IG's guidance when applicable.",
+        "rule_id": "us-core-patient|6.1.0-profile-conformance",
+        "reference": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0#invariant"
+      }
+    ],
+    "operation_outcome": {
+      "resourceType": "OperationOutcome",
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>error</td><td>Patient</td><td>structure</td><td>Patient.gender: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0)</td><td/><td>InstanceValidator</td></tr><tr><td>error</td><td>Patient</td><td>structure</td><td>Patient.identifier: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0)</td><td/><td>InstanceValidator</td></tr><tr><td>error</td><td>Patient</td><td>structure</td><td>Patient.name: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0)</td><td/><td>InstanceValidator</td></tr><tr><td>warning</td><td>Patient</td><td>invariant</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "issue": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 27
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Validation_VAL_Profile_Minimum"
+            }
+          ],
+          "severity": "error",
+          "code": "structure",
+          "details": {
+            "text": "Patient.gender: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0)"
+          },
+          "expression": [
+            "Patient"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 27
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Validation_VAL_Profile_Minimum"
+            }
+          ],
+          "severity": "error",
+          "code": "structure",
+          "details": {
+            "text": "Patient.identifier: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0)"
+          },
+          "expression": [
+            "Patient"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 27
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "Validation_VAL_Profile_Minimum"
+            }
+          ],
+          "severity": "error",
+          "code": "structure",
+          "details": {
+            "text": "Patient.name: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0)"
+          },
+          "expression": [
+            "Patient"
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+              "valueInteger": 27
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+              "valueString": "InstanceValidator"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+              "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+            }
+          ],
+          "severity": "warning",
+          "code": "invariant",
+          "details": {
+            "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          },
+          "expression": [
+            "Patient"
+          ]
+        }
+      ]
+    },
+    "status": "FAILED",
+    "compliance_score": 65,
+    "ig_name": "hl7.fhir.us.core",
+    "ig_version": "6.1.0",
+    "profile_url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0",
+    "execution_time": "0.499s"
+  }
+}
