@@ -1,0 +1,25 @@
+{
+  "resourceType": "Patient",
+  "id": "mcode-pt-2",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-patient"
+    ]
+  },
+  "identifier": [
+    {
+      "system": "http://cancercenter.example.org/mrn",
+      "value": "ONC-1002"
+    }
+  ],
+  "name": [
+    {
+      "family": "Patient2",
+      "given": [
+        "Oncology"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1952-06-15"
+}

@@ -1,0 +1,22 @@
+{
+  "resourceType": "Patient",
+  "id": "tho-simple-valid",
+  "name": [
+    {
+      "family": "Chen",
+      "given": [
+        "Li"
+      ]
+    }
+  ],
+  "gender": "female",
+  "maritalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus",
+        "code": "S",
+        "display": "Never Married"
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "resourceType": "Observation",
+  "id": "ehr-vs-29463-7",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-vital-signs"
+    ]
+  },
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "vital-signs"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "29463-7",
+        "display": "Body weight"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/ehr-admit-001"
+  },
+  "effectiveDateTime": "2026-07-18T09:20:00-05:00",
+  "valueQuantity": {
+    "value": 70.5,
+    "system": "http://unitsofmeasure.org",
+    "code": "1"
+  }
+}

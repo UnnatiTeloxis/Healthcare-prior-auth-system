@@ -1,0 +1,10 @@
+{
+  "resourceType": "Patient",
+  "id": "vrdr-dec-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/vrdr/StructureDefinition/vrdr-decedent"
+    ]
+  },
+  "gender": "not-valid"
+}

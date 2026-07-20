@@ -1,0 +1,16 @@
+{
+  "resourceType": "MeasureReport",
+  "id": "ra-003",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-measurereport"
+    ]
+  },
+  "status": "complete",
+  "type": "individual",
+  "measure": "http://example.org/Measure/ra-model-3",
+  "subject": {
+    "reference": "Patient/ra-003"
+  },
+  "date": "2026-01-20"
+}

@@ -1,0 +1,10 @@
+{
+  "resourceType": "Group",
+  "id": "deqm-grp-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-group-deqm"
+    ]
+  },
+  "type": "person"
+}

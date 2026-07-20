@@ -1,0 +1,10 @@
+{
+  "resourceType": "Observation",
+  "id": "ecr-obs-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/ecr/StructureDefinition/rr-reportability-information-observation"
+    ]
+  },
+  "status": "final"
+}

@@ -9,7 +9,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # Database
+    # Database — default Docker Compose; override for fhir_validator_db1
     DATABASE_URL: str = "postgresql://interop:interop123@postgres:5432/interop"
     DATABASE_POOL_SIZE: int = 10
     DATABASE_MAX_OVERFLOW: int = 20
@@ -23,13 +23,19 @@ class Settings(BaseSettings):
     API_PORT: int = 8000
     API_DEBUG: bool = True
     API_RELOAD: bool = True
+    FRONTEND_URL: str = "http://localhost:3000"
 
     # FHIR
     FHIR_SERVER_URL: str = "http://localhost:8080"
     FHIR_SERVER_TIMEOUT: int = 30
     FHIR_SERVER_RETRIES: int = 3
     INFERNO_VALIDATOR_URL: str = "http://fhir-validator-wrapper:4567"
-    DEFAULT_IGS: str = "hl7.fhir.us.core#6.1.0"
+    DEFAULT_IGS: str = (
+        "hl7.fhir.us.core#9.0.0,"
+        "hl7.fhir.us.davinci-crd#2.2.1,"
+        "hl7.fhir.us.davinci-dtr#2.2.0,"
+        "hl7.fhir.us.davinci-pas#2.2.1"
+    )
     CORS_ORIGINS: str = "*"
 
     # Terminology Server
@@ -50,10 +56,17 @@ class Settings(BaseSettings):
     CRD_SCENARIOS_PATH: str = "/app/data/scenarios/crd"
     VALIDATION_RULES_PATH: str = "/app/data/validation_rules"
 
-    # Security
+    # Security (AUTH_* preferred; JWT_* accepted as aliases via env)
     AUTH_SECRET_KEY: str = Field(default="change-me-to-a-long-random-secret")
     AUTH_ALGORITHM: str = "HS256"
-    AUTH_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    AUTH_ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
+    JWT_SECRET_KEY: str | None = None
+    JWT_ALGORITHM: str | None = None
+    JWT_EXPIRE_MINUTES: int | None = None
+
+    # Google OAuth (optional)
+    GOOGLE_CLIENT_ID: str | None = None
+    GOOGLE_CLIENT_SECRET: str | None = None
 
     # Logging
     LOG_LEVEL: str = "INFO"
@@ -66,14 +79,16 @@ class Settings(BaseSettings):
 
     @property
     def SECRET_KEY(self) -> str:
-        return self.AUTH_SECRET_KEY
+        return self.JWT_SECRET_KEY or self.AUTH_SECRET_KEY
 
     @property
     def ALGORITHM(self) -> str:
-        return self.AUTH_ALGORITHM
+        return self.JWT_ALGORITHM or self.AUTH_ALGORITHM
 
     @property
     def ACCESS_TOKEN_EXPIRE_MINUTES(self) -> int:
+        if self.JWT_EXPIRE_MINUTES is not None:
+            return self.JWT_EXPIRE_MINUTES
         return self.AUTH_ACCESS_TOKEN_EXPIRE_MINUTES
 
     @property

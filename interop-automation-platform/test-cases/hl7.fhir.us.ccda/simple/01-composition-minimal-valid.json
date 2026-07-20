@@ -1,0 +1,33 @@
+{
+  "resourceType": "Composition",
+  "id": "ccda-simple-comp",
+  "status": "final",
+  "type": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "34133-9",
+        "display": "Summary of episode note"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "date": "2026-03-01T12:00:00Z",
+  "author": [
+    {
+      "reference": "Practitioner/author-1"
+    }
+  ],
+  "title": "C-CDA Summary Document",
+  "section": [
+    {
+      "title": "Problems",
+      "text": {
+        "status": "generated",
+        "div": "<div>Problems</div>"
+      }
+    }
+  ]
+}

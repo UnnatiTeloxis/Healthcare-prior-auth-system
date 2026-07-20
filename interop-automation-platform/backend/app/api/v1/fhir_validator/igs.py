@@ -13,6 +13,7 @@ router = APIRouter()
 class LoadIGRequest(BaseModel):
     package_name: str
     version: str | None = None
+    wait: bool = True
 
 
 @router.get("/", response_model=dict[str, Any])
@@ -46,7 +47,11 @@ async def load_ig_on_demand(request: LoadIGRequest):
     Subsequent requests return cached result in <10ms.
     """
     try:
-        result = await ig_manager.load_ig(request.package_name, request.version)
+        result = await ig_manager.load_ig(
+            request.package_name,
+            request.version,
+            wait=request.wait,
+        )
         return {
             "success": True,
             "ig": result,
@@ -56,6 +61,17 @@ async def load_ig_on_demand(request: LoadIGRequest):
             status_code=400,
             detail=f"Failed to load IG {request.package_name}: {exc}",
         ) from exc
+
+
+@router.get("/profile-cache")
+async def get_profile_cache():
+    """Pre-extracted profile URLs for all popular IGs (instant dropdown selection)."""
+    cache = ig_manager.get_profile_cache()
+    return {
+        "success": True,
+        "count": len(cache),
+        "cache": cache,
+    }
 
 
 @router.get("/loaded")
@@ -80,17 +96,52 @@ async def load_ig(package_id: str, version: str | None = None):
         ) from exc
 
 
-@router.post("/upload", response_model=IGInfo)
+@router.post("/upload")
 async def upload_ig(file: UploadFile = File(...)):
+    """
+    Upload a custom FHIR NPM package (.tgz / .tar.gz), load it into Inferno,
+    and return package metadata + StructureDefinition profile URLs for validation.
+    """
     if not file.filename or not file.filename.endswith((".tgz", ".tar.gz")):
         raise HTTPException(status_code=400, detail="File must be a .tgz or .tar.gz package")
 
     try:
         package_data = await file.read()
-        result = await inferno_client.upload_custom_ig(package_data)
-        return IGInfo(**result)
+        if not package_data:
+            raise HTTPException(status_code=400, detail="Uploaded package is empty")
+
+        loaded = await ig_manager.ingest_uploaded_package(package_data, file.filename)
+        return {
+            "id": loaded.get("package_name"),
+            "name": loaded.get("package_name"),
+            "version": loaded.get("version"),
+            "title": loaded.get("title") or loaded.get("package_name"),
+            "canonical_url": loaded.get("canonical") or None,
+            "profiles": loaded.get("profiles") or [],
+            "extension_urls": loaded.get("extension_urls") or [],
+            "profiles_by_type": loaded.get("profiles_by_type") or {},
+            "status": "ready",
+            "uploaded": True,
+            "package_kind": _classify_package(loaded),
+        }
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=400, detail=f"Failed to upload IG: {exc}") from exc
+
+
+def _classify_package(loaded: dict) -> str:
+    """Hint for the UI: resource IG vs extensions/terminology support package."""
+    name = (loaded.get("package_name") or "").lower()
+    profiles = loaded.get("profiles") or []
+    extensions = loaded.get("extension_urls") or []
+    if "terminology" in name:
+        return "terminology"
+    if "extensions" in name or (not profiles and extensions):
+        return "extensions"
+    if profiles:
+        return "implementation-guide"
+    return "support"
 
 
 @router.get("/version")

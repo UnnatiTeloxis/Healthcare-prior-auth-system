@@ -1,0 +1,11 @@
+{
+  "resourceType": "Observation",
+  "id": "vrdr-cod-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/vrdr/StructureDefinition/vrdr-cause-of-death-part1"
+    ]
+  },
+  "status": "final",
+  "valueString": "Wrong type"
+}

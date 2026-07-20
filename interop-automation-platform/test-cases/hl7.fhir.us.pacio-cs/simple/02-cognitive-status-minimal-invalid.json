@@ -1,0 +1,10 @@
+{
+  "resourceType": "Observation",
+  "id": "pcs-obs-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/pacio-cs/StructureDefinition/pacio-cs"
+    ]
+  },
+  "status": "final"
+}

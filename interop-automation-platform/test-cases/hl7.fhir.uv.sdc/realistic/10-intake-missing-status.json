@@ -1,0 +1,17 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "sdc-intake-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire"
+    ]
+  },
+  "title": "Broken intake",
+  "item": [
+    {
+      "linkId": "1",
+      "type": "string",
+      "text": "Name"
+    }
+  ]
+}

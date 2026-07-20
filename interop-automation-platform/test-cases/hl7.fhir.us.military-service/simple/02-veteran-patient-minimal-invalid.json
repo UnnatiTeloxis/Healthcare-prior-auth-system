@@ -1,0 +1,10 @@
+{
+  "resourceType": "Patient",
+  "id": "ms-vet-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/military-service/StructureDefinition/usveteran"
+    ]
+  },
+  "gender": "invalid-gender"
+}

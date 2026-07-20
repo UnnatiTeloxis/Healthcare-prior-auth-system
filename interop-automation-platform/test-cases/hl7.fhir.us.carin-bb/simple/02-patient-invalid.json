@@ -1,0 +1,10 @@
+{
+  "resourceType": "Patient",
+  "id": "carin-pt-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient"
+    ]
+  },
+  "gender": "xyz"
+}

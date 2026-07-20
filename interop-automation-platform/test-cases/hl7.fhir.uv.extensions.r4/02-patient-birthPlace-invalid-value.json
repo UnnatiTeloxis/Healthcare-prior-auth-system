@@ -1,0 +1,17 @@
+{
+  "resourceType": "Patient",
+  "id": "ext-birthplace-invalid",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/patient-birthPlace",
+      "valueString": "Boston, MA"
+    }
+  ],
+  "name": [
+    {
+      "family": "Doe",
+      "given": ["Jane"]
+    }
+  ],
+  "gender": "female"
+}

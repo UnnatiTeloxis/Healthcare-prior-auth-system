@@ -1,0 +1,14 @@
+{
+  "resourceType": "Observation",
+  "id": "odh-job-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/odh/StructureDefinition/odh-PastOrPresentJob"
+    ]
+  },
+  "status": "final",
+  "code": {
+    "text": "Job"
+  },
+  "valueString": "Should be CodeableConcept"
+}

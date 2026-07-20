@@ -1,0 +1,20 @@
+{
+  "resourceType": "Observation",
+  "id": "pfs-obs-full",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/pacio-fs/StructureDefinition/pacio-fs"
+    ]
+  },
+  "status": "final",
+  "code": {
+    "text": "Functional status assessment"
+  },
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "effectiveDateTime": "2026-01-05T11:00:00Z",
+  "valueCodeableConcept": {
+    "text": "Requires assistance with bathing"
+  }
+}

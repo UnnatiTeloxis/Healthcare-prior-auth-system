@@ -1,0 +1,10 @@
+{
+  "resourceType": "Patient",
+  "id": "ipa-pt-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/ipa/StructureDefinition/ipa-patient"
+    ]
+  },
+  "gender": "invalid"
+}

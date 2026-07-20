@@ -1,0 +1,25 @@
+{
+  "resourceType": "Patient",
+  "id": "mcode-pt-8",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-patient"
+    ]
+  },
+  "identifier": [
+    {
+      "system": "http://cancercenter.example.org/mrn",
+      "value": "ONC-1008"
+    }
+  ],
+  "name": [
+    {
+      "family": "Patient8",
+      "given": [
+        "Oncology"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1958-06-15"
+}

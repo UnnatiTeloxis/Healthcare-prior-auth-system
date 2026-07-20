@@ -1,0 +1,24 @@
+{
+  "resourceType": "QuestionnaireResponse",
+  "id": "dtr-simple-qr",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse"
+    ]
+  },
+  "questionnaire": "http://example.org/Questionnaire/simple",
+  "status": "completed",
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "item": [
+    {
+      "linkId": "1",
+      "answer": [
+        {
+          "valueBoolean": true
+        }
+      ]
+    }
+  ]
+}

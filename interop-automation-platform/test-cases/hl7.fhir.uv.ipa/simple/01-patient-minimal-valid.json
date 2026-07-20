@@ -1,0 +1,25 @@
+{
+  "resourceType": "Patient",
+  "id": "ipa-pt-1",
+  "identifier": [
+    {
+      "system": "http://hospital.example.org/mrn",
+      "value": "MRN-ipa-pt-1"
+    }
+  ],
+  "name": [
+    {
+      "family": "Mueller",
+      "given": [
+        "Hans"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1980-06-15",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/ipa/StructureDefinition/ipa-patient"
+    ]
+  }
+}

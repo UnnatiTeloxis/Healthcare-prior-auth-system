@@ -1,0 +1,10 @@
+{
+  "resourceType": "Observation",
+  "id": "pfs-obs-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/pacio-fs/StructureDefinition/pacio-fs"
+    ]
+  },
+  "status": "final"
+}

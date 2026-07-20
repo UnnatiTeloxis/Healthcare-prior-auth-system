@@ -1,0 +1,7 @@
+{
+  "resourceType": "Claim",
+  "id": "pas-claim-bad",
+  "status": "active",
+  "use": "preauthorization",
+  "created": "2026-07-18"
+}

@@ -1,0 +1,10 @@
+{
+  "resourceType": "Task",
+  "id": "smart-task-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/smart-app-launch/StructureDefinition/task-standalone-launch"
+    ]
+  },
+  "status": "requested"
+}

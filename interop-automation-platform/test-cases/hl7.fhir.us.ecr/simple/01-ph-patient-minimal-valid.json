@@ -1,0 +1,25 @@
+{
+  "resourceType": "Patient",
+  "id": "ecr-pt-1",
+  "identifier": [
+    {
+      "system": "http://hospital.example.org/mrn",
+      "value": "MRN-ecr-pt-1"
+    }
+  ],
+  "name": [
+    {
+      "family": "Wilson",
+      "given": [
+        "Jordan"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1980-06-15",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-patient"
+    ]
+  }
+}

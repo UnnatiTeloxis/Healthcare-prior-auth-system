@@ -1,0 +1,10 @@
+{
+  "resourceType": "Encounter",
+  "id": "alerts-enc-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-alerts/StructureDefinition/adt-notification-encounter"
+    ]
+  },
+  "status": "finished"
+}

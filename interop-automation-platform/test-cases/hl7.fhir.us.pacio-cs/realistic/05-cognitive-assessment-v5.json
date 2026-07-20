@@ -1,0 +1,20 @@
+{
+  "resourceType": "Observation",
+  "id": "pcs-005",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/pacio-cs/StructureDefinition/pacio-cs"
+    ]
+  },
+  "status": "final",
+  "code": {
+    "text": "Cognitive status"
+  },
+  "subject": {
+    "reference": "Patient/pcs-005"
+  },
+  "effectiveDateTime": "2026-01-05",
+  "valueCodeableConcept": {
+    "text": "Assessment result 5"
+  }
+}

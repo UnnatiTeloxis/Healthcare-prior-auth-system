@@ -1,0 +1,25 @@
+{
+  "resourceType": "Patient",
+  "id": "mcode-pt-4",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-patient"
+    ]
+  },
+  "identifier": [
+    {
+      "system": "http://cancercenter.example.org/mrn",
+      "value": "ONC-1004"
+    }
+  ],
+  "name": [
+    {
+      "family": "Patient4",
+      "given": [
+        "Oncology"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1954-06-15"
+}

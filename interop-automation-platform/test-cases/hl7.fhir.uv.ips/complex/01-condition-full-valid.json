@@ -1,0 +1,29 @@
+{
+  "resourceType": "Condition",
+  "id": "ips-cond-1",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/ips/StructureDefinition/Condition-uv-ips"
+    ]
+  },
+  "clinicalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active"
+      }
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "38341003",
+        "display": "Hypertension"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/ips-pt-1"
+  }
+}

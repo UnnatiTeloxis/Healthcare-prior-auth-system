@@ -1,0 +1,9 @@
+{
+  "resourceType": "Organization",
+  "id": "smart-org-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/smart-app-launch/StructureDefinition/user-access-brand"
+    ]
+  }
+}

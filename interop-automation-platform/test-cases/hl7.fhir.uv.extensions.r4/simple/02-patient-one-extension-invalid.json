@@ -1,0 +1,15 @@
+{
+  "resourceType": "Patient",
+  "id": "ext-simple-invalid",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/patient-birthPlace",
+      "valueBoolean": true
+    }
+  ],
+  "name": [
+    {
+      "family": "Rivera"
+    }
+  ]
+}

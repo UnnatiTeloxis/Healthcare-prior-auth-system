@@ -1,0 +1,15 @@
+{
+  "resourceType": "Task",
+  "id": "pcde-task-1",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-pcde/StructureDefinition/pcde-task-request"
+    ]
+  },
+  "status": "requested",
+  "intent": "order",
+  "for": {
+    "reference": "Patient/example"
+  },
+  "description": "Request coverage decision exchange"
+}

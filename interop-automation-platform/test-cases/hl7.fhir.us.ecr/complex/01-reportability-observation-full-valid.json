@@ -1,0 +1,20 @@
+{
+  "resourceType": "Observation",
+  "id": "ecr-obs-1",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/ecr/StructureDefinition/rr-reportability-information-observation"
+    ]
+  },
+  "status": "final",
+  "code": {
+    "text": "Reportability information"
+  },
+  "subject": {
+    "reference": "Patient/ecr-pt-1"
+  },
+  "effectiveDateTime": "2026-02-10T09:00:00Z",
+  "valueCodeableConcept": {
+    "text": "Reportable condition detected"
+  }
+}

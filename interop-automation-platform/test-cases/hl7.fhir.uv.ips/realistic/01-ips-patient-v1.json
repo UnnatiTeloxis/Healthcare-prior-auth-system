@@ -1,0 +1,25 @@
+{
+  "resourceType": "Patient",
+  "id": "ips-001",
+  "identifier": [
+    {
+      "system": "http://hospital.example.org/mrn",
+      "value": "MRN-ips-001"
+    }
+  ],
+  "name": [
+    {
+      "family": "Bernard",
+      "given": [
+        "Traveler1"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1980-06-15",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/ips/StructureDefinition/Patient-uv-ips"
+    ]
+  }
+}

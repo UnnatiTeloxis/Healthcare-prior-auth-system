@@ -1,0 +1,10 @@
+{
+  "resourceType": "Coverage",
+  "id": "crd-simple-coverage-invalid",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-crd/StructureDefinition/profile-coverage"
+    ]
+  },
+  "status": "not-a-status"
+}

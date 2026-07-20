@@ -1,0 +1,10 @@
+{
+  "resourceType": "CarePlan",
+  "id": "pcde-cp-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-pcde/StructureDefinition/profile-careplan"
+    ]
+  },
+  "status": "active"
+}

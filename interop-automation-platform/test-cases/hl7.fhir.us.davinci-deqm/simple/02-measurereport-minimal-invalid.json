@@ -1,0 +1,11 @@
+{
+  "resourceType": "MeasureReport",
+  "id": "deqm-mr-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm"
+    ]
+  },
+  "status": "complete",
+  "type": "individual"
+}

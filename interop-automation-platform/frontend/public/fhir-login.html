@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In | FHIR Conformance Validator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    :root {
+      --primary: #0f172a;
+      --primary-dark: #0b1220;
+      --secondary: #60a5fa;
+      --accent: #38bdf8;
+      --accent-2: #8b5cf6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --info: #3b82f6;
+      --bg: #f1f5f9;
+      --card: rgba(255,255,255,0.72);
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 22px 60px rgba(15, 23, 42, 0.16);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --transition: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      --focus: 0 0 0 4px rgba(37, 99, 235, 0.22);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      inset: -40vmax;
+      pointer-events: none;
+      z-index: -2;
+    }
+    body::before {
+      background:
+        radial-gradient(closest-side at 25% 20%, rgba(6,182,212,0.22), transparent 60%),
+        radial-gradient(closest-side at 75% 30%, rgba(139,92,246,0.20), transparent 62%),
+        radial-gradient(closest-side at 55% 75%, rgba(37,99,235,0.18), transparent 58%),
+        radial-gradient(closest-side at 20% 85%, rgba(15,23,42,0.08), transparent 60%);
+      filter: blur(18px);
+      animation: driftBg 16s ease-in-out infinite alternate;
+    }
+    body::after {
+      background-image: radial-gradient(rgba(15,23,42,0.08) 1px, transparent 1px);
+      background-size: 18px 18px;
+      opacity: 0.55;
+      mask-image: radial-gradient(circle at 35% 20%, rgba(0,0,0,1), transparent 62%);
+    }
+    @keyframes driftBg {
+      0%   { transform: translate3d(-2%, -1%, 0) scale(1); }
+      50%  { transform: translate3d(3%, 2%, 0) scale(1.03); }
+      100% { transform: translate3d(-1%, 3%, 0) scale(1.02); }
+    }
+    .auth-shell { width: 100%; max-width: 460px; }
+    .brand {
+      text-align: center;
+      margin-bottom: 1.25rem;
+    }
+    .brand-icon {
+      width: 56px; height: 56px;
+      margin: 0 auto 0.75rem;
+      background: rgba(255,255,255,0.18);
+      backdrop-filter: blur(12px);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      border: 1px solid rgba(255,255,255,0.25);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+      background: linear-gradient(135deg, rgba(96,165,250,0.35), rgba(56,189,248,0.35));
+    }
+    .brand h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(90deg, #0f172a 0%, var(--secondary) 55%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .brand p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem; }
+    .card {
+      background: var(--card);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.55);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      padding: 1.75rem 1.5rem;
+    }
+    .card h2 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+    }
+    .card .subtitle { color: var(--text-muted); font-size: 0.9rem; margin: 0.35rem 0 1.25rem; }
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.25rem 0;
+    }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 0.4rem;
+    }
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.9375rem;
+      background: rgba(255,255,255,0.9);
+      color: var(--text);
+      transition: all var(--transition);
+      min-height: 48px;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: var(--secondary);
+      box-shadow: var(--focus);
+    }
+    .row-between {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin: 0.25rem 0 1.1rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+    .check {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.8rem 1.5rem;
+      min-height: 48px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none !important; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(26,86,219,0.35);
+    }
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(26,86,219,0.4);
+    }
+    .btn-google {
+      background: rgba(255,255,255,0.92);
+      color: var(--primary);
+      border: 2px solid var(--border);
+    }
+    .btn-google:hover:not(:disabled) { background: #fff; border-color: #cbd5e1; }
+    .footer-text {
+      text-align: center;
+      margin-top: 1.1rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .footer-text a {
+      color: var(--secondary);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .footer-text a:hover { text-decoration: underline; }
+    .alert {
+      display: none;
+      margin-bottom: 1rem;
+      padding: 0.75rem 0.9rem;
+      border-radius: var(--radius-sm);
+      border-left: 4px solid var(--error);
+      background: rgba(239,68,68,0.08);
+      color: #991b1b;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    .alert.show { display: block; }
+    .alert.success {
+      border-left-color: var(--success);
+      background: rgba(16,185,129,0.1);
+      color: #065f46;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-shell">
+    <div class="brand">
+      <div class="brand-icon" aria-hidden="true">🔍</div>
+      <h1>FHIR Conformance Validator</h1>
+      <p>Interop Automation Platform</p>
+    </div>
+
+    <div class="card">
+      <h2>Welcome Back</h2>
+      <p class="subtitle">Sign in to continue your validation work</p>
+      <div class="alert" id="alertBox" role="alert"></div>
+
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input class="form-input" type="email" id="email" name="email" autocomplete="email" placeholder="you@example.com" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input class="form-input" type="password" id="password" name="password" autocomplete="current-password" placeholder="••••••••" required />
+        </div>
+        <div class="row-between">
+          <label class="check"><input type="checkbox" id="rememberMe" /> Remember Me</label>
+        </div>
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          <i class="fas fa-key"></i> Sign In
+        </button>
+      </form>
+
+      <hr class="divider" />
+
+      <button type="button" class="btn btn-google" id="googleBtn" style="display:none;">
+        <i class="fab fa-google"></i> Sign in with Google
+      </button>
+
+      <p class="footer-text">
+        Don't have an account? <a href="/fhir-register.html">Sign Up</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const TOKEN_KEY = 'access_token';
+    const USER_KEY = 'fhir_auth_user';
+    const REMEMBER_KEY = 'fhir_auth_remember';
+
+    const alertBox = document.getElementById('alertBox');
+    const form = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const googleBtn = document.getElementById('googleBtn');
+
+    function showAlert(message, type = 'error') {
+      alertBox.textContent = message;
+      alertBox.className = 'alert show' + (type === 'success' ? ' success' : '');
+    }
+
+    function clearAlert() {
+      alertBox.className = 'alert';
+      alertBox.textContent = '';
+    }
+
+    function saveSession(token, user, remember) {
+      localStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(USER_KEY, JSON.stringify(user || {}));
+      localStorage.setItem(REMEMBER_KEY, remember ? '1' : '0');
+    }
+
+    async function redirectIfLoggedIn() {
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (!token) return;
+      try {
+        const res = await fetch('/api/v1/auth/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          window.location.replace('/fhir-validator.html');
+        } else {
+          localStorage.removeItem(TOKEN_KEY);
+          localStorage.removeItem(USER_KEY);
+        }
+      } catch (_) { /* stay on login */ }
+    }
+
+    async function loadAuthConfig() {
+      try {
+        const res = await fetch('/api/v1/auth/config');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.google_enabled) googleBtn.style.display = 'inline-flex';
+      } catch (_) { /* hide google */ }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearAlert();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const remember = document.getElementById('rememberMe').checked;
+
+      if (!email || !password) {
+        showAlert('Please fill all fields');
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showAlert('Please enter a valid email');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+
+      try {
+        const res = await fetch('/api/v1/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const detail = data.detail || 'Invalid email or password';
+          showAlert(typeof detail === 'string' ? detail : 'Invalid email or password');
+          return;
+        }
+        saveSession(data.access_token, data.user, remember);
+        showAlert('Signed in successfully', 'success');
+        window.location.replace('/fhir-validator.html');
+      } catch (_) {
+        showAlert('Network error. Check your connection.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-key"></i> Sign In';
+      }
+    });
+
+    googleBtn.addEventListener('click', () => {
+      showAlert('Google Sign-In is not configured on this server.');
+    });
+
+    redirectIfLoggedIn();
+    loadAuthConfig();
+  </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "resourceType": "CarePlan",
+  "id": "adi-cp-1",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/pacio-adi/StructureDefinition/ADI-PreferenceCarePlan"
+    ]
+  },
+  "status": "active",
+  "intent": "plan",
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "title": "Advance directive care plan"
+}

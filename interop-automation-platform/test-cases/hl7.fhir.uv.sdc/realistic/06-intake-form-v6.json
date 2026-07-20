@@ -1,0 +1,53 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "sdc-intake-v6",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire"
+    ]
+  },
+  "status": "draft",
+  "title": "Intake Form Version 6",
+  "item": [
+    {
+      "linkId": "q1",
+      "text": "Intake question 1",
+      "type": "string"
+    },
+    {
+      "linkId": "q2",
+      "text": "Intake question 2",
+      "type": "string"
+    },
+    {
+      "linkId": "q3",
+      "text": "Intake question 3",
+      "type": "string"
+    },
+    {
+      "linkId": "q4",
+      "text": "Intake question 4",
+      "type": "string"
+    },
+    {
+      "linkId": "q5",
+      "text": "Intake question 5",
+      "type": "string"
+    },
+    {
+      "linkId": "q6",
+      "text": "Intake question 6",
+      "type": "string"
+    },
+    {
+      "linkId": "q7",
+      "text": "Intake question 7",
+      "type": "string"
+    },
+    {
+      "linkId": "q8",
+      "text": "Intake question 8",
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "resourceType": "Parameters",
+  "id": "bulk-simple-export",
+  "parameter": [
+    {
+      "name": "_outputFormat",
+      "valueString": "application/fhir+ndjson"
+    },
+    {
+      "name": "_type",
+      "valueString": "Patient,Observation"
+    }
+  ]
+}

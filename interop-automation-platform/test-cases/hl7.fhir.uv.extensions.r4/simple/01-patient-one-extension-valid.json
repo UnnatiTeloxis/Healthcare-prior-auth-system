@@ -1,0 +1,23 @@
+{
+  "resourceType": "Patient",
+  "id": "ext-simple-valid",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/patient-birthPlace",
+      "valueAddress": {
+        "city": "Austin",
+        "state": "TX",
+        "country": "US"
+      }
+    }
+  ],
+  "name": [
+    {
+      "family": "Rivera",
+      "given": [
+        "Alex"
+      ]
+    }
+  ],
+  "gender": "male"
+}

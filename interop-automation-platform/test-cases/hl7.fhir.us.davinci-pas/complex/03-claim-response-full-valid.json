@@ -1,0 +1,58 @@
+{
+  "resourceType": "ClaimResponse",
+  "id": "pas-claim-response-valid",
+  "meta": {
+    "profile": ["http://hl7.org/fhir/us/davinci-pas/StructureDefinition/profile-claimresponse"]
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Prior Authorization Response - Approved</p></div>"
+  },
+  "status": "active",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/claim-type",
+        "code": "professional",
+        "display": "Professional"
+      }
+    ]
+  },
+  "use": "preauthorization",
+  "patient": {
+    "reference": "Patient/us-core-patient-valid",
+    "display": "John Smith"
+  },
+  "created": "2024-03-02",
+  "insurer": {
+    "reference": "Organization/org-payer-1",
+    "display": "Blue Cross Blue Shield"
+  },
+  "request": {
+    "reference": "Claim/pas-claim-valid"
+  },
+  "outcome": "complete",
+  "preAuthRef": "AUTH-2024-00123",
+  "item": [
+    {
+      "itemSequence": 1,
+      "adjudication": [
+        {
+          "category": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/adjudication",
+                "code": "submitted",
+                "display": "Submitted Amount"
+              }
+            ]
+          },
+          "amount": {
+            "value": 1500.00,
+            "currency": "USD"
+          }
+        }
+      ]
+    }
+  ]
+}

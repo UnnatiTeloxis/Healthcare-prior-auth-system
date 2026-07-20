@@ -1,4 +1,4 @@
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 import asyncio
 import logging
 import os
@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.router import router
 from app.services.fhir_validator.inferno_client import inferno_client
+from app.services.fhir_validator.ig_manager import ig_manager
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +50,8 @@ def _resolve_fhir_validator_html() -> Path | None:
     candidates = [
         Path("/app/frontend/dist/fhir-validator.html"),
         Path("/app/frontend/public/fhir-validator.html"),
+        Path(__file__).resolve().parent.parent.parent / "frontend" / "dist" / "fhir-validator.html",
+        Path(__file__).resolve().parent.parent.parent / "frontend" / "public" / "fhir-validator.html",
         Path(__file__).resolve().parent.parent / "frontend" / "dist" / "fhir-validator.html",
         Path(__file__).resolve().parent.parent / "frontend" / "public" / "fhir-validator.html",
     ]
@@ -73,6 +76,7 @@ def _resolve_fhir_validator_public_dir() -> Path | None:
 
     candidates = [
         Path("/app/frontend/public"),
+        Path(__file__).resolve().parent.parent.parent / "frontend" / "public",
         Path(__file__).resolve().parent.parent / "frontend" / "public",
     ]
     if FHIR_VALIDATOR_HTML:
@@ -89,22 +93,33 @@ FHIR_VALIDATOR_PUBLIC = _resolve_fhir_validator_public_dir()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Warm Inferno + pre-register all IGs so dropdown selection is instant.
+    # Ensure auth tables exist when pointing at a fresh DB (no-op if already created).
+    try:
+        from app.database import Base, engine
+        import app.models.user  # noqa: F401 — register models
+
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database models ready")
+    except Exception as exc:
+        logger.warning("Database init skipped/failed: %s — auth may be unavailable", exc)
+
     preload_task = asyncio.create_task(_warm_and_register_igs())
     try:
         yield
     finally:
         preload_task.cancel()
-        with asyncio.suppress(asyncio.CancelledError):
+        with suppress(asyncio.CancelledError):
             await preload_task
         await inferno_client.close()
 
 
 async def _warm_and_register_igs():
-    """Warm up Inferno engine. IGs loaded on-demand when selected."""
+    """Warm Inferno and pre-cache local IG profiles for instant dropdown use."""
     try:
+        warmed = ig_manager.warm_local_profile_cache()
+        logger.info("Local IG profile cache ready (%d packages)", warmed)
         await inferno_client.warm_up()
-        logger.info("Inferno engine warmed up, validation ready")
+        logger.info("Inferno engine warmed up")
     except Exception as exc:
         logger.warning("Warm-up incomplete: %s — validation will retry on request", exc)
 
@@ -128,12 +143,35 @@ app.add_middleware(
 app.include_router(router, prefix="/api/v1")
 
 
+def _public_html(name: str) -> Path | None:
+    if not FHIR_VALIDATOR_PUBLIC:
+        return None
+    candidate = FHIR_VALIDATOR_PUBLIC / name
+    return candidate if candidate.is_file() else None
+
+
 if FHIR_VALIDATOR_HTML:
     logger.info("FHIR validator UI available at /fhir-validator.html (%s)", FHIR_VALIDATOR_HTML)
 
     @app.get("/fhir-validator.html")
     async def serve_fhir_validator_page():
         return FileResponse(FHIR_VALIDATOR_HTML)
+
+    login_html = _public_html("fhir-login.html")
+    register_html = _public_html("fhir-register.html")
+    if login_html:
+        logger.info("Auth login UI available at /fhir-login.html")
+
+        @app.get("/fhir-login.html")
+        async def serve_fhir_login_page():
+            return FileResponse(login_html)
+
+    if register_html:
+        logger.info("Auth register UI available at /fhir-register.html")
+
+        @app.get("/fhir-register.html")
+        async def serve_fhir_register_page():
+            return FileResponse(register_html)
 
     if FHIR_VALIDATOR_PUBLIC:
         worker_js = FHIR_VALIDATOR_PUBLIC / "fhir-validator-worker.js"
@@ -159,6 +197,8 @@ if FRONTEND_DIST:
 
     @app.get("/")
     async def serve_frontend_root():
+        if _public_html("fhir-login.html") or (FRONTEND_DIST / "fhir-login.html").is_file():
+            return RedirectResponse(url="/fhir-login.html", status_code=302)
         validator_path = FRONTEND_DIST / "fhir-validator.html"
         if validator_path.is_file():
             return RedirectResponse(url="/fhir-validator.html", status_code=302)
@@ -187,6 +227,8 @@ else:
 
     @app.get("/")
     async def root():
+        if _public_html("fhir-login.html"):
+            return RedirectResponse(url="/fhir-login.html", status_code=302)
         if FHIR_VALIDATOR_HTML:
             return RedirectResponse(url="/fhir-validator.html", status_code=302)
         return {

@@ -1,0 +1,6 @@
+{
+  "resourceType": "Composition",
+  "id": "ccda-simple-comp-bad",
+  "status": "entered-in-error",
+  "title": "Missing required fields"
+}

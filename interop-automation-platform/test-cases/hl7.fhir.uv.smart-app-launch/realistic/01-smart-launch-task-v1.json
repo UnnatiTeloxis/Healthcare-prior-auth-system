@@ -1,0 +1,12 @@
+{
+  "resourceType": "Task",
+  "id": "smart-001",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/smart-app-launch/StructureDefinition/task-standalone-launch"
+    ]
+  },
+  "status": "requested",
+  "intent": "order",
+  "description": "Launch SMART app context 1"
+}

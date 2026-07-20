@@ -1,0 +1,22 @@
+{
+  "resourceType": "MedicationKnowledge",
+  "id": "form-drug-1",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-drug-formulary/StructureDefinition/usdf-FormularyDrug"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "197361",
+        "display": "Metformin"
+      }
+    ]
+  },
+  "status": "active",
+  "doseForm": {
+    "text": "Tablet"
+  }
+}

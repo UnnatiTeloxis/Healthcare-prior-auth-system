@@ -1,0 +1,25 @@
+{
+  "resourceType": "Patient",
+  "id": "us-core-simple-patient",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+    ]
+  },
+  "identifier": [
+    {
+      "system": "http://example.org/mrn",
+      "value": "MRN-1001"
+    }
+  ],
+  "name": [
+    {
+      "family": "Lee",
+      "given": [
+        "Sam"
+      ]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1990-01-01"
+}

@@ -1,0 +1,10 @@
+{
+  "resourceType": "MeasureReport",
+  "id": "ra-mr-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-measurereport"
+    ]
+  },
+  "status": "complete"
+}

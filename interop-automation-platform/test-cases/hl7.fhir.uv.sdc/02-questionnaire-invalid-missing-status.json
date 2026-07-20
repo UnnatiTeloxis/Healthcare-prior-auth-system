@@ -1,0 +1,19 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "sdc-demo-invalid",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire"
+    ]
+  },
+  "url": "http://example.org/fhir/Questionnaire/sdc-demo-invalid",
+  "name": "SdcDemoInvalid",
+  "title": "SDC Demo Questionnaire (invalid — missing status)",
+  "item": [
+    {
+      "linkId": "name",
+      "text": "What is your full name?",
+      "type": "string"
+    }
+  ]
+}

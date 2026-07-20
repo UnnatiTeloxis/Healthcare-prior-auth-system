@@ -1,0 +1,23 @@
+{
+  "resourceType": "Observation",
+  "id": "ms-ep-1",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/military-service/StructureDefinition/military-service-episode"
+    ]
+  },
+  "status": "final",
+  "code": {
+    "text": "Military service episode"
+  },
+  "subject": {
+    "reference": "Patient/ms-vet-1"
+  },
+  "effectivePeriod": {
+    "start": "2010-01-01",
+    "end": "2014-06-30"
+  },
+  "valueCodeableConcept": {
+    "text": "Active duty"
+  }
+}

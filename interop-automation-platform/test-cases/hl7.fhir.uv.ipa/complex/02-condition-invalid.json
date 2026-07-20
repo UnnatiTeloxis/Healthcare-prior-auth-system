@@ -1,0 +1,12 @@
+{
+  "resourceType": "Condition",
+  "id": "ipa-cond-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/ipa/StructureDefinition/ipa-condition"
+    ]
+  },
+  "subject": {
+    "reference": "Patient/ipa-pt-1"
+  }
+}

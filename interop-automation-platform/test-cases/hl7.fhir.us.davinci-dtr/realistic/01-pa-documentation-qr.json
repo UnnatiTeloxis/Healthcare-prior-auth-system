@@ -1,0 +1,60 @@
+{
+  "resourceType": "QuestionnaireResponse",
+  "id": "dtr-pa-doc-001",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse"
+    ]
+  },
+  "questionnaire": "http://example.org/Questionnaire/home-oxygen",
+  "status": "completed",
+  "subject": {
+    "reference": "Patient/ehr-admit-001"
+  },
+  "authored": "2026-07-18T14:00:00Z",
+  "author": {
+    "reference": "Practitioner/dr-smith"
+  },
+  "item": [
+    {
+      "linkId": "diagnosis",
+      "text": "Primary diagnosis",
+      "answer": [
+        {
+          "valueCoding": {
+            "system": "http://snomed.info/sct",
+            "code": "13645005",
+            "display": "COPD"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "o2-sat",
+      "text": "Resting O2 saturation",
+      "answer": [
+        {
+          "valueInteger": 88
+        }
+      ]
+    },
+    {
+      "linkId": "tried-alternatives",
+      "text": "Tried alternatives?",
+      "answer": [
+        {
+          "valueBoolean": true
+        }
+      ]
+    },
+    {
+      "linkId": "notes",
+      "text": "Clinical notes",
+      "answer": [
+        {
+          "valueString": "Patient desaturates on room air; qualifies for home O2."
+        }
+      ]
+    }
+  ]
+}

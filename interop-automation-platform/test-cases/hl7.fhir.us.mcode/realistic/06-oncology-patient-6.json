@@ -1,0 +1,25 @@
+{
+  "resourceType": "Patient",
+  "id": "mcode-pt-6",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-patient"
+    ]
+  },
+  "identifier": [
+    {
+      "system": "http://cancercenter.example.org/mrn",
+      "value": "ONC-1006"
+    }
+  ],
+  "name": [
+    {
+      "family": "Patient6",
+      "given": [
+        "Oncology"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1956-06-15"
+}

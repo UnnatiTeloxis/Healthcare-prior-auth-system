@@ -5,24 +5,29 @@ services:
     ports:
       - "4567:4567"
     environment:
-      DISPLAY_ISSUES_ARE_WARNINGS: "true"
-      DISABLE_TX: "true"
-      # Force offline mode — prevents hanging when packages.fhir.org is unreachable
-      JAVA_TOOL_OPTIONS: "-DfhirOffline=true -Xmx4g"
+      # Inferno Resource Validator parity:
+      # - DISPLAY_ISSUES_ARE_WARNINGS=false → display/code mismatches stay ERRORs
+      #   (Inferno wrapper default; "true" demotes them to warnings — common mismatch)
+      # - DISABLE_TX=true + local packages → fast offline binds (live tx.fhir.org hangs here)
+      # Override in .env for hosted-TX experiments:
+      #   DISABLE_TX=false
+      #   TX_SERVER_URL=http://tx.fhir.org
+      #   JAVA_TOOL_OPTIONS=-Xmx4g
+      DISPLAY_ISSUES_ARE_WARNINGS: ${DISPLAY_ISSUES_ARE_WARNINGS:-false}
+      DISABLE_TX: ${DISABLE_TX:-true}
+      TX_SERVER_URL: ${TX_SERVER_URL:-}
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--DfhirOffline=true -Xmx4g}
     volumes:
-      # Override built-in /home/igs with empty dir for instant startup (no IG loading at boot).
-      # All IGs loaded on-demand via POST /igs after engine is ready.
-      - ./backend/fhir_packages/empty:/home/igs:ro
-      # Make IG packages accessible for on-demand upload
-      - ./backend/fhir_packages:/app/igs:ro
+      # Terminology only at boot — matches hosted Inferno "do not fetch unknown profiles".
+      # US Core / Da Vinci / SDC are loaded on demand when the user selects Upload/IG.
+      - ./backend/fhir_packages_inferno:/home/igs:ro
+      - fhir_validator_pkg_cache:/home/fhir
     healthcheck:
-      # /profiles returns 503 until the validation engine is fully initialized (and may never
-      # succeed when terminology is unreachable). /version confirms the service is up.
       test: ["CMD", "curl", "-f", "http://localhost:4567/version"]
       interval: 10s
       timeout: 10s
-      retries: 36
-      start_period: 180s
+      retries: 60
+      start_period: 300s
     networks:
       - interop_network
     restart: unless-stopped
@@ -69,19 +74,34 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql://interop:interop123@postgres:5432/interop
+      # Override via project `.env` to use fhir_validator_db1 on the host:
+      # DATABASE_URL=postgresql://postgres:PASSWORD@host.docker.internal:5432/fhir_validator_db1
+      DATABASE_URL: ${DATABASE_URL:-postgresql://interop:interop123@postgres:5432/interop}
       REDIS_URL: redis://redis:6379
       INFERNO_VALIDATOR_URL: http://fhir-validator-wrapper:4567
       FHIR_PACKAGES_PATH: /app/fhir_packages
-      DEFAULT_IGS: hl7.fhir.us.core#6.1.0
+      FHIR_TEST_CASES_PATH: /app/test-cases
+      DEFAULT_IGS: "hl7.fhir.us.core#9.0.0,hl7.fhir.us.davinci-crd#2.2.1,hl7.fhir.us.davinci-dtr#2.2.0,hl7.fhir.us.davinci-pas#2.2.1"
       CORS_ORIGINS: "*"
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      AUTH_SECRET_KEY: ${AUTH_SECRET_KEY:-change-me-to-a-long-random-secret}
+      AUTH_ACCESS_TOKEN_EXPIRE_MINUTES: ${AUTH_ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
+      # Mirror Inferno wrapper TX mode so the UI can show parity status
+      DISABLE_TX: ${DISABLE_TX:-true}
+      DISPLAY_ISSUES_ARE_WARNINGS: ${DISPLAY_ISSUES_ARE_WARNINGS:-false}
       PYTHONUNBUFFERED: "1"
       # Avoid watchfiles I/O crashes on Windows Docker bind mounts (uvicorn --reload).
       WATCHFILES_FORCE_POLLING: "true"
+    env_file:
+      - path: .env
+        required: false
     volumes:
       - ./backend:/app
       - ./frontend/public:/app/frontend/public:ro
       - ./data:/app/data:ro
+      - ./backend/fhir_packages:/app/fhir_packages:ro
+      - ./backend/fhir_packages_extra:/app/fhir_packages_extra:ro
+      - ./test-cases:/app/test-cases:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -124,3 +144,4 @@ networks:
 volumes:
   postgres_data:
   redis_data:
+  fhir_validator_pkg_cache:

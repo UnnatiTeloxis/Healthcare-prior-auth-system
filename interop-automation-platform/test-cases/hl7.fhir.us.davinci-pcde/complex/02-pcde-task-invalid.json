@@ -1,0 +1,10 @@
+{
+  "resourceType": "Task",
+  "id": "pcde-task-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-pcde/StructureDefinition/pcde-task-request"
+    ]
+  },
+  "status": "requested"
+}

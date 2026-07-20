@@ -1,0 +1,18 @@
+{
+  "resourceType": "Parameters",
+  "id": "bulk-req-002",
+  "parameter": [
+    {
+      "name": "_outputFormat",
+      "valueString": "application/fhir+ndjson"
+    },
+    {
+      "name": "_type",
+      "valueString": "Patient,Observation,Condition,Procedure,Immunization"
+    },
+    {
+      "name": "_since",
+      "valueInstant": "2025-03-01T00:00:00Z"
+    }
+  ]
+}

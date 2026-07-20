@@ -1,0 +1,10 @@
+{
+  "resourceType": "Observation",
+  "id": "odh-emp-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/odh/StructureDefinition/odh-EmploymentStatus"
+    ]
+  },
+  "status": "not-a-status"
+}

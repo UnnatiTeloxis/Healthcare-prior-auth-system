@@ -1,0 +1,26 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "sdc-complex-q-invalid",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire"
+    ]
+  },
+  "url": "http://hl7.org/fhir/uv/sdc/Questionnaire/demo-complex-invalid",
+  "name": "SdcComplexInvalid",
+  "title": "SDC Complex Invalid",
+  "status": "unknown-status",
+  "item": [
+    {
+      "type": "group",
+      "text": "Missing linkId group",
+      "item": [
+        {
+          "linkId": "x",
+          "type": "not-a-type",
+          "text": "Bad type"
+        }
+      ]
+    }
+  ]
+}

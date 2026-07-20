@@ -1,0 +1,16 @@
+{
+  "resourceType": "MeasureReport",
+  "id": "ra-mr-1",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-measurereport"
+    ]
+  },
+  "status": "complete",
+  "type": "individual",
+  "measure": "http://example.org/Measure/risk-adjustment",
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "date": "2026-01-15"
+}

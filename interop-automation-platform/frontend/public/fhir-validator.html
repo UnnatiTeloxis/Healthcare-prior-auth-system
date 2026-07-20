@@ -18,6 +18,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" crossorigin="anonymous"></script>
+  <script>
+    (function () {
+      if (!localStorage.getItem('access_token')) {
+        window.location.replace('/fhir-login.html');
+      }
+    })();
+  </script>
   <style>
     :root {
       /* Premium healthcare palette */
@@ -203,6 +210,25 @@
       letter-spacing: -0.02em;
       box-shadow: 0 14px 38px rgba(0,0,0,0.18);
       border: 1px solid rgba(255,255,255,0.22);
+      flex-shrink: 0;
+    }
+    .header-user {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      margin-left: 0.15rem;
+    }
+    .header-user-name {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.92);
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    @media (max-width: 640px) {
+      .header-user-name { display: none; }
     }
 
     /* Step indicator */
@@ -551,6 +577,64 @@
     .ig-selector-wrap {
       margin-bottom: 1.25rem;
     }
+    .ig-profile-wrap {
+      margin-bottom: 1.25rem;
+      display: none;
+    }
+    .ig-profile-wrap.visible { display: block; }
+    .ig-profile-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .ig-profile-select {
+      flex: 1 1 280px;
+      min-height: 40px;
+      padding: 0.5rem 0.75rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card);
+      font-family: inherit;
+      font-size: 0.875rem;
+      color: var(--text);
+    }
+    .ig-profile-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+    .ig-profile-hint strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .ig-sample-wrap {
+      margin-bottom: 1.25rem;
+      display: none;
+    }
+    .ig-sample-wrap.visible { display: block; }
+    .ig-sample-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .ig-sample-select {
+      flex: 1 1 280px;
+      min-height: 40px;
+      padding: 0.5rem 0.75rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card);
+      font-family: inherit;
+      font-size: 0.875rem;
+      color: var(--text);
+    }
+    .ig-sample-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
     .ig-selector-label {
       display: flex;
       align-items: center;
@@ -646,7 +730,7 @@
     }
     .ig-options-list {
       overflow-y: auto;
-      max-height: 220px;
+      max-height: 320px;
       padding: 0.25rem 0;
     }
     .ig-option {
@@ -687,10 +771,24 @@
       font-size: 0.7rem;
       background: rgba(59,130,246,0.1);
       color: var(--secondary);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 600;
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
       white-space: nowrap;
+    }
+    .ig-option-divider {
+      height: 1px;
+      margin: 0.35rem 0.85rem;
+      background: var(--border);
+    }
+    .ig-option.ig-option-upload {
+      color: var(--primary);
+      border-top: none;
+    }
+    .ig-option.ig-option-upload .ig-opt-icon {
+      color: var(--accent);
+    }
+    .ig-option.ig-option-upload .ig-opt-title {
+      font-weight: 600;
     }
     .ig-loading-indicator {
       display: none;
@@ -2049,7 +2147,13 @@
           <button type="button" class="header-action-btn" data-nav="reports" aria-label="Open reports">
             <i class="fas fa-clipboard-list" aria-hidden="true"></i> Reports
           </button>
-          <span class="header-avatar" aria-label="User">IA</span>
+          <div class="header-user" id="headerUser" aria-label="Signed-in user">
+            <span class="header-avatar" id="headerAvatar" aria-hidden="true">…</span>
+            <span class="header-user-name" id="headerUserName">Loading…</span>
+            <button type="button" class="header-action-btn" id="logoutBtn" aria-label="Log out">
+              <i class="fas fa-sign-out-alt" aria-hidden="true"></i> Logout
+            </button>
+          </div>
         </div>
         <div class="step-badge" id="stepBadge" aria-live="polite" style="display:none;">Step 1 of 4: Provide Data</div>
       </div>
@@ -2139,6 +2243,26 @@
             <div class="ig-spinner"></div>
             <span id="igLoadingText">Loading IG...</span>
           </div>
+          <div class="ig-profile-wrap" id="igProfileWrap">
+            <label class="ig-selector-label"><i class="fas fa-layer-group"></i> Profile (selected IG)</label>
+            <div class="ig-profile-row">
+              <select class="ig-profile-select" id="igProfileSelect" aria-label="Choose a StructureDefinition profile for validation">
+                <option value="">Auto — best match for resource type</option>
+              </select>
+            </div>
+            <p class="ig-profile-hint" id="igProfileHint">Pick a profile or leave Auto to match your file’s resource type and meta.profile.</p>
+          </div>
+          <div class="ig-sample-wrap" id="igSampleWrap">
+            <label class="ig-selector-label"><i class="fas fa-vial"></i> Test sample (<span id="igSamplePackageLabel">IG</span>)</label>
+            <div class="ig-sample-row">
+              <select class="ig-sample-select" id="igSampleSelect" aria-label="Choose a test case JSON for the selected IG">
+                <option value="">Choose a test file…</option>
+              </select>
+              <button type="button" class="btn btn-secondary" id="loadIgSampleBtn" style="min-height:40px;">Load sample</button>
+            </div>
+            <p class="ig-sample-hint" id="igSampleHint">Folder name matches the IG package ID — e.g. hl7.fhir.us.core</p>
+          </div>
+          <input type="file" id="igUploadInput" accept=".tgz,.tar.gz,application/gzip,application/x-gzip,application/x-tar" hidden />
         </div>
 
         <div class="mode-selector" id="modeSelector">
@@ -2158,7 +2282,7 @@
               </div>
               <div class="json-editor-body">
                 <div class="line-numbers" id="lineNumbers" aria-hidden="true">1</div>
-                <textarea class="json-textarea" id="jsonInput" spellcheck="false" aria-label="FHIR JSON input"></textarea>
+                <textarea class="json-textarea" id="jsonInput" spellcheck="false" aria-label="FHIR JSON input" placeholder="Select an IG → choose a test sample (from test-cases/), or paste FHIR JSON here"></textarea>
               </div>
             </div>
             <p id="jsonError" style="color:var(--error);font-size:0.875rem;margin-top:0.5rem;display:none;" role="alert"></p>
@@ -2510,6 +2634,136 @@
       '2708-6' // Oxygen saturation
     ]);
 
+    function profileBelongsToSelectedIg(profileUrl, igName) {
+      if (!profileUrl || !igName) return false;
+      const u = String(profileUrl).toLowerCase().split('|')[0];
+      const name = String(igName).toLowerCase();
+
+      if (name.includes('us.core')) return u.includes('/us/core/');
+      if (name.includes('davinci-hrex')) return u.includes('/davinci-hrex/');
+      if (name.includes('davinci-crd')) return u.includes('/davinci-crd/');
+      if (name.includes('davinci-dtr')) return u.includes('/davinci-dtr/');
+      if (name.includes('davinci-pas')) return u.includes('/davinci-pas/');
+      if (name.includes('davinci-pdex')) return u.includes('davinci-pdex');
+      if (name.includes('davinci-cdex')) return u.includes('davinci-cdex');
+      if (name.includes('davinci-pcde')) return u.includes('davinci-pcde');
+      if (name.includes('davinci-alerts')) return u.includes('davinci-alerts');
+      if (name.includes('drug-formulary')) return u.includes('drug-formulary') || u.includes('formulary');
+      if (name.includes('davinci-deqm')) return u.includes('davinci-deqm') || u.includes('/deqm/');
+      if (name.includes('davinci-ra')) return u.includes('davinci-ra');
+      if (name.includes('uv.sdc') || name.endsWith('.sdc')) return u.includes('/uv/sdc/');
+      if (name.includes('uv.ipa') || name.endsWith('.ipa')) return u.includes('/uv/ipa/');
+      if (name.includes('uv.ips') || name.endsWith('.ips')) return u.includes('/uv/ips/');
+      if (name.includes('smart-app-launch')) return u.includes('smart-app-launch');
+      if (name.includes('mcode')) return u.includes('/us/mcode/');
+      if (name.includes('carin-bb')) return u.includes('/us/carin-bb/') || u.includes('carin-bb');
+      if (name.includes('qicore')) return u.includes('/us/qicore/');
+      if (name.includes('ccda')) return u.includes('ccda');
+      if (name.includes('bulkdata')) return u.includes('bulkdata') || u.includes('bulk-data');
+      if (name.includes('.odh') || name.endsWith('odh')) return u.includes('/odh/');
+      if (name.includes('military-service')) return u.includes('military-service');
+      if (name.includes('vrdr')) return u.includes('vrdr');
+      if (name.includes('.ecr') || name.endsWith('ecr')) return u.includes('/ecr/');
+      if (name.includes('pacio-adi')) return u.includes('pacio-adi');
+      if (name.includes('pacio-cs')) return u.includes('pacio-cs');
+      if (name.includes('pacio-fs')) return u.includes('pacio-fs');
+      if (name.includes('extensions')) {
+        return u.includes('/uv/extensions/');
+      }
+      if (name.includes('terminology')) return u.includes('terminology.hl7.org');
+
+      // Uploaded / custom IG: membership in the profiles returned for that package
+      if (igState.selected && String(igState.selected.name).toLowerCase() === name) {
+        const key = `${igState.selected.name}#${igState.selected.version}`;
+        const loaded = igState.loadedProfiles[key] || [];
+        if (loaded.some(p => String(p).split('|')[0].toLowerCase() === u)) return true;
+      }
+
+      // Generic package-name → URL path heuristic (hl7.fhir.uv.foo → /uv/foo/)
+      const parts = name
+        .replace(/^hl7\.fhir\./, '')
+        .replace(/^hl7\./, '')
+        .split('.')
+        .filter(p => p && !['r4', 'r4b', 'r5', 'fhir'].includes(p));
+      if (parts.length >= 2) {
+        const needle = `/${parts[parts.length - 2]}/${parts[parts.length - 1]}/`;
+        if (u.includes(needle)) return true;
+      }
+      const token = parts[parts.length - 1];
+      return !!(token && token.length >= 3 && u.includes(token));
+    }
+
+    function igCacheKey(name, version) {
+      return `${name}#${version}`;
+    }
+
+    function igMarkInfernoReady(name, version) {
+      if (name && version) igState.infernoReadyKeys.add(igCacheKey(name, version));
+    }
+
+    function igIsInfernoReady(name, version) {
+      return igState.infernoReadyKeys.has(igCacheKey(name, version));
+    }
+
+    function igStoreLoadedIg(key, igResult) {
+      if (!key || !igResult) return;
+      igState.loadedProfiles[key] = igResult.profiles || [];
+      igState.loadedProfilesByType[key] = igResult.profiles_by_type || {};
+      if (igResult.inferno_pending === false) {
+        const [name, version] = key.split('#');
+        if (name && version) igMarkInfernoReady(name, version);
+      }
+    }
+
+    function igGetSelectedProfilesByType() {
+      if (!igState.selected) return {};
+      const key = `${igState.selected.name}#${igState.selected.version}`;
+      return igState.loadedProfilesByType[key] || {};
+    }
+
+    function isBaseExtensionStructureDefinition(url) {
+      const u = String(url || '').toLowerCase().split('|')[0];
+      return u.includes('hl7.org/fhir/structuredefinition/') &&
+        !u.includes('/us/') &&
+        !u.includes('/uv/');
+    }
+
+    function findBestIgProfile(profiles, resourceType, igName) {
+      if (!resourceType) return null;
+      const kebab = resourceType.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
+
+      const byType = igGetSelectedProfilesByType();
+      if (byType[resourceType]?.length) {
+        const typed = byType[resourceType].filter(url =>
+          profileBelongsToSelectedIg(url, igName) && !isBaseExtensionStructureDefinition(url)
+        );
+        if (typed.length) return typed[0];
+      }
+
+      let candidates = (profiles || []).filter(url =>
+        profileBelongsToSelectedIg(url, igName) && !isBaseExtensionStructureDefinition(url)
+      );
+      if (!candidates.length) {
+        candidates = (profiles || []).filter(url => !isBaseExtensionStructureDefinition(url));
+      }
+      if (!candidates.length) return null;
+
+      const score = (url) => {
+        const slug = (url.split('/').pop() || '').split('|')[0].toLowerCase();
+        if (slug === `profile-${kebab}` || slug === `us-core-${kebab}` || slug === `qicore-${kebab}`) return 100;
+        if (slug === `sdc-${kebab}`) return 95;
+        if (slug === kebab) return 90;
+        if (slug.endsWith(`-${kebab}`)) return 85;
+        return 0;
+      };
+
+      const ranked = candidates
+        .map(url => ({ url, s: score(url) }))
+        .filter(x => x.s > 0)
+        .sort((a, b) => b.s - a.s);
+      return ranked[0]?.url || null;
+    }
+
     function extractMetaProfile(resource) {
       const metaProfile = resource?.meta?.profile;
       if (Array.isArray(metaProfile) && metaProfile.length) return metaProfile[0];
@@ -2564,42 +2818,85 @@
 
     function resolveProfileForResource(resource) {
       const resourceType = resource?.resourceType || ACTIVE_PROFILE.resourceType;
+      const metaProfile = extractMetaProfile(resource);
 
-      // If an IG is selected, try to find a matching profile for this resource type
-      if (igState.selected) {
-        const profiles = igGetSelectedProfiles();
-        const matchingProfile = profiles.find(url => {
-          const lower = url.toLowerCase();
-          return lower.includes(resourceType.toLowerCase()) ||
-                 lower.includes(resourceType.replace(/([A-Z])/g, '-$1').toLowerCase().slice(1));
-        });
-        if (matchingProfile) {
+      // Inferno parity rules:
+      // 1) Base FHIR (no IG): never force a profile query param — Inferno validates
+      //    meta.profile from the resource automatically when profiles=[].
+      // 2) IG selected + meta.profile in that IG: use the declared profile (exact match).
+      // 3) IG selected + no usable meta.profile: use best StructureDefinition for the
+      //    resource type from the selected IG (same as picking that profile in Inferno Advanced).
+
+      if (!igState.selected) {
+        // Inferno default (no Advanced profile): do not pretend we selected meta.profile.
+        // submitValidation sends profiles:[] — engine applies meta.profile only if loaded.
+        return baseProfileForType(resourceType);
+      }
+
+      const igTitle = igState.selected.title || igState.selected.name;
+
+      // User picked a specific profile — validate against that URL exactly (Inferno Advanced).
+      if (igState.selectedProfileUrl) {
+        const pickedRt = resourceTypeFromProfileUrl(igState.selectedProfileUrl);
+        if (pickedRt && pickedRt !== resourceType) {
+          // Mismatch (e.g. Extension profile vs Patient resource) — use meta.profile or auto instead.
+          if (metaProfile && profileBelongsToSelectedIg(metaProfile, igState.selected.name)) {
+            return profileFromUrl(metaProfile, resourceType);
+          }
+        } else {
+          const useRt = pickedRt || resourceType;
           return {
-            id: `ig-${igState.selected.name}-${resourceType}`,
-            name: `${resourceType} (${igState.selected.title || igState.selected.name})`,
-            icon: '📋',
-            resourceType,
-            description: `Validates against ${igState.selected.title || igState.selected.name} v${igState.selected.version} profile.`,
+            id: `ig-${igState.selected.name}-picked`,
+            name: `${friendlyProfileName(igState.selectedProfileUrl)} (${igTitle})`,
+            icon: '🎯',
+            resourceType: useRt,
+            description: `Validates against the profile you selected for ${igTitle} v${igState.selected.version}.`,
             requiredFields: [],
             supportFields: [],
-            profile: matchingProfile
+            profile: igState.selectedProfileUrl
           };
         }
-        // IG selected but no specific profile for this resource type — still load the IG
+      }
+
+      // Auto: prefer meta.profile in IG, else best StructureDefinition for resource type.
+      if (metaProfile && profileBelongsToSelectedIg(metaProfile, igState.selected.name)) {
+        return profileFromUrl(metaProfile, resourceType);
+      }
+
+      // No in-IG meta.profile — pick best StructureDefinition for the resource type
+      // (equivalent to manually selecting that profile under the IG in Inferno).
+      const profiles = igGetSelectedProfiles();
+      const igProfile = findBestIgProfile(profiles, resourceType, igState.selected.name);
+
+      if (igProfile) {
         return {
-          id: `ig-${igState.selected.name}-base-${resourceType}`,
-          name: `${resourceType} (${igState.selected.title || igState.selected.name})`,
-          icon: '📦',
+          id: `ig-${igState.selected.name}-${resourceType}`,
+          name: `${friendlyProfileName(igProfile)} (${igState.selected.title || igState.selected.name})`,
+          icon: '📋',
           resourceType,
-          description: `Validates ${resourceType} with ${igState.selected.title || igState.selected.name} loaded.`,
+          description: `Validates against ${igState.selected.title || igState.selected.name} v${igState.selected.version} — same profile parameter as Inferno Advanced.`,
           requiredFields: [],
           supportFields: [],
-          profile: ''
+          profile: igProfile
         };
       }
 
-      // No IG selected: validate against base FHIR StructureDefinition.
-      return baseProfileForType(resourceType);
+      if (metaProfile) {
+        // Inferno still validates meta.profile from the body even when Advanced
+        // selection is empty; pass it explicitly for identical ?profile= behavior.
+        return profileFromUrl(metaProfile, resourceType);
+      }
+
+      return {
+        id: `ig-${igState.selected.name}-base-${resourceType}`,
+        name: `${resourceType} (${igState.selected.title || igState.selected.name})`,
+        icon: '📦',
+        resourceType,
+        description: `${igState.selected.title || igState.selected.name} loaded — add meta.profile for IG-specific rules (Inferno-compatible).`,
+        requiredFields: [],
+        supportFields: [],
+        profile: ''
+      };
     }
 
     function renderProfileInfo(profile) {
@@ -2656,6 +2953,7 @@
         const profile = resolveProfileForResource(parsed);
         state.activeProfile = profile;
         renderProfileInfo(profile);
+        updateIgProfileHint();
       } catch (_) {
         if (!state.activeProfile) {
           state.activeProfile = ACTIVE_PROFILE;
@@ -2664,77 +2962,28 @@
       }
     }
 
-    const SAMPLE_PATIENT = `{
-  "resourceType": "Patient",
-  "id": "us-core-sample-patient",
-  "meta": {
-    "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]
-  },
-  "identifier": [
-    {
-      "use": "usual",
-      "type": {
-        "coding": [
-          {
-            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-            "code": "MR",
-            "display": "Medical Record Number"
-          }
-        ],
-        "text": "Medical Record Number"
-      },
-      "system": "http://hospital.smarthealthit.org",
-      "value": "1032702"
-    }
-  ],
-  "active": true,
-  "name": [
-    {
-      "use": "official",
-      "family": "Baxter",
-      "given": ["Amy", "V."],
-      "suffix": ["PharmD"]
-    }
-  ],
-  "telecom": [
-    {
-      "system": "phone",
-      "value": "555-555-5555",
-      "use": "home"
-    },
-    {
-      "system": "email",
-      "value": "amy.baxter@example.com"
-    }
-  ],
-  "gender": "female",
-  "birthDate": "1987-02-20",
-  "address": [
-    {
-      "use": "home",
-      "line": ["183 Mountain View St"],
-      "city": "Mounds",
-      "state": "OK",
-      "postalCode": "74048",
-      "country": "US"
-    }
-  ],
-  "communication": [
-    {
-      "language": {
-        "coding": [
-          {
-            "system": "urn:ietf:bcp:47",
-            "code": "en-US",
-            "display": "English (United States)"
-          }
-        ],
-        "text": "English"
-      },
-      "preferred": true
-    }
-  ]
-}`;
+    const state = {
+      currentStep: 1,
+      currentPage: 'dashboard',
+      inputData: '',
+      inputMethod: 'paste',
+      mode: 'single',
+      uploadedFileName: null,
+      batchFiles: [],
+      batchResults: null,
+      isBatchRunning: false,
+      viewingBatchFile: false,
+      results: null,
+      activeFilter: 'all',
+      activeProfile: ACTIVE_PROFILE,
+      ruleOutcomes: null,
+      reportsPage: 1,
+      selectedReportId: null,
+      parsedCache: null,
+      largeFilePreview: false,
+      loadedSamplePath: null,
+      lastLoadedSampleContent: null
+    };
 
     const VALIDATION_ENDPOINTS = [
       '/api/v1/fhir/validate',
@@ -2742,6 +2991,77 @@
       'http://localhost:8000/api/v1/fhir/validate',
       'http://localhost:8000/api/v1/validate/'
     ];
+
+    const AUTH_TOKEN_KEY = 'access_token';
+    const AUTH_USER_KEY = 'fhir_auth_user';
+
+    function getAccessToken() {
+      return localStorage.getItem(AUTH_TOKEN_KEY);
+    }
+
+    function authHeaders(extra = {}) {
+      const headers = { 'Content-Type': 'application/json', ...extra };
+      const token = getAccessToken();
+      if (token) headers.Authorization = `Bearer ${token}`;
+      return headers;
+    }
+
+    function clearAuthAndRedirect() {
+      localStorage.removeItem(AUTH_TOKEN_KEY);
+      localStorage.removeItem(AUTH_USER_KEY);
+      window.location.replace('/fhir-login.html');
+    }
+
+    function userInitials(user) {
+      const name = (user?.full_name || user?.email || 'U').trim();
+      const parts = name.split(/\s+/).filter(Boolean);
+      if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+      return name.slice(0, 2).toUpperCase();
+    }
+
+    function renderAuthUser(user) {
+      const avatar = document.getElementById('headerAvatar');
+      const nameEl = document.getElementById('headerUserName');
+      if (avatar) avatar.textContent = userInitials(user);
+      if (nameEl) nameEl.textContent = user?.full_name || user?.email || 'User';
+      try { localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user || {})); } catch (_) {}
+    }
+
+    async function ensureAuthenticated() {
+      const token = getAccessToken();
+      if (!token) {
+        clearAuthAndRedirect();
+        return null;
+      }
+      try {
+        const res = await fetch('/api/v1/auth/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          clearAuthAndRedirect();
+          return null;
+        }
+        const user = await res.json();
+        renderAuthUser(user);
+        return user;
+      } catch (_) {
+        clearAuthAndRedirect();
+        return null;
+      }
+    }
+
+    async function logoutUser() {
+      const token = getAccessToken();
+      try {
+        if (token) {
+          await fetch('/api/v1/auth/logout', {
+            method: 'POST',
+            headers: authHeaders()
+          });
+        }
+      } catch (_) { /* ignore network errors on logout */ }
+      clearAuthAndRedirect();
+    }
 
     const STEPS = ['Provide Data', 'Validate', 'Results', 'Actions'];
     const STEP_TITLES = [
@@ -2762,37 +3082,16 @@
       { id: 'reports', label: 'Reports', icon: '📊' }
     ];
 
-    const state = {
-      currentStep: 1,
-      currentPage: 'dashboard',
-      inputData: SAMPLE_PATIENT,
-      inputMethod: 'paste',
-      mode: 'single',
-      uploadedFileName: null,
-      batchFiles: [],
-      batchResults: null,
-      isBatchRunning: false,
-      viewingBatchFile: false,
-      results: null,
-      activeFilter: 'all',
-      activeProfile: ACTIVE_PROFILE,
-      ruleOutcomes: null,
-      reportsPage: 1,
-      selectedReportId: null,
-      parsedCache: null,
-      largeFilePreview: false
-    };
-
     const PERF = {
       LARGE_FILE_BYTES: 100 * 1024,
       JSON_WORKER_THRESHOLD: 50 * 1024,
       LINE_NUMBERS_MAX_LINES: 400,
       BATCH_CONCURRENCY: 4,
-      RULE_STAGGER_MS: 35,
-      RULE_COMPLETE_MS: 25,
-      POLL_MS: 60,
-      STEP_TRANSITION_MS: 380,
-      VALIDATION_COMPLETE_HOLD_MS: 280,
+      RULE_STAGGER_MS: 10,
+      RULE_COMPLETE_MS: 6,
+      POLL_MS: 25,
+      STEP_TRANSITION_MS: 280,
+      VALIDATION_COMPLETE_HOLD_MS: 80,
       MAX_STORED_REPORTS: 25,
       MAX_STORED_SOURCE_BYTES: 16 * 1024,
       MAX_STORED_ISSUES: 250
@@ -2807,31 +3106,339 @@
       available: [],
       selected: null,
       loadedProfiles: {},
+      loadedProfilesByType: {},
+      selectedProfileUrl: null,
       isLoading: false,
-      isOpen: false
+      isOpen: false,
+      infernoReadyKeys: new Set()
     };
 
-    async function igFetchAvailable() {
+    const testCaseState = { byPackage: {}, loaded: false };
+
+    const FHIR_RESOURCE_TYPES = [
+      'Account','ActivityDefinition','AdverseEvent','AllergyIntolerance','Appointment','AppointmentResponse',
+      'AuditEvent','Basic','Binary','BiologicallyDerivedProduct','BodyStructure','Bundle','CapabilityStatement',
+      'CarePlan','CareTeam','CatalogEntry','ChargeItem','ChargeItemDefinition','Claim','ClaimResponse',
+      'ClinicalImpression','CodeSystem','Communication','CommunicationRequest','CompartmentDefinition',
+      'Composition','ConceptMap','Condition','Consent','Contract','Coverage','CoverageEligibilityRequest',
+      'CoverageEligibilityResponse','DetectedIssue','Device','DeviceDefinition','DeviceMetric','DeviceRequest',
+      'DeviceUseStatement','DiagnosticReport','DocumentManifest','DocumentReference','EffectEvidenceSynthesis',
+      'Encounter','Endpoint','EnrollmentRequest','EnrollmentResponse','EpisodeOfCare','EventDefinition',
+      'Evidence','EvidenceVariable','ExampleScenario','ExplanationOfBenefit','FamilyMemberHistory','Flag',
+      'Goal','GraphDefinition','Group','GuidanceResponse','HealthcareService','ImagingStudy','Immunization',
+      'ImmunizationEvaluation','ImmunizationRecommendation','ImplementationGuide','InsurancePlan','Invoice',
+      'Library','Linkage','List','Location','Measure','MeasureReport','Media','Medication','MedicationAdministration',
+      'MedicationDispense','MedicationKnowledge','MedicationRequest','MedicationStatement','MedicinalProduct',
+      'MedicinalProductAuthorization','MedicinalProductContraindication','MedicinalProductIndication',
+      'MedicinalProductIngredient','MedicinalProductInteraction','MedicinalProductManufactured',
+      'MedicinalProductPackaged','MedicinalProductPharmaceutical','MedicinalProductUndesirableEffect',
+      'MessageDefinition','MessageHeader','MolecularSequence','NamingSystem','NutritionOrder','Observation',
+      'ObservationDefinition','OperationDefinition','OperationOutcome','Organization','OrganizationAffiliation',
+      'Parameters','Patient','PaymentNotice','PaymentReconciliation','Person','PlanDefinition','Practitioner',
+      'PractitionerRole','Procedure','Provenance','Questionnaire','QuestionnaireResponse','RelatedPerson',
+      'RequestGroup','ResearchDefinition','ResearchElementDefinition','ResearchStudy','ResearchSubject',
+      'RiskAssessment','RiskEvidenceSynthesis','Schedule','SearchParameter','ServiceRequest','Slot',
+      'Specimen','SpecimenDefinition','StructureDefinition','StructureMap','Subscription','Substance',
+      'SubstanceNucleicAcid','SubstancePolymer','SubstanceProtein','SubstanceReferenceInformation',
+      'SubstanceSourceMaterial','SubstanceSpecification','SupplyDelivery','SupplyRequest','Task',
+      'TerminologyCapabilities','TestReport','TestScript','ValueSet','VerificationResult','VisionPrescription'
+    ];
+
+    function resourceTypeFromProfileUrl(profileUrl) {
+      if (!profileUrl) return null;
+      const slug = (profileUrl.split('/').pop() || '').split('|')[0].toLowerCase();
+      for (const rt of FHIR_RESOURCE_TYPES) {
+        const kebab = rt.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
+        if (slug === kebab || slug.endsWith(`-${kebab}`) || slug.startsWith(`${kebab}-`) || slug.includes(`-${kebab}-`)) {
+          return rt;
+        }
+      }
+      return null;
+    }
+
+    function groupProfilesForSelect(profiles) {
+      const groups = new Map();
+      for (const url of profiles || []) {
+        const rt = resourceTypeFromProfileUrl(url) || 'Other';
+        if (!groups.has(rt)) groups.set(rt, []);
+        groups.get(rt).push(url);
+      }
+      const order = [...FHIR_RESOURCE_TYPES, 'Other'];
+      return order
+        .filter(rt => groups.has(rt))
+        .map(rt => ({
+          resourceType: rt,
+          profiles: groups.get(rt).sort((a, b) => friendlyProfileName(a).localeCompare(friendlyProfileName(b)))
+        }));
+    }
+
+    function refreshIgProfileSelect() {
+      const wrap = document.getElementById('igProfileWrap');
+      const select = document.getElementById('igProfileSelect');
+      const hint = document.getElementById('igProfileHint');
+      if (!wrap || !select) return;
+
+      if (!igState.selected) {
+        wrap.classList.remove('visible');
+        igState.selectedProfileUrl = null;
+        select.innerHTML = '<option value="">Auto — best match for resource type</option>';
+        return;
+      }
+
+      const profiles = igGetSelectedProfiles().filter(url => !isBaseExtensionStructureDefinition(url));
+      wrap.classList.add('visible');
+      const prev = igState.selectedProfileUrl || select.value || '';
+      select.innerHTML = '<option value="">Auto — best match for resource type</option>';
+
+      const grouped = groupProfilesForSelect(profiles);
+      for (const { resourceType, profiles: urls } of grouped) {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = resourceType;
+        for (const url of urls) {
+          const opt = document.createElement('option');
+          opt.value = url;
+          opt.textContent = friendlyProfileName(url);
+          optgroup.appendChild(opt);
+        }
+        select.appendChild(optgroup);
+      }
+
+      if (prev && profiles.includes(prev)) {
+        select.value = prev;
+        igState.selectedProfileUrl = prev;
+      } else {
+        select.value = '';
+        igState.selectedProfileUrl = null;
+      }
+
+      updateIgProfileHint(hint);
+    }
+
+    function updateIgProfileHint(hintEl) {
+      const hint = hintEl || document.getElementById('igProfileHint');
+      if (!hint || !igState.selected) return;
+
+      const count = igGetSelectedProfiles().length;
+      if (igState.selectedProfileUrl) {
+        hint.innerHTML = `Validating against <strong>${escapeHtml(friendlyProfileName(igState.selectedProfileUrl))}</strong> — exact Inferno Advanced profile.`;
+        return;
+      }
+
+      let autoLabel = 'resource type + meta.profile';
       try {
-        const res = await fetch('/api/v1/igs/available');
+        const parsed = JSON.parse(state.inputData || '');
+        if (parsed?.resourceType) {
+          const resolved = resolveProfileForResource(parsed);
+          if (resolved?.profile) {
+            autoLabel = friendlyProfileName(resolved.profile);
+          }
+        }
+      } catch (_) { /* ignore */ }
+
+      hint.innerHTML = count
+        ? `<strong>${count}</strong> profiles available. Auto will use <strong>${escapeHtml(autoLabel)}</strong> for your file.`
+        : 'Loading profiles for this IG…';
+    }
+
+    function onIgProfileSelectChange() {
+      const select = document.getElementById('igProfileSelect');
+      igState.selectedProfileUrl = select?.value || null;
+      updateIgProfileHint();
+      refreshIgSampleSelect();
+      refreshActiveProfile();
+      renderValidateSummary();
+      if (igState.selected && igState.selectedProfileUrl) {
+        igWarmInfernoBackground(igState.selected.name, igState.selected.version);
+      }
+    }
+
+    async function fetchTestCaseCatalog() {
+      if (testCaseState.loaded) return;
+      try {
+        const res = await fetch('/api/v1/test-cases/catalog', { headers: authHeaders() });
         if (!res.ok) return;
         const data = await res.json();
-        igState.available = data.igs || [];
-        igRenderOptions(igState.available);
-        // Pre-warm US Core (auto-loaded, instant)
-        const usCore = igState.available.find(ig => ig.name.includes('us.core'));
-        if (usCore) {
-          const key = `${usCore.name}#${usCore.version}`;
-          fetch('/api/v1/igs/load', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ package_name: usCore.name, version: usCore.version })
-          }).then(r => r.ok ? r.json() : null).then(data => {
-            if (data?.ig?.profiles) igState.loadedProfiles[key] = data.ig.profiles;
-          }).catch(() => {});
+        testCaseState.byPackage = {};
+        for (const entry of data.igs || []) {
+          testCaseState.byPackage[entry.package_id] = entry;
+        }
+        testCaseState.loaded = true;
+        if (igState.selected?.name) refreshIgSampleSelect();
+      } catch (e) {
+        console.warn('Failed to fetch test-case catalog:', e);
+      }
+    }
+
+    function refreshIgSampleSelect() {
+      const wrap = document.getElementById('igSampleWrap');
+      const select = document.getElementById('igSampleSelect');
+      const hint = document.getElementById('igSampleHint');
+      const pkgLabel = document.getElementById('igSamplePackageLabel');
+      if (!wrap || !select) return;
+
+      if (!igState.selected?.name) {
+        wrap.classList.remove('visible');
+        select.innerHTML = '<option value="">Choose a test file…</option>';
+        return;
+      }
+
+      const packageId = igState.selected.name;
+      const entry = testCaseState.byPackage[packageId];
+      const samples = entry?.samples || [];
+      const profileFilter = igState.selectedProfileUrl;
+
+      wrap.classList.add('visible');
+      if (pkgLabel) pkgLabel.textContent = packageId;
+      select.innerHTML = '<option value="">Choose a test file…</option>';
+
+      let filtered = samples;
+      if (profileFilter) {
+        filtered = samples.filter(s =>
+          s.profile_url === profileFilter ||
+          (!s.profile_url && s.resource_type === resourceTypeFromProfileUrl(profileFilter))
+        );
+        if (!filtered.length) filtered = samples;
+      }
+
+      const tiers = ['simple', 'complex', 'realistic'];
+      for (const tier of tiers) {
+        const tierSamples = filtered.filter(s => s.tier === tier);
+        if (!tierSamples.length) continue;
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = tier.charAt(0).toUpperCase() + tier.slice(1);
+        for (const sample of tierSamples) {
+          const opt = document.createElement('option');
+          opt.value = sample.path;
+          const rt = sample.resource_type ? ` · ${sample.resource_type}` : '';
+          const prof = sample.profile_url ? ` · ${friendlyProfileName(sample.profile_url)}` : '';
+          opt.textContent = `${sample.file}${rt}${prof}`;
+          opt.dataset.profileUrl = sample.profile_url || '';
+          opt.dataset.resourceType = sample.resource_type || '';
+          optgroup.appendChild(opt);
+        }
+        select.appendChild(optgroup);
+      }
+
+      if (hint) {
+        const folder = entry?.folder || packageId;
+        if (!entry) {
+          hint.textContent = `Loading samples for ${packageId}…`;
+        } else if (!samples.length) {
+          hint.textContent = `No samples in test-cases/${folder}/ yet.`;
+        } else {
+          const shown = filtered.length;
+          hint.textContent = profileFilter
+            ? `${shown} sample(s) matching selected profile · folder: test-cases/${folder}/`
+            : `${samples.length} sample(s) · folder: test-cases/${folder}/ — selecting a file loads it automatically`;
+        }
+      }
+    }
+
+    async function loadSelectedIgSample() {
+      const select = document.getElementById('igSampleSelect');
+      const path = select?.value;
+      if (!path) {
+        showToast('Choose a test sample first', 'info');
+        return;
+      }
+      const packageId = igState.selected?.name;
+      const entry = testCaseState.byPackage[packageId];
+      const sampleMeta = entry?.samples?.find(s => s.path === path);
+      try {
+        const res = await fetch(`/api/v1/test-cases/content?path=${encodeURIComponent(path)}`, {
+          headers: authHeaders()
+        });
+        if (!res.ok) throw new Error('Sample not found');
+        const data = await res.json();
+        const content = data.content || '';
+        document.getElementById('jsonInput').value = content;
+        state.inputData = content;
+        state.parsedCache = null;
+        state.loadedSamplePath = path;
+        state.lastLoadedSampleContent = content;
+        state.results = null;
+        document.getElementById('jsonInput').classList.remove('invalid');
+        document.getElementById('jsonError').style.display = 'none';
+        updateLineNumbers();
+
+        const sampleProfile = sampleMeta?.profile_url || '';
+        const igProfiles = igGetSelectedProfiles();
+        if (sampleProfile && igProfiles.includes(sampleProfile)) {
+          igState.selectedProfileUrl = sampleProfile;
+          const profileSelect = document.getElementById('igProfileSelect');
+          if (profileSelect) profileSelect.value = sampleProfile;
+        } else if (sampleProfile && profileBelongsToSelectedIg(sampleProfile, packageId)) {
+          igState.selectedProfileUrl = sampleProfile;
+          const profileSelect = document.getElementById('igProfileSelect');
+          if (profileSelect) profileSelect.value = sampleProfile;
+        } else {
+          igState.selectedProfileUrl = null;
+          const profileSelect = document.getElementById('igProfileSelect');
+          if (profileSelect) profileSelect.value = '';
+        }
+
+        updateIgProfileHint();
+        refreshActiveProfile();
+        renderValidateSummary();
+        showToast(`Loaded ${path.split('/').pop()} from test-cases`, 'success');
+
+        if (igState.selected) {
+          igWarmInfernoBackground(igState.selected.name, igState.selected.version, false);
         }
       } catch (e) {
+        showToast('Failed to load test sample from test-cases', 'error');
+      }
+    }
+
+    function igWarmInfernoBackground(name, version, wait = false) {
+      if (wait && igIsInfernoReady(name, version)) return Promise.resolve();
+      return fetch('/api/v1/igs/load', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ package_name: name, version, wait })
+      })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (!data?.ig) return;
+          const key = igCacheKey(name, version);
+          igStoreLoadedIg(key, data.ig);
+        })
+        .catch(() => {});
+    }
+
+    async function igFetchAvailable() {
+      const list = document.getElementById('igOptionsList');
+      try {
+        // Load IG catalog first — do not block on profile-cache / test-cases.
+        const availRes = await fetch('/api/v1/igs/available', { headers: authHeaders() });
+        if (!availRes.ok) {
+          console.warn('IG catalog HTTP', availRes.status);
+          showToast('Could not load Implementation Guides — check backend is running.', 'warning');
+          return;
+        }
+        const data = await availRes.json();
+        igState.available = data.igs || [];
+        igRenderOptions(igState.available);
+        if (!igState.available.length && list) {
+          list.insertAdjacentHTML('beforeend',
+            '<div class="ig-option ig-option-empty" style="cursor:default;opacity:0.7;">No IGs found on server</div>');
+        }
+
+        // Profile cache in background (non-blocking for dropdown).
+        fetch('/api/v1/igs/profile-cache', { headers: authHeaders() })
+          .then(r => r.ok ? r.json() : null)
+          .then(cacheData => {
+            if (!cacheData?.cache) return;
+            for (const [key, entry] of Object.entries(cacheData.cache)) {
+              igStoreLoadedIg(key, entry);
+            }
+            if (igState.selected) refreshIgProfileSelect();
+          })
+          .catch(() => {});
+        fetchTestCaseCatalog();
+      } catch (e) {
         console.warn('Failed to fetch available IGs:', e);
+        showToast('Failed to load Implementation Guides.', 'error');
       }
     }
 
@@ -2845,6 +3452,15 @@
           <span class="ig-opt-package">Validates against base StructureDefinitions</span>
         </span>
       </div>`;
+      if (!igs.length) {
+        html += `<div class="ig-option ig-option-loading" style="cursor:default;opacity:0.75;">
+          <span class="ig-opt-icon"><i class="fas fa-spinner fa-spin"></i></span>
+          <span class="ig-opt-details">
+            <span class="ig-opt-title">Loading Implementation Guides…</span>
+            <span class="ig-opt-package">Fetching from /api/v1/igs/available</span>
+          </span>
+        </div>`;
+      }
       for (const ig of igs) {
         const sel = igState.selected && igState.selected.name === ig.name ? 'selected' : '';
         html += `<div class="ig-option ${sel}" data-ig-name="${ig.name}" data-ig-version="${ig.version}">
@@ -2856,6 +3472,14 @@
           <span class="ig-opt-version">${ig.version}</span>
         </div>`;
       }
+      html += `<div class="ig-option-divider" role="separator"></div>
+      <div class="ig-option ig-option-upload" data-ig-action="upload" role="option">
+        <span class="ig-opt-icon"><i class="fas fa-upload"></i></span>
+        <span class="ig-opt-details">
+          <span class="ig-opt-title">Upload your IG</span>
+          <span class="ig-opt-package">Import a custom FHIR package (.tgz / .tar.gz)</span>
+        </span>
+      </div>`;
       list.innerHTML = html;
     }
 
@@ -2866,7 +3490,12 @@
       container.classList.toggle('open', open);
       if (open) {
         document.getElementById('igSearchInput').value = '';
-        igRenderOptions(igState.available);
+        if (!igState.available.length) {
+          igRenderOptions([]);
+          igFetchAvailable();
+        } else {
+          igRenderOptions(igState.available);
+        }
         document.getElementById('igSearchInput').focus();
       }
     }
@@ -2890,36 +3519,54 @@
 
       if (!name) {
         igState.selected = null;
+        igState.selectedProfileUrl = null;
         trigger.textContent = 'Base FHIR R4 (No IG)';
         meta.textContent = 'Validates against base FHIR StructureDefinitions';
+        refreshIgProfileSelect();
+        refreshIgSampleSelect();
+        state.loadedSamplePath = null;
+        state.lastLoadedSampleContent = null;
+        refreshActiveProfile();
         return;
       }
 
       const ig = igState.available.find(i => i.name === name && i.version === version);
       igState.selected = ig || { name, version, title: name };
+      igState.selectedProfileUrl = null;
+      state.loadedSamplePath = null;
+      state.lastLoadedSampleContent = null;
+      document.getElementById('jsonInput').value = '';
+      state.inputData = '';
+      state.parsedCache = null;
+      updateLineNumbers();
       trigger.textContent = ig ? (ig.title || ig.name) : name;
       meta.textContent = `${name} v${version}`;
+      refreshIgProfileSelect();
+      refreshIgSampleSelect();
+      fetchTestCaseCatalog();
 
       const cacheKey = `${name}#${version}`;
-      if (igState.loadedProfiles[cacheKey]) {
+      if (igState.loadedProfiles[cacheKey]?.length) {
         indicator.classList.add('visible');
-        document.getElementById('igLoadingText').textContent = `✓ Ready`;
+        document.getElementById('igLoadingText').textContent = `✓ Ready (${igState.loadedProfiles[cacheKey].length} profiles)`;
         setTimeout(() => indicator.classList.remove('visible'), 800);
+        refreshIgProfileSelect();
+        refreshIgSampleSelect();
+        igWarmInfernoBackground(name, version, false);
+        refreshActiveProfile();
         return;
       }
 
       igState.isLoading = true;
       indicator.classList.add('visible');
-      const isUsCore = name.includes('us.core');
-      document.getElementById('igLoadingText').textContent = isUsCore
-        ? `Loading ${ig?.title || name}...`
-        : `Loading ${ig?.title || name} (first time may take 10-20s)...`;
+      document.getElementById('igLoadingText').textContent =
+        `Loading ${ig?.title || name}...`;
 
       try {
         const loadIg = async () => {
           const r = await fetch('/api/v1/igs/load', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders(),
             body: JSON.stringify({ package_name: name, version })
           });
           return r.ok ? (await r.json()).ig : null;
@@ -2929,24 +3576,30 @@
 
         if (igResult && igResult.status === 'loading') {
           document.getElementById('igLoadingText').textContent = `Loading ${ig?.title || name}...`;
-          for (let i = 0; i < 10; i++) {
-            await new Promise(r => setTimeout(r, 2000));
+          for (let i = 0; i < 60; i++) {
+            await new Promise(r => setTimeout(r, 1000));
             igResult = await loadIg();
             if (!igResult || igResult.status !== 'loading') break;
           }
         }
 
         if (igResult && igResult.status === 'ready' && igResult.profiles?.length > 0) {
-          igState.loadedProfiles[cacheKey] = igResult.profiles;
+          igStoreLoadedIg(cacheKey, igResult);
           document.getElementById('igLoadingText').textContent =
             `✓ ${igResult.profiles.length} profiles loaded`;
           setTimeout(() => indicator.classList.remove('visible'), 1200);
+        } else if (igResult && igResult.status === 'ready') {
+          igStoreLoadedIg(cacheKey, igResult);
+          document.getElementById('igLoadingText').textContent = '✓ Selected — validation ready';
+          setTimeout(() => indicator.classList.remove('visible'), 1500);
         } else {
-          // IG selected but profiles not fully loaded — validation still works with base rules
-          igState.loadedProfiles[cacheKey] = [];
+          igStoreLoadedIg(cacheKey, { profiles: [], profiles_by_type: {} });
           document.getElementById('igLoadingText').textContent = '✓ Selected — validation ready';
           setTimeout(() => indicator.classList.remove('visible'), 1500);
         }
+        refreshIgProfileSelect();
+        refreshIgSampleSelect();
+        refreshActiveProfile();
       } catch (e) {
         document.getElementById('igLoadingText').textContent = 'Load error — using base FHIR';
         setTimeout(() => indicator.classList.remove('visible'), 2500);
@@ -2961,10 +3614,141 @@
       return igState.loadedProfiles[key] || [];
     }
 
+    function igPickUploadFile() {
+      igToggleDropdown(false);
+      const input = document.getElementById('igUploadInput');
+      if (!input) return;
+      input.value = '';
+      input.click();
+    }
+
+    function isIgPackageFilename(name) {
+      const lower = String(name || '').toLowerCase();
+      return lower.endsWith('.tgz') || lower.endsWith('.tar.gz');
+    }
+
+    async function igUploadCustomPackage(file) {
+      if (!file) return;
+      if (!isIgPackageFilename(file.name)) {
+        showToast('Please upload a FHIR IG package (.tgz or .tar.gz)', 'error');
+        return;
+      }
+
+      const trigger = document.getElementById('igTriggerName');
+      const meta = document.getElementById('igTriggerMeta');
+      const indicator = document.getElementById('igLoadingIndicator');
+
+      igState.isLoading = true;
+      indicator.classList.add('visible');
+      document.getElementById('igLoadingText').textContent = `Uploading ${file.name}...`;
+      if (trigger) trigger.textContent = 'Uploading IG…';
+      if (meta) meta.textContent = file.name;
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const headers = {};
+        const token = getAccessToken();
+        if (token) headers.Authorization = `Bearer ${token}`;
+
+        const res = await fetch('/api/v1/igs/upload', {
+          method: 'POST',
+          headers,
+          body: formData
+        });
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const detail = payload.detail || 'Failed to upload IG';
+          let msg = 'Failed to upload IG';
+          if (typeof detail === 'string') msg = detail;
+          else if (Array.isArray(detail)) {
+            msg = detail.map((d) => d.msg || d.message || JSON.stringify(d)).join('; ');
+          } else if (detail && typeof detail === 'object' && detail.message) {
+            msg = detail.message;
+          }
+          throw new Error(msg);
+        }
+
+        const name = payload.id || payload.name || file.name.replace(/\.(tgz|tar\.gz)$/i, '');
+        const version = payload.version || 'unknown';
+        const title = payload.title || name;
+        const profiles = Array.isArray(payload.profiles) ? payload.profiles : [];
+        const packageKind = payload.package_kind || 'implementation-guide';
+        const extensionCount = Array.isArray(payload.extension_urls) ? payload.extension_urls.length : 0;
+
+        const uploaded = {
+          name,
+          version,
+          title,
+          description: 'Uploaded custom Implementation Guide',
+          uploaded: true,
+          packageKind
+        };
+
+        const existingIdx = igState.available.findIndex(
+          ig => ig.name === name && String(ig.version) === String(version)
+        );
+        if (existingIdx >= 0) igState.available[existingIdx] = { ...igState.available[existingIdx], ...uploaded };
+        else igState.available = [uploaded, ...igState.available];
+
+        igState.selected = uploaded;
+        const cacheKey = `${name}#${version}`;
+        igStoreLoadedIg(cacheKey, { profiles, profiles_by_type: payload.profiles_by_type || {} });
+
+        if (trigger) trigger.textContent = title;
+        if (meta) {
+          if (packageKind === 'extensions') {
+            meta.textContent = `${name} v${version} · ${extensionCount} extensions (support pack)`;
+          } else if (packageKind === 'terminology') {
+            meta.textContent = `${name} v${version} · terminology support pack`;
+          } else {
+            meta.textContent = `${name} v${version} · ${profiles.length} profiles`;
+          }
+        }
+
+        let readyMsg = '✓ Custom IG ready';
+        if (profiles.length) readyMsg = `✓ ${profiles.length} profiles loaded`;
+        else if (packageKind === 'extensions') readyMsg = `✓ ${extensionCount} extension defs loaded`;
+        else if (packageKind === 'terminology') readyMsg = '✓ Terminology pack loaded';
+
+        document.getElementById('igLoadingText').textContent = readyMsg;
+        setTimeout(() => indicator.classList.remove('visible'), 1500);
+        refreshIgProfileSelect();
+        refreshIgSampleSelect();
+        refreshActiveProfile();
+
+        if (packageKind === 'extensions' || packageKind === 'terminology') {
+          showToast(
+            `${title} loaded. Use sample resources with meta.profile / extensions — this pack has few (or no) resource profiles.`,
+            'info'
+          );
+        } else {
+          showToast(`IG uploaded: ${title} (${profiles.length} profiles)`, 'success');
+        }
+      } catch (err) {
+        document.getElementById('igLoadingText').textContent = 'Upload failed';
+        setTimeout(() => indicator.classList.remove('visible'), 2500);
+        if (!igState.selected) {
+          if (trigger) trigger.textContent = 'Base FHIR R4 (No IG)';
+          if (meta) meta.textContent = 'Validates against base FHIR StructureDefinitions';
+        } else {
+          if (trigger) trigger.textContent = igState.selected.title || igState.selected.name;
+          if (meta) meta.textContent = `${igState.selected.name} v${igState.selected.version}`;
+        }
+        showToast(err.message || 'Failed to upload IG', 'error');
+      } finally {
+        igState.isLoading = false;
+        const input = document.getElementById('igUploadInput');
+        if (input) input.value = '';
+      }
+    }
+
     function igInitListeners() {
       const trigger = document.getElementById('igSelectorTrigger');
       const searchInput = document.getElementById('igSearchInput');
       const optionsList = document.getElementById('igOptionsList');
+      const uploadInput = document.getElementById('igUploadInput');
 
       if (trigger) {
         trigger.addEventListener('click', (e) => { e.stopPropagation(); igToggleDropdown(); });
@@ -2976,9 +3760,31 @@
       if (optionsList) {
         optionsList.addEventListener('click', (e) => {
           const option = e.target.closest('.ig-option');
-          if (option) {
-            igSelectOption(option.dataset.igName, option.dataset.igVersion);
+          if (!option) return;
+          if (option.dataset.igAction === 'upload') {
+            igPickUploadFile();
+            return;
           }
+          igSelectOption(option.dataset.igName, option.dataset.igVersion);
+        });
+      }
+      if (uploadInput) {
+        uploadInput.addEventListener('change', () => {
+          if (uploadInput.files?.length) igUploadCustomPackage(uploadInput.files[0]);
+        });
+      }
+      const profileSelect = document.getElementById('igProfileSelect');
+      if (profileSelect) {
+        profileSelect.addEventListener('change', onIgProfileSelectChange);
+      }
+      const loadSampleBtn = document.getElementById('loadIgSampleBtn');
+      if (loadSampleBtn) {
+        loadSampleBtn.addEventListener('click', () => loadSelectedIgSample());
+      }
+      const sampleSelect = document.getElementById('igSampleSelect');
+      if (sampleSelect) {
+        sampleSelect.addEventListener('change', () => {
+          if (sampleSelect.value) loadSelectedIgSample();
         });
       }
       document.addEventListener('click', (e) => {
@@ -3136,20 +3942,39 @@
       }
     }
 
+    async function loadInfernoParityStatus() {
+      try {
+        const res = await fetch('/api/v1/fhir/health', { headers: authHeaders() });
+        if (!res.ok) return;
+        const data = await res.json();
+        const parity = data.inferno_parity;
+        if (!parity) return;
+        if (parity.disable_tx) {
+          console.info('[Inferno parity]', parity.note);
+        }
+      } catch (_) { /* non-blocking */ }
+    }
+
     // --- Init ---
     function init() {
       compactReportHistory();
       renderMainNav();
       renderSteps();
-      document.getElementById('jsonInput').value = SAMPLE_PATIENT;
+      document.getElementById('jsonInput').value = '';
+      document.getElementById('jsonInput').placeholder = 'Select an IG → choose a test sample (from test-cases/), or paste FHIR JSON here';
       updateLineNumbers();
       refreshActiveProfile();
       bindEvents();
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) logoutBtn.addEventListener('click', () => logoutUser());
       updateModePanels();
       renderBatchFileList();
       renderValidateSummary();
       igInitListeners();
+      loadInfernoParityStatus();
       navigateTo('dashboard', false);
+      // Ensure IG catalog is loaded (also retried when dropdown opens).
+      igFetchAvailable();
     }
 
     function renderMainNav() {
@@ -4166,8 +4991,9 @@
       document.getElementById('validateSummary').innerHTML = `
         <div class="validate-summary-item"><span>Profile</span><strong>${profile.name}</strong></div>
         <div class="validate-summary-item"><span>Resource Type</span><strong>${resourceType}</strong></div>
+        ${state.loadedSamplePath ? `<div class="validate-summary-item"><span>Test sample</span><strong>${escapeHtml(state.loadedSamplePath.split('/').pop())}</strong></div>` : ''}
         <div class="validate-summary-item"><span>Data Size</span><strong>${(size / 1024).toFixed(2)} KB</strong></div>
-        <div class="validate-summary-item"><span>Input Method</span><strong>${state.inputMethod === 'paste' ? 'Paste JSON' : 'File Upload'}</strong></div>
+        <div class="validate-summary-item"><span>Input Method</span><strong>${state.loadedSamplePath ? 'Test sample' : (state.inputMethod === 'paste' ? 'Paste JSON' : 'File Upload')}</strong></div>
       `;
     }
 
@@ -4635,6 +5461,7 @@
       const totalRules = rules.length;
 
       for (let index = 0; index < totalRules; index += 1) {
+        if (getOutcomes()) break;
         const rule = rules[index];
         const ruleElement = document.getElementById(`rule-${rule.id}`);
         uiBatch.queueRuleUpdate(ruleElement, 'checking', rule.simpleLanguage);
@@ -4648,8 +5475,8 @@
         if (getError && getError()) {
           throw getError();
         }
-        uiBatch.queueSubtitle('Waiting for validator response...');
-        uiBatch.queueProgress(Math.min(88, 35 + Math.round((performance.now() % 3000) / 40)));
+        uiBatch.queueSubtitle('Running validator…');
+        uiBatch.queueProgress(Math.min(88, 35 + Math.round((performance.now() % 2000) / 35)));
         uiBatch.flush();
         await delay(PERF.POLL_MS);
       }
@@ -4672,8 +5499,24 @@
     }
 
     async function runValidation() {
-      const parsed = await parseJsonInputAsync();
-      if (!parsed && state.currentStep >= 1) {
+      const raw = document.getElementById('jsonInput').value.trim();
+      if (!raw) {
+        showJsonError('Select a test sample (loads from test-cases/) or paste/upload FHIR JSON.');
+        goToStep(1);
+        return;
+      }
+      state.inputData = raw;
+      state.parsedCache = null;
+
+      const outcome = await parseResourceTextAsync(raw);
+      if (outcome.error && !outcome.isXml) {
+        showJsonError(outcome.error.startsWith('Invalid JSON:') ? outcome.error : 'Invalid JSON: ' + outcome.error);
+        goToStep(1);
+        return;
+      }
+      const parsed = outcome.parsed;
+      if (!parsed) {
+        showJsonError('Could not parse FHIR resource.');
         goToStep(1);
         return;
       }
@@ -4686,15 +5529,22 @@
       renderProfileInfo(profileUsed);
 
       const metaProfile = extractMetaProfile(parsed);
-      if (metaProfile && metaProfile !== profileUsed.profile) {
-        showToast(`Resource profile does not match ${parsed.resourceType}; validating against ${profileUsed.name}.`, 'info');
+      if (metaProfile && igState.selected && !profileBelongsToSelectedIg(metaProfile, igState.selected.name)) {
+        showToast(`Resource meta.profile is outside ${igState.selected.title || igState.selected.name}; using best matching profile for this IG.`, 'info');
+      } else if (metaProfile && profileUsed.profile && metaProfile !== profileUsed.profile) {
+        showToast(`Validating against ${profileUsed.name} (Inferno uses declared meta.profile when present).`, 'info');
       }
 
       beginValidationUI(profileUsed);
       state.ruleOutcomes = null;
       state.apiValidationError = null;
 
-      const apiPromise = submitValidation(state.inputData, parsed, profileUsed)
+      // Pre-warm IG in background (non-blocking); backend ensures Inferno on validate.
+      if (igState.selected) {
+        igWarmInfernoBackground(igState.selected.name, igState.selected.version, false);
+      }
+
+      const apiPromise = submitValidation(raw, parsed, profileUsed)
         .then(apiResult => {
           state.ruleOutcomes = evaluateRulesFromApiResult(apiResult, profileUsed, parsed);
           return apiResult;
@@ -4723,7 +5573,7 @@
         document.getElementById('validationIcon').classList.remove('spinning');
         document.getElementById('validationIcon').textContent = '✅';
 
-        state.results = normalizeValidationResult(apiResult, startedAt, profileUsed, parsed, state.inputData);
+        state.results = normalizeValidationResult(apiResult, startedAt, profileUsed, parsed, raw);
         state.results.profile = profileUsed.name;
 
         await delay(220);
@@ -5104,10 +5954,41 @@
       }
     }
 
+    async function ensureInfernoIgReady(profileUrl) {
+      if (!igState.selected || !profileUrl) return;
+      const { name, version } = igState.selected;
+      try {
+        const res = await fetch('/api/v1/igs/load', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ package_name: name, version })
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || `IG load failed (${res.status})`);
+        }
+        const data = await res.json();
+        const ig = data.ig || {};
+        const key = `${name}#${version}`;
+        igStoreLoadedIg(key, ig);
+      } catch (e) {
+        console.warn('IG Inferno preload failed:', e);
+        throw e;
+      }
+    }
+
     async function submitValidation(resourceText, parsed, profileUsed) {
+      // Inferno parity for Base FHIR: send profiles:[] and let the engine apply
+      // meta.profile from the resource (same as Inferno with no Advanced profile).
+      // When an IG is selected, pass the resolved profile URL (same as Inferno Advanced).
+      // IG upload is handled once on the backend — no duplicate /igs/load here.
+      const profiles = (!igState.selected)
+        ? []
+        : (profileUsed.profile ? [profileUsed.profile] : []);
+
       const request = {
         resource: resourceText,
-        profiles: profileUsed.profile ? [profileUsed.profile] : [],
+        profiles,
         resource_type: parsed.resourceType || profileUsed.resourceType
       };
 
@@ -5119,7 +6000,7 @@
           try {
             const response = await fetch(endpoint, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: authHeaders(),
               body: JSON.stringify(request)
             });
 
@@ -5156,8 +6037,15 @@
 
     function normalizeValidationResult(apiResult, startedAt, profileUsed, parsed, sourceText, overrides = {}) {
       const issues = (apiResult.issues || []).map(normalizeIssue);
-      const errors = Number(apiResult.error_count ?? issues.filter(i => i.severity === 'error').length);
-      const warnings = Number(apiResult.warning_count ?? issues.filter(i => i.severity === 'warning').length);
+      // Prefer Inferno-derived API counts — never recompute from remapped UI severities.
+      const errors = Number(
+        apiResult.error_count
+          ?? issues.filter(i => i.severity === 'error' || i.severity === 'fatal').length
+      );
+      const warnings = Number(
+        apiResult.warning_count
+          ?? issues.filter(i => i.severity === 'warning').length
+      );
       const info = Number(
         apiResult.info_count
           ?? issues.filter(i => i.severity === 'information' || i.severity === 'info').length
@@ -5191,12 +6079,15 @@
         issues,
         sourceText: sourceText || '',
         apiSummary: apiResult.summary || '',
+        profilesUsed: apiResult.profiles || (profileUsed.profile ? [profileUsed.profile] : []),
         batchId: overrides.batchId || null,
         sourceFileName: overrides.sourceFileName || state.uploadedFileName || ''
       };
     }
 
     function normalizeIssue(issue) {
+      // Keep Inferno severity exactly (fatal/error/warning/information).
+      // Never swap error↔warning — that was the main UI/API drift vs Inferno.
       const severity = normalizeSeverity(issue.severity);
       const location = issue.location || 'Resource';
       const line = Number.isInteger(issue.line) ? issue.line : (issue.line ? Number(issue.line) : null);
@@ -5204,6 +6095,7 @@
       const lineInfo = line ? `Line ${line}${column ? ', column ' + column : ''}` : '';
       return {
         severity,
+        originalSeverity: issue.severity || severity,
         code: escapeHtml(issue.code || 'unknown'),
         location: escapeHtml(location),
         rawLocation: location,
@@ -5218,9 +6110,10 @@
     }
 
     function normalizeSeverity(severity) {
-      // Inferno groups fatal under Errors; keep information as-is for parity.
-      if (severity === 'fatal') return 'error';
-      return severity || 'information';
+      const s = String(severity || 'information').toLowerCase().trim();
+      if (s === 'info') return 'information';
+      if (s === 'fatal' || s === 'error' || s === 'warning' || s === 'information') return s;
+      return 'information';
     }
 
     function toJsonPath(location) {
@@ -5438,9 +6331,14 @@
 
     function renderIssues() {
       const list = document.getElementById('issueList');
-      const issues = state.results.issues.filter(i =>
-        state.activeFilter === 'all' || i.severity === state.activeFilter
-      );
+      const issues = state.results.issues.filter(i => {
+        if (state.activeFilter === 'all') return true;
+        if (state.activeFilter === 'error') {
+          // Inferno Errors tab includes fatal + error
+          return i.severity === 'error' || i.severity === 'fatal';
+        }
+        return i.severity === state.activeFilter;
+      });
       if (!issues.length) {
         list.innerHTML = `
           <div class="issue-card info">
@@ -5457,11 +6355,16 @@
         `;
         return;
       }
-      list.innerHTML = issues.map((issue, idx) => `
-        <div class="issue-card ${issue.severity}" style="animation-delay:${Math.min(idx * 0.04, 0.8)}s" data-idx="${idx}">
+      list.innerHTML = issues.map((issue, idx) => {
+        const sev = issue.severity;
+        const pillClass = sev === 'fatal' ? 'error' : sev;
+        const pillIcon = (sev === 'error' || sev === 'fatal') ? '⛔' : sev === 'warning' ? '⚠️' : 'ℹ️';
+        const pillLabel = sev === 'information' ? 'Information' : sev;
+        return `
+        <div class="issue-card ${pillClass}" style="animation-delay:${Math.min(idx * 0.04, 0.8)}s" data-idx="${idx}">
           <div class="issue-header" role="button" tabindex="0" aria-expanded="false">
             <div class="issue-left">
-              <span class="severity-pill ${issue.severity}">${issue.severity === 'error' ? '⛔' : issue.severity === 'warning' ? '⚠️' : 'ℹ️'} ${issue.severity === 'information' ? 'Information' : issue.severity}</span>
+              <span class="severity-pill ${pillClass}">${pillIcon} ${pillLabel}</span>
               <div>
                 <div class="issue-msg">${escapeHtml(issue.message)}</div>
                 <div class="issue-location">${issue.location} · ${issue.code}${issue.line ? ' · line ' + issue.line : ''}</div>
@@ -5480,7 +6383,8 @@
             <div class="issue-detail"><label>Documentation</label><p>${issue.documentation}</p></div>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
 
       list.querySelectorAll('.issue-header').forEach(header => {
         header.addEventListener('click', () => {
@@ -6021,13 +6925,15 @@
       state.isBatchRunning = false;
       state.viewingBatchFile = false;
       state.activeFilter = 'all';
-      state.inputData = state.mode === 'single' ? SAMPLE_PATIENT : '';
+      state.inputData = '';
       state.inputMethod = state.mode === 'single' ? 'paste' : 'batch';
       state.uploadedFileName = null;
       state.parsedCache = null;
+      state.loadedSamplePath = null;
+      state.lastLoadedSampleContent = null;
       state.largeFilePreview = false;
-      document.getElementById('jsonInput').value = state.mode === 'single' ? SAMPLE_PATIENT : '';
-      document.getElementById('jsonInput').placeholder = '';
+      document.getElementById('jsonInput').value = '';
+      document.getElementById('jsonInput').placeholder = 'Select an IG → choose a test sample (from test-cases/), or paste FHIR JSON here';
       document.getElementById('fileName').classList.remove('show');
       updateLineNumbers();
       renderBatchFileList();
@@ -6137,6 +7043,13 @@
         scheduleLineNumbersUpdate();
         state.inputData = document.getElementById('jsonInput').value;
         state.parsedCache = null;
+        const current = state.inputData;
+        if (state.loadedSamplePath && state.lastLoadedSampleContent && current !== state.lastLoadedSampleContent) {
+          state.loadedSamplePath = null;
+          state.lastLoadedSampleContent = null;
+          const sampleSelect = document.getElementById('igSampleSelect');
+          if (sampleSelect) sampleSelect.value = '';
+        }
         refreshActiveProfile();
       });
 
@@ -6261,7 +7174,11 @@
       document.getElementById('fileInput').value = '';
     }
 
-    init();
+    (async function bootstrap() {
+      const user = await ensureAuthenticated();
+      if (!user) return;
+      init();
+    })();
   </script>
 </body>
 </html>

@@ -1,0 +1,9 @@
+{
+  "resourceType": "Task",
+  "id": "dtr-simple-task",
+  "status": "requested",
+  "intent": "order",
+  "for": {
+    "reference": "Patient/example"
+  }
+}

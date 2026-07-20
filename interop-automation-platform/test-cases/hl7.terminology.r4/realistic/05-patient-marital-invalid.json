@@ -1,0 +1,63 @@
+{
+  "resourceType": "Patient",
+  "id": "tho-bad",
+  "identifier": [
+    {
+      "use": "usual",
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MR",
+            "display": "Medical Record Number"
+          }
+        ]
+      },
+      "system": "http://hospital.example.org/ehr/mrn",
+      "value": "MRN-THO-BAD"
+    }
+  ],
+  "active": true,
+  "name": [
+    {
+      "use": "official",
+      "family": "Nguyen",
+      "given": [
+        "Anh"
+      ]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "555-0100",
+      "use": "mobile"
+    },
+    {
+      "system": "email",
+      "value": "anh.nguyen@example.org"
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1978-05-14",
+  "address": [
+    {
+      "use": "home",
+      "line": [
+        "742 Evergreen Terrace"
+      ],
+      "city": "Springfield",
+      "state": "IL",
+      "postalCode": "62704",
+      "country": "US"
+    }
+  ],
+  "maritalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus",
+        "code": "XX-INVALID"
+      }
+    ]
+  }
+}

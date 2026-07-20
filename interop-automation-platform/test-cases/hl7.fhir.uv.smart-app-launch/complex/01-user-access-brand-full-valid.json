@@ -1,0 +1,17 @@
+{
+  "resourceType": "Organization",
+  "id": "smart-org-1",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/smart-app-launch/StructureDefinition/user-access-brand"
+    ]
+  },
+  "active": true,
+  "name": "Community Hospital SMART Brand",
+  "telecom": [
+    {
+      "system": "url",
+      "value": "https://hospital.example.org"
+    }
+  ]
+}

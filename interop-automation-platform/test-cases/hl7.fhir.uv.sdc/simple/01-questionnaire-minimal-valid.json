@@ -1,0 +1,17 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "sdc-simple-q",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire"
+    ]
+  },
+  "status": "draft",
+  "item": [
+    {
+      "linkId": "1",
+      "type": "boolean",
+      "text": "Agree?"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "sdc-simple-q-invalid",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire"
+    ]
+  },
+  "item": [
+    {
+      "linkId": "1",
+      "type": "string"
+    }
+  ]
+}

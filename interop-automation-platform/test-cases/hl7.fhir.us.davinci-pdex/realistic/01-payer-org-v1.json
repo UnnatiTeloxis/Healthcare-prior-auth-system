@@ -1,0 +1,17 @@
+{
+  "resourceType": "Organization",
+  "id": "pdex-org-001",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/mtls-organization"
+    ]
+  },
+  "active": true,
+  "name": "Payer Network 1",
+  "telecom": [
+    {
+      "system": "url",
+      "value": "https://payer1.example.org/fhir"
+    }
+  ]
+}

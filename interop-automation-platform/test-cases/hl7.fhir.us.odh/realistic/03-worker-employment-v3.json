@@ -1,0 +1,34 @@
+{
+  "resourceType": "Observation",
+  "id": "odh-real-003",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/odh/StructureDefinition/odh-EmploymentStatus"
+    ]
+  },
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "74165-2",
+        "display": "Employment status"
+      }
+    ],
+    "text": "Employment status"
+  },
+  "subject": {
+    "reference": "Patient/odh-pt-003"
+  },
+  "effectiveDateTime": "2026-01-15T10:00:00Z",
+  "valueCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "224406003",
+        "display": "Employed"
+      }
+    ],
+    "text": "Employed full time"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "resourceType": "QuestionnaireResponse",
+  "id": "sdc-qr-phq9-minimal",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaireresponse"
+    ]
+  },
+  "questionnaire": "http://hl7.org/fhir/uv/sdc/Questionnaire/questionnaire-sdc-profile-example-PHQ9",
+  "status": "completed",
+  "subject": {
+    "reference": "Patient/example",
+    "display": "Example Patient"
+  },
+  "authored": "2026-07-18T10:00:00Z",
+  "item": [
+    {
+      "linkId": "LittleInterest",
+      "text": "Little interest or pleasure in doing things",
+      "answer": [
+        {
+          "valueCoding": {
+            "system": "http://loinc.org",
+            "code": "LA6568-5",
+            "display": "Not at all"
+          }
+        }
+      ]
+    }
+  ]
+}

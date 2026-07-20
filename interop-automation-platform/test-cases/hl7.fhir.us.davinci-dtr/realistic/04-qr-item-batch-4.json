@@ -1,0 +1,57 @@
+{
+  "resourceType": "QuestionnaireResponse",
+  "id": "dtr-qr-batch-4",
+  "questionnaire": "http://example.org/Questionnaire/pa-form-4",
+  "status": "completed",
+  "subject": {
+    "reference": "Patient/ehr-admit-001"
+  },
+  "authored": "2026-07-18T15:00:00Z",
+  "item": [
+    {
+      "linkId": "1",
+      "text": "Question 1",
+      "answer": [
+        {
+          "valueString": "Answer 1 from clinic EHR"
+        }
+      ]
+    },
+    {
+      "linkId": "2",
+      "text": "Question 2",
+      "answer": [
+        {
+          "valueString": "Answer 2 from clinic EHR"
+        }
+      ]
+    },
+    {
+      "linkId": "3",
+      "text": "Question 3",
+      "answer": [
+        {
+          "valueString": "Answer 3 from clinic EHR"
+        }
+      ]
+    },
+    {
+      "linkId": "4",
+      "text": "Question 4",
+      "answer": [
+        {
+          "valueString": "Answer 4 from clinic EHR"
+        }
+      ]
+    },
+    {
+      "linkId": "5",
+      "text": "Question 5",
+      "answer": [
+        {
+          "valueString": "Answer 5 from clinic EHR"
+        }
+      ]
+    }
+  ]
+}

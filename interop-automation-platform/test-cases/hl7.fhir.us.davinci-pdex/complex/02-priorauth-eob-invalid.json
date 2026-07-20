@@ -1,0 +1,11 @@
+{
+  "resourceType": "ExplanationOfBenefit",
+  "id": "pdex-eob-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/pdex-priorauthorization"
+    ]
+  },
+  "status": "active",
+  "use": "preauthorization"
+}

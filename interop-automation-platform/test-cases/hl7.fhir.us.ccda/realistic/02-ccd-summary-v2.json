@@ -1,0 +1,33 @@
+{
+  "resourceType": "Composition",
+  "id": "ccda-real-002",
+  "status": "final",
+  "type": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "34133-9",
+        "display": "Summary of episode note"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/ccda-pt-002"
+  },
+  "date": "2026-03-15T09:00:00Z",
+  "author": [
+    {
+      "reference": "Practitioner/attending"
+    }
+  ],
+  "title": "Hospital Discharge Summary #2",
+  "section": [
+    {
+      "title": "Reason for Visit",
+      "text": {
+        "status": "generated",
+        "div": "<div>Visit reason variant 2</div>"
+      }
+    }
+  ]
+}

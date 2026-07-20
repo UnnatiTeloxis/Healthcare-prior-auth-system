@@ -1,0 +1,16 @@
+{
+  "resourceType": "MeasureReport",
+  "id": "deqm-002",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm"
+    ]
+  },
+  "status": "complete",
+  "type": "individual",
+  "measure": "http://example.org/Measure/quality-measure-2",
+  "subject": {
+    "reference": "Patient/qm-002"
+  },
+  "date": "2026-02-01"
+}

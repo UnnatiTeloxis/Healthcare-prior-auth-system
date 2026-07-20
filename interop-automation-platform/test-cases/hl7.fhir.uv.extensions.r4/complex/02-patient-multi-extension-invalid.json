@@ -1,0 +1,28 @@
+{
+  "resourceType": "Patient",
+  "id": "ext-complex-invalid",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/patient-birthPlace",
+      "valueString": "Boston only \u2014 should be Address"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/patient-religion",
+      "valueInteger": 42
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/patient-genderIdentity",
+      "valueBoolean": false
+    }
+  ],
+  "name": [
+    {
+      "family": "Doe",
+      "given": [
+        "Jane"
+      ]
+    }
+  ],
+  "gender": "not-a-gender",
+  "birthDate": "85-04-12"
+}

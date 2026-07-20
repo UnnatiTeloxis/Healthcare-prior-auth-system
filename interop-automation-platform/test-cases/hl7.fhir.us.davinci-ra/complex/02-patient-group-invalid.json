@@ -1,0 +1,9 @@
+{
+  "resourceType": "Group",
+  "id": "ra-grp-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-patient-group"
+    ]
+  }
+}

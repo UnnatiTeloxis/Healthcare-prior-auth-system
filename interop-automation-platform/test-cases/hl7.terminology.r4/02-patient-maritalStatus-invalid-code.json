@@ -1,0 +1,20 @@
+{
+  "resourceType": "Patient",
+  "id": "tho-marital-invalid-code",
+  "name": [
+    {
+      "family": "Nguyen",
+      "given": ["Anh"]
+    }
+  ],
+  "gender": "female",
+  "maritalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus",
+        "code": "NOT-A-REAL-CODE",
+        "display": "Invalid"
+      }
+    ]
+  }
+}

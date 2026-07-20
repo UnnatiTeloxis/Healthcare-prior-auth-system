@@ -102,7 +102,7 @@ Runs entirely on localhost via Docker Compose (Inferno wrapper + API + UI).
 | http://localhost:8000/health | API health |
 | http://localhost:4567/version | Inferno wrapper |
 
-Validation uses the same Inferno/HL7 engine settings as the hosted Inferno resource validator (`TX_SERVER_URL`, `DISPLAY_ISSUES_ARE_WARNINGS`). US Core is auto-loaded from `backend/fhir_packages/us-core.tgz`.
+Validation uses the Inferno/HL7 engine with four selectable IGs (**US Core**, **CRD**, **DTR**, **PAS**). Results are passed through unchanged. Local terminology packages keep ValueSet checks fast without remote TX hangs; Base FHIR mode sends `profiles:[]` like Inferno (uses `meta.profile` from the file). Typical validate latency is under 200ms after warm-up.
 
 ```powershell
 cd interop-automation-platform

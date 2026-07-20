@@ -1,0 +1,17 @@
+{
+  "resourceType": "ServiceRequest",
+  "id": "crd-simple-sr",
+  "status": "active",
+  "intent": "order",
+  "code": {
+    "coding": [
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "73721"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/example"
+  }
+}

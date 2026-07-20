@@ -1,15 +1,20 @@
 from fastapi import APIRouter
 
+from app.api.v1.auth.endpoints import router as auth_router
 from app.api.v1.crd_simulator.endpoints import router as crd_router
 from app.api.v1.dtr_simulator.endpoints import router as dtr_router
 from app.api.v1.fhir_validator.endpoints import router as fhir_router
 from app.api.v1.fhir_validator.igs import router as igs_router
 
+from app.api.v1.fhir_validator.test_cases import router as test_cases_router
+
 router = APIRouter()
 
+router.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 router.include_router(fhir_router, prefix="/fhir", tags=["FHIR Validator"])
 router.include_router(fhir_router, prefix="/validate", tags=["FHIR Validator"])
 router.include_router(igs_router, prefix="/igs", tags=["FHIR Implementation Guides"])
+router.include_router(test_cases_router, prefix="/test-cases", tags=["FHIR Test Cases"])
 router.include_router(crd_router, prefix="/crd", tags=["CRD Simulator"])
 router.include_router(dtr_router, prefix="/dtr", tags=["DTR Simulator"])
 

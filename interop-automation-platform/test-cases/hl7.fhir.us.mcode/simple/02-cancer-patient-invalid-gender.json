@@ -1,0 +1,15 @@
+{
+  "resourceType": "Patient",
+  "id": "mcode-pt-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-patient"
+    ]
+  },
+  "name": [
+    {
+      "family": "Oncology"
+    }
+  ],
+  "gender": "not-valid"
+}

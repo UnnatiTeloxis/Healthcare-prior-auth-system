@@ -1,0 +1,25 @@
+{
+  "resourceType": "Patient",
+  "id": "ms-vet-005",
+  "identifier": [
+    {
+      "system": "http://hospital.example.org/mrn",
+      "value": "MRN-ms-vet-005"
+    }
+  ],
+  "name": [
+    {
+      "family": "Martinez",
+      "given": [
+        "Case5"
+      ]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1980-06-15",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/military-service/StructureDefinition/usveteran"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "resourceType": "Observation",
+  "id": "ms-ep-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/military-service/StructureDefinition/military-service-episode"
+    ]
+  },
+  "status": "final"
+}

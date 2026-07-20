@@ -1,0 +1,22 @@
+{
+  "resourceType": "Parameters",
+  "id": "bulk-complex-export",
+  "parameter": [
+    {
+      "name": "_outputFormat",
+      "valueString": "application/fhir+ndjson"
+    },
+    {
+      "name": "_type",
+      "valueString": "Patient,Observation,Condition,Encounter"
+    },
+    {
+      "name": "_since",
+      "valueInstant": "2025-01-01T00:00:00Z"
+    },
+    {
+      "name": "_typeFilter",
+      "valueString": "Observation?category=vital-signs"
+    }
+  ]
+}

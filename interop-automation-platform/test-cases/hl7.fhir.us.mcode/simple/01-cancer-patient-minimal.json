@@ -1,0 +1,25 @@
+{
+  "resourceType": "Patient",
+  "id": "mcode-pt-1",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-patient"
+    ]
+  },
+  "identifier": [
+    {
+      "system": "http://hospital.example.org/mrn",
+      "value": "ONC-1"
+    }
+  ],
+  "name": [
+    {
+      "family": "Oncology",
+      "given": [
+        "Casey"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1965-02-02"
+}

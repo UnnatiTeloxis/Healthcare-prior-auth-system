@@ -1,0 +1,9 @@
+{
+  "resourceType": "Composition",
+  "id": "ccda-complex-bad",
+  "status": "unknown-status",
+  "type": {
+    "text": "Bad type"
+  },
+  "date": "not-a-date"
+}

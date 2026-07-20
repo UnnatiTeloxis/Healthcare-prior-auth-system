@@ -29,15 +29,32 @@ class FHIRPackageLoader:
     def __init__(self, packages_path: str | Path | None = None) -> None:
         raw = str(packages_path or os.getenv("FHIR_PACKAGES_PATH", "")).strip()
         self.packages_dir = Path(raw) if raw else None
+        extra = str(os.getenv("FHIR_PACKAGES_EXTRA_PATH", "")).strip()
+        if not extra and self.packages_dir:
+            # Sibling folder for uploadable IGs not auto-mounted into Inferno /home/igs
+            candidate = self.packages_dir.parent / "fhir_packages_extra"
+            if candidate.is_dir():
+                extra = str(candidate)
+            else:
+                # Docker: /app/fhir_packages → /app/fhir_packages_extra
+                candidate = Path("/app/fhir_packages_extra")
+                if candidate.is_dir():
+                    extra = str(candidate)
+        self.extra_packages_dir = Path(extra) if extra else None
+        uploads = str(os.getenv("FHIR_UPLOADS_PATH", "")).strip()
+        if not uploads and self.packages_dir:
+            candidate = self.packages_dir.parent / "fhir_packages_uploads"
+            uploads = str(candidate)
+        self.uploads_dir = Path(uploads) if uploads else None
         self._bytes_cache: dict[str, bytes] = {}
 
     def is_enabled(self) -> bool:
         return bool(self.packages_dir and self.packages_dir.is_dir())
 
     def _candidate_paths(self, ref: FHIRPackageRef) -> list[Path]:
-        if not self.packages_dir:
+        dirs = [d for d in (self.packages_dir, self.extra_packages_dir, self.uploads_dir) if d]
+        if not dirs:
             return []
-        base = self.packages_dir
         pid = ref.package_id
         ver = ref.version
 
@@ -56,17 +73,28 @@ class FHIRPackageLoader:
         # Also support friendly aliases used in docs (e.g., us-core.tgz)
         if pid == "hl7.fhir.us.core":
             candidates.append("us-core.tgz")
+        if pid == "hl7.fhir.us.davinci-hrex":
+            candidates.append("davinci-hrex.tgz")
         if pid == "hl7.fhir.us.davinci-crd":
             candidates.append("davinci-crd.tgz")
         if pid == "hl7.fhir.us.davinci-dtr":
             candidates.append("davinci-dtr.tgz")
         if pid == "hl7.fhir.us.davinci-pas":
             candidates.append("davinci-pas.tgz")
+        if pid == "hl7.fhir.us.mcode":
+            candidates.append("mcode.tgz")
+        if pid == "hl7.fhir.us.carin-bb":
+            candidates.append("carin-bb.tgz")
+        if pid == "hl7.fhir.us.qicore":
+            candidates.append("qicore.tgz")
         if pid.startswith("hl7.fhir.us.davinci-"):
             short = pid.rsplit(".", 1)[-1]
             candidates.append(f"davinci-{short}.tgz")
 
-        return [base / name for name in candidates]
+        paths: list[Path] = []
+        for base in dirs:
+            paths.extend(base / name for name in candidates)
+        return paths
 
     def load_package_bytes(self, package_id: str, version: str | None = None) -> bytes | None:
         ref = FHIRPackageRef(package_id=package_id, version=version)
@@ -98,6 +126,7 @@ class FHIRPackageLoader:
         name = path.name.lower()
         alias_map = {
             "us-core.tgz": ("hl7.fhir.us.core", None),
+            "davinci-hrex.tgz": ("hl7.fhir.us.davinci-hrex", None),
             "davinci-crd.tgz": ("hl7.fhir.us.davinci-crd", None),
             "davinci-dtr.tgz": ("hl7.fhir.us.davinci-dtr", None),
             "davinci-pas.tgz": ("hl7.fhir.us.davinci-pas", None),

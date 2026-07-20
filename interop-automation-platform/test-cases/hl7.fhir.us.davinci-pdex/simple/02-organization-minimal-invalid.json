@@ -1,0 +1,9 @@
+{
+  "resourceType": "Organization",
+  "id": "pdex-org-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/mtls-organization"
+    ]
+  }
+}

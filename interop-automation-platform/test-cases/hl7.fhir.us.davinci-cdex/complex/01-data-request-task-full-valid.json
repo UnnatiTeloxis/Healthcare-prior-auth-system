@@ -1,0 +1,15 @@
+{
+  "resourceType": "Task",
+  "id": "cdex-task-1",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-cdex/StructureDefinition/cdex-task-data-request"
+    ]
+  },
+  "status": "requested",
+  "intent": "order",
+  "for": {
+    "reference": "Patient/cdex-pt-1"
+  },
+  "description": "Request clinical data exchange"
+}

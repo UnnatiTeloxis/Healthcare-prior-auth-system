@@ -1,4 +1,5 @@
 import json
+import os
 import re
 from typing import Any
 
@@ -93,6 +94,59 @@ def _issue_location(issue: dict[str, Any]) -> str | None:
     return None
 
 
+def _env_flag(name: str, default: str = "false") -> bool:
+    return os.getenv(name, default).strip().lower() in {"1", "true", "yes"}
+
+
+def _suppress_offline_tx_noise() -> bool:
+    """
+    When terminology is offline (DISABLE_TX), Inferno cannot reach CTS/VSAC or use
+    LOINC. That produces ValueSet-not-found / false 'not in ValueSet' warnings that
+    hosted Inferno (live TX) does not show. Suppress those by default for UI parity.
+    """
+    if _env_flag("SUPPRESS_OFFLINE_TX_WARNINGS", "true"):
+        return _env_flag("DISABLE_TX", "true")
+    return False
+
+
+_OFFLINE_TX_NOISE = (
+    re.compile(r"ValueSet\s+'https?://cts\.nlm\.nih\.gov/[^']+'\s+not found", re.I),
+    re.compile(
+        r"A definition for CodeSystem\s+'https?://loinc\.org'\s+could not be found",
+        re.I,
+    ),
+    re.compile(
+        r"A definition for CodeSystem\s+'https?://www\.nlm\.nih\.gov/research/umls/rxnorm'\s+could not be found",
+        re.I,
+    ),
+    re.compile(
+        r"Unable to check whether the code is in the value set .+ because the code system https?://loinc\.org was not found",
+        re.I,
+    ),
+    re.compile(
+        r"None of the codings provided are in the value set .+"
+        r"(cts\.nlm\.nih\.gov|observation-vitalsignresult|Vital Sign Result Type|us-core-vital-signs)",
+        re.I,
+    ),
+    re.compile(
+        r"The code provided \(https?://unitsofmeasure\.org#[^)]+\) is not in the value set "
+        r"'Vital Signs Units'",
+        re.I,
+    ),
+    re.compile(
+        r"Resolved system https?://unitsofmeasure\.org .+, but the definition is only a fragment",
+        re.I,
+    ),
+)
+
+
+def _is_offline_tx_noise(message: str) -> bool:
+    text = (message or "").strip()
+    if not text:
+        return False
+    return any(pattern.search(text) for pattern in _OFFLINE_TX_NOISE)
+
+
 def count_operation_outcome_severities(
     operation_outcome: dict[str, Any] | None,
 ) -> tuple[bool, int, int, int]:
@@ -104,25 +158,55 @@ def count_operation_outcome_severities(
 def count_issue_severities(
     issues: list[dict[str, Any]],
 ) -> tuple[bool, int, int, int]:
-    error_count = sum(1 for issue in issues if issue.get("severity") in {"error", "fatal"})
-    warning_count = sum(1 for issue in issues if issue.get("severity") == "warning")
-    info_count = sum(1 for issue in issues if issue.get("severity") == "information")
+    """
+    Count severities exactly as Inferno/HL7 OperationOutcome reports them.
+    Never remaps error↔warning. Treats legacy \"info\" as information.
+    valid == no error and no fatal (Inferno Resource Validator semantics).
+    """
+    error_count = 0
+    warning_count = 0
+    info_count = 0
+    for issue in issues:
+        severity = str(issue.get("severity") or "information").lower().strip()
+        if severity in {"error", "fatal"}:
+            error_count += 1
+        elif severity == "warning":
+            warning_count += 1
+        elif severity in {"information", "info"}:
+            info_count += 1
+        else:
+            # Unknown severities stay visible as information — do not promote/demote.
+            info_count += 1
     return error_count == 0, error_count, warning_count, info_count
+
+
+def _normalize_issue_severity(raw: Any) -> str:
+    """Passthrough Inferno severities; only normalize the legacy alias info→information."""
+    severity = str(raw or "information").lower().strip()
+    if severity == "info":
+        return "information"
+    if severity in {"fatal", "error", "warning", "information"}:
+        return severity
+    return "information"
 
 
 def parse_operation_outcome(
     operation_outcome: dict[str, Any],
     resource: str | None = None,
 ) -> tuple[bool, list[dict[str, Any]]]:
-    """Map OperationOutcome issues 1:1 from Inferno — no severity or message changes."""
+    """Map OperationOutcome issues from Inferno; optionally drop offline TX noise."""
     del resource  # call-site compatibility only; never mutates issues
     if not operation_outcome or "issue" not in operation_outcome:
         return True, []
 
-    is_valid, _, _, _ = count_operation_outcome_severities(operation_outcome)
+    suppress_tx = _suppress_offline_tx_noise()
     issues: list[dict[str, Any]] = []
 
     for issue in operation_outcome.get("issue", []):
+        message = _issue_message(issue)
+        if suppress_tx and _is_offline_tx_noise(message):
+            continue
+
         line = None
         column = None
         for extension in issue.get("extension", []):
@@ -134,13 +218,14 @@ def parse_operation_outcome(
 
         issues.append(
             {
-                "severity": issue.get("severity", "information"),
+                "severity": _normalize_issue_severity(issue.get("severity")),
                 "code": issue.get("code", "unknown"),
-                "message": _issue_message(issue),
+                "message": message,
                 "location": _issue_location(issue),
                 "line": line,
                 "column": column,
             }
         )
 
+    is_valid, _, _, _ = count_issue_severities(issues)
     return is_valid, issues

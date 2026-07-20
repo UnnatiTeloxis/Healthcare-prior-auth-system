@@ -1,0 +1,20 @@
+{
+  "resourceType": "Observation",
+  "id": "pfs-003",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/pacio-fs/StructureDefinition/pacio-fs"
+    ]
+  },
+  "status": "final",
+  "code": {
+    "text": "Functional status"
+  },
+  "subject": {
+    "reference": "Patient/pfs-003"
+  },
+  "effectiveDateTime": "2026-01-05",
+  "valueCodeableConcept": {
+    "text": "Functional level 3"
+  }
+}

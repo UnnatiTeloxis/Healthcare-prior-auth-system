@@ -1,0 +1,6 @@
+{
+  "resourceType": "Claim",
+  "id": "pas-simple-claim-invalid",
+  "status": "active",
+  "use": "preauthorization"
+}

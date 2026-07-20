@@ -1,0 +1,9 @@
+{
+  "resourceType": "ServiceRequest",
+  "id": "crd-order-bad",
+  "status": "scheduled-wrong",
+  "intent": "proposal-wrong",
+  "subject": {
+    "reference": "Patient/ehr-admit-001"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "resourceType": "Observation",
+  "id": "adi-obs-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/pacio-adi/StructureDefinition/ADI-PersonalInterventionPreference"
+    ]
+  },
+  "status": "final"
+}

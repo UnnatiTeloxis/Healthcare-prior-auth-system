@@ -1,0 +1,6 @@
+{
+  "resourceType": "Organization",
+  "id": "pas-simple-org",
+  "active": true,
+  "name": "Simple Payer Inc"
+}

@@ -1,0 +1,53 @@
+{
+  "resourceType": "Parameters",
+  "id": "dtr-parameters-valid",
+  "parameter": [
+    {
+      "name": "questionnaire",
+      "resource": {
+        "resourceType": "Questionnaire",
+        "id": "inline-questionnaire",
+        "url": "http://example.org/Questionnaire/home-oxygen-therapy",
+        "status": "active",
+        "item": [
+          {
+            "linkId": "1",
+            "text": "Diagnosis Code",
+            "type": "choice",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "context",
+      "part": [
+        {
+          "name": "name",
+          "valueString": "order"
+        },
+        {
+          "name": "content",
+          "resource": {
+            "resourceType": "ServiceRequest",
+            "id": "sr-context",
+            "status": "active",
+            "intent": "order",
+            "code": {
+              "coding": [
+                {
+                  "system": "https://www.hcpcs.codes/",
+                  "code": "E0601",
+                  "display": "CPAP device"
+                }
+              ]
+            },
+            "subject": {
+              "reference": "Patient/us-core-patient-valid"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "resourceType": "Condition",
+  "id": "ips-cond-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/ips/StructureDefinition/Condition-uv-ips"
+    ]
+  },
+  "clinicalStatus": {
+    "text": "active"
+  }
+}

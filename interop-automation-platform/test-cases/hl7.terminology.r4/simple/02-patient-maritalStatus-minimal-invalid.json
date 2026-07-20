@@ -1,0 +1,17 @@
+{
+  "resourceType": "Patient",
+  "id": "tho-simple-invalid",
+  "name": [
+    {
+      "family": "Chen"
+    }
+  ],
+  "maritalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus",
+        "code": "ZZZ-BAD"
+      }
+    ]
+  }
+}

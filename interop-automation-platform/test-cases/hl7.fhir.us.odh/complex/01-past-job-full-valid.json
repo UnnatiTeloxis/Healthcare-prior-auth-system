@@ -1,0 +1,52 @@
+{
+  "resourceType": "Observation",
+  "id": "odh-job-1",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/odh/StructureDefinition/odh-PastOrPresentJob"
+    ]
+  },
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "86188-0",
+        "display": "History of occupation"
+      }
+    ],
+    "text": "History of occupation"
+  },
+  "subject": {
+    "reference": "Patient/odh-pt-1"
+  },
+  "effectiveDateTime": "2026-01-15T10:00:00Z",
+  "valueCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "224406003",
+        "display": "Employed"
+      }
+    ],
+    "text": "Employed full time"
+  },
+  "component": [
+    {
+      "code": {
+        "text": "Industry"
+      },
+      "valueCodeableConcept": {
+        "text": "Healthcare"
+      }
+    },
+    {
+      "code": {
+        "text": "Occupation"
+      },
+      "valueCodeableConcept": {
+        "text": "Registered Nurse"
+      }
+    }
+  ]
+}

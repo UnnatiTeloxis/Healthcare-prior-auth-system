@@ -1,0 +1,25 @@
+{
+  "resourceType": "Patient",
+  "id": "cdex-001",
+  "identifier": [
+    {
+      "system": "http://hospital.example.org/mrn",
+      "value": "MRN-cdex-001"
+    }
+  ],
+  "name": [
+    {
+      "family": "Davis",
+      "given": [
+        "Member1"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1980-06-15",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-cdex/StructureDefinition/cdex-patient-demographics"
+    ]
+  }
+}

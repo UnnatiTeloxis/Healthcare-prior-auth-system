@@ -1,0 +1,10 @@
+{
+  "resourceType": "CarePlan",
+  "id": "adi-cp-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/pacio-adi/StructureDefinition/ADI-PreferenceCarePlan"
+    ]
+  },
+  "status": "active"
+}

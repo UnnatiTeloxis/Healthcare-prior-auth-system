@@ -1,0 +1,10 @@
+{
+  "resourceType": "InsurancePlan",
+  "id": "form-plan-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-drug-formulary/StructureDefinition/usdf-Formulary"
+    ]
+  },
+  "status": "active"
+}

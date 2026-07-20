@@ -1,0 +1,49 @@
+{
+  "resourceType": "ServiceRequest",
+  "id": "crd-service-request-valid",
+  "meta": {
+    "profile": ["http://hl7.org/fhir/us/davinci-crd/StructureDefinition/profile-servicerequest"]
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>MRI Brain without contrast</p></div>"
+  },
+  "status": "active",
+  "intent": "order",
+  "code": {
+    "coding": [
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "70551",
+        "display": "MRI brain without contrast"
+      }
+    ],
+    "text": "MRI Brain without contrast"
+  },
+  "subject": {
+    "reference": "Patient/us-core-patient-valid",
+    "display": "John Smith"
+  },
+  "authoredOn": "2024-03-01",
+  "requester": {
+    "reference": "Practitioner/pract-1",
+    "display": "Dr. Jane Wilson"
+  },
+  "reasonCode": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "25064002",
+          "display": "Headache"
+        }
+      ],
+      "text": "Persistent headaches"
+    }
+  ],
+  "insurance": [
+    {
+      "reference": "Coverage/crd-coverage-valid"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "resourceType": "QuestionnaireResponse",
+  "id": "dtr-qr-bad",
+  "status": "not-a-status",
+  "item": [
+    {
+      "linkId": "1"
+    }
+  ]
+}

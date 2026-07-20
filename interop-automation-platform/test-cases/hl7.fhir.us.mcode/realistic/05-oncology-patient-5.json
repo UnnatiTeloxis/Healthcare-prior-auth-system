@@ -1,0 +1,25 @@
+{
+  "resourceType": "Patient",
+  "id": "mcode-pt-5",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-patient"
+    ]
+  },
+  "identifier": [
+    {
+      "system": "http://cancercenter.example.org/mrn",
+      "value": "ONC-1005"
+    }
+  ],
+  "name": [
+    {
+      "family": "Patient5",
+      "given": [
+        "Oncology"
+      ]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1955-06-15"
+}

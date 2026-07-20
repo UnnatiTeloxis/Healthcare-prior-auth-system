@@ -1,0 +1,40 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "sdc-intake-001",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire"
+    ]
+  },
+  "url": "http://hl7.org/fhir/uv/sdc/Questionnaire/clinic-intake",
+  "name": "ClinicIntake",
+  "title": "Clinic Patient Intake",
+  "status": "active",
+  "subjectType": [
+    "Patient"
+  ],
+  "item": [
+    {
+      "linkId": "chief-complaint",
+      "text": "Chief complaint",
+      "type": "text",
+      "required": true
+    },
+    {
+      "linkId": "allergies",
+      "text": "Known allergies",
+      "type": "string"
+    },
+    {
+      "linkId": "meds",
+      "text": "Current medications",
+      "type": "text"
+    },
+    {
+      "linkId": "consent",
+      "text": "Consent to treat",
+      "type": "boolean",
+      "required": true
+    }
+  ]
+}

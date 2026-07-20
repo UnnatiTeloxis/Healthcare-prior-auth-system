@@ -1,0 +1,32 @@
+{
+  "resourceType": "Observation",
+  "id": "pcs-obs-full",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/pacio-cs/StructureDefinition/pacio-cs"
+    ]
+  },
+  "status": "final",
+  "code": {
+    "text": "Cognitive status assessment"
+  },
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "effectiveDateTime": "2026-01-05T10:00:00Z",
+  "performer": [
+    {
+      "reference": "Practitioner/assessor-1"
+    }
+  ],
+  "valueCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "248152002",
+        "display": "Mild impairment"
+      }
+    ],
+    "text": "Mild cognitive impairment"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "resourceType": "Patient",
+  "id": "ecr-pt-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-patient"
+    ]
+  },
+  "gender": "x-invalid"
+}

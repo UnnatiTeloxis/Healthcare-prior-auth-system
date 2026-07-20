@@ -1,0 +1,58 @@
+{
+  "resourceType": "MedicationRequest",
+  "id": "crd-medication-request-valid",
+  "meta": {
+    "profile": ["http://hl7.org/fhir/us/davinci-crd/StructureDefinition/profile-medicationrequest"]
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Humira 40mg injection</p></div>"
+  },
+  "status": "active",
+  "intent": "order",
+  "medicationCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "327361",
+        "display": "adalimumab 40 MG/0.8 ML Prefilled Syringe"
+      }
+    ],
+    "text": "Humira 40mg"
+  },
+  "subject": {
+    "reference": "Patient/us-core-patient-valid",
+    "display": "John Smith"
+  },
+  "authoredOn": "2024-02-15",
+  "requester": {
+    "reference": "Practitioner/pract-1",
+    "display": "Dr. Jane Wilson"
+  },
+  "insurance": [
+    {
+      "reference": "Coverage/crd-coverage-valid"
+    }
+  ],
+  "dosageInstruction": [
+    {
+      "text": "Inject 40mg subcutaneously every two weeks",
+      "timing": {
+        "repeat": {
+          "frequency": 1,
+          "period": 2,
+          "periodUnit": "wk"
+        }
+      },
+      "route": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "34206005",
+            "display": "Subcutaneous route"
+          }
+        ]
+      }
+    }
+  ]
+}

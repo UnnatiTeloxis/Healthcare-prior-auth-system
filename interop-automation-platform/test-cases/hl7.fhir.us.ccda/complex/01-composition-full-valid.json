@@ -1,0 +1,63 @@
+{
+  "resourceType": "Composition",
+  "id": "ccda-complex-comp",
+  "status": "final",
+  "type": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "34133-9",
+        "display": "Summary of episode note"
+      }
+    ],
+    "text": "Clinical Summary"
+  },
+  "subject": {
+    "reference": "Patient/ccda-pt-001"
+  },
+  "date": "2026-03-01T14:30:00Z",
+  "author": [
+    {
+      "reference": "Practitioner/dr-smith"
+    }
+  ],
+  "custodian": {
+    "reference": "Organization/hospital-a"
+  },
+  "title": "Continuity of Care Document",
+  "confidentiality": "N",
+  "section": [
+    {
+      "title": "Allergies",
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "48765-2",
+            "display": "Allergies and adverse reactions"
+          }
+        ]
+      },
+      "text": {
+        "status": "generated",
+        "div": "<div>No known allergies</div>"
+      }
+    },
+    {
+      "title": "Medications",
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "10160-0",
+            "display": "History of Medication use"
+          }
+        ]
+      },
+      "text": {
+        "status": "generated",
+        "div": "<div>Medication list</div>"
+      }
+    }
+  ]
+}

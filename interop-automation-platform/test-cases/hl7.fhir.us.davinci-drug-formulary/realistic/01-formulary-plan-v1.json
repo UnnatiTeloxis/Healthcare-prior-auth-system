@@ -1,0 +1,11 @@
+{
+  "resourceType": "InsurancePlan",
+  "id": "form-001",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-drug-formulary/StructureDefinition/usdf-Formulary"
+    ]
+  },
+  "status": "active",
+  "name": "Payer Formulary Tier 1"
+}

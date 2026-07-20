@@ -1,0 +1,26 @@
+{
+  "resourceType": "Patient",
+  "id": "vrdr-001",
+  "identifier": [
+    {
+      "system": "http://hospital.example.org/mrn",
+      "value": "MRN-vrdr-001"
+    }
+  ],
+  "name": [
+    {
+      "family": "Williams",
+      "given": [
+        "Decedent1"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1980-06-15",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/vrdr/StructureDefinition/vrdr-decedent"
+    ]
+  },
+  "deceasedDateTime": "2026-02-12T14:00:00Z"
+}

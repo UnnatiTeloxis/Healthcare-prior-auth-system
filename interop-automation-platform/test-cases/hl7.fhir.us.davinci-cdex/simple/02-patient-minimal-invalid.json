@@ -1,0 +1,10 @@
+{
+  "resourceType": "Patient",
+  "id": "cdex-pt-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-cdex/StructureDefinition/cdex-patient-demographics"
+    ]
+  },
+  "gender": "bad-code"
+}

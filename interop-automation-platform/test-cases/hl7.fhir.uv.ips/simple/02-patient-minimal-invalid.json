@@ -1,0 +1,10 @@
+{
+  "resourceType": "Patient",
+  "id": "ips-pt-bad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/ips/StructureDefinition/Patient-uv-ips"
+    ]
+  },
+  "gender": "not-valid"
+}

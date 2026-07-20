@@ -1,0 +1,44 @@
+{
+  "resourceType": "ServiceRequest",
+  "id": "crd-order-70553",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-crd/StructureDefinition/profile-servicerequest"
+    ]
+  },
+  "status": "active",
+  "intent": "order",
+  "code": {
+    "coding": [
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "70553",
+        "display": "MRI brain w/o & w contrast"
+      }
+    ],
+    "text": "MRI brain w/o & w contrast"
+  },
+  "subject": {
+    "reference": "Patient/ehr-admit-001"
+  },
+  "authoredOn": "2026-07-18",
+  "requester": {
+    "reference": "Practitioner/dr-smith"
+  },
+  "insurance": [
+    {
+      "reference": "Coverage/payer-cov-001"
+    }
+  ],
+  "reasonCode": [
+    {
+      "coding": [
+        {
+          "system": "http://hl7.org/fhir/sid/icd-10-cm",
+          "code": "I10",
+          "display": "Essential hypertension"
+        }
+      ]
+    }
+  ]
+}

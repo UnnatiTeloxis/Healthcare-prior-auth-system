@@ -1,0 +1,23 @@
+{
+  "resourceType": "Patient",
+  "id": "tho-marital-valid",
+  "name": [
+    {
+      "use": "official",
+      "family": "Nguyen",
+      "given": ["Anh"]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1990-08-21",
+  "maritalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus",
+        "code": "M",
+        "display": "Married"
+      }
+    ],
+    "text": "Married"
+  }
+}
