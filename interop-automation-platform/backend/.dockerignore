@@ -1,4 +1,5 @@
 __pycache__
+**/__pycache__
 *.py[cod]
 *$py.class
 *.so
@@ -22,3 +23,12 @@ tests
 *.md
 .env
 .env.*
+
+# Regenerable / local-only — never bake into the image
+fhir_package_cache/
+fhir_packages_uploads/
+fhir_packages_originals/
+test-history/
+frontend/
+*.log
+*.pyc

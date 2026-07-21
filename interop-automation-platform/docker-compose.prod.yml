@@ -1,10 +1,52 @@
+# Production stack for Interop Automation Platform
+# FHIR Conformance Validator parity with docker-compose.yml:
+# Inferno wrapper + IG packages + test-cases + static validator UI.
+#
+# Usage:
+#   Copy-Item .env.example .env   # set POSTGRES_PASSWORD, AUTH_SECRET_KEY, etc.
+#   docker compose -f docker-compose.prod.yml up -d --build
+
 services:
+  fhir-validator-wrapper:
+    image: infernocommunity/fhir-validator-service:latest
+    container_name: interop_fhir_validator_wrapper_prod
+    environment:
+      DISPLAY_ISSUES_ARE_WARNINGS: ${DISPLAY_ISSUES_ARE_WARNINGS:-false}
+      DISABLE_TX: ${DISABLE_TX:-true}
+      TX_SERVER_URL: ${TX_SERVER_URL:-}
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--DfhirOffline=true -Xmx4g}
+    volumes:
+      - ./backend/fhir_packages_inferno:/home/igs:ro
+      - fhir_validator_pkg_cache:/home/fhir
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4567/version"]
+      interval: 15s
+      timeout: 10s
+      retries: 60
+      start_period: 300s
+    networks:
+      - interop_network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 5G
+        reservations:
+          cpus: "0.5"
+          memory: 1G
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
   postgres:
     image: postgres:15-alpine
     container_name: interop_postgres_prod
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-interop}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-interop123}
       POSTGRES_DB: ${POSTGRES_DB:-interop}
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
@@ -64,35 +106,55 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: interop_backend_prod
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
-      DATABASE_URL: ${DATABASE_URL}
-      REDIS_URL: ${REDIS_URL}
-      FHIR_SERVER_URL: ${FHIR_SERVER_URL}
-      TERMINOLOGY_SERVER_URL: ${TERMINOLOGY_SERVER_URL}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-interop}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-interop}}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      INFERNO_VALIDATOR_URL: http://fhir-validator-wrapper:4567
+      FHIR_PACKAGES_PATH: /app/fhir_packages
+      FHIR_PACKAGES_EXTRA_PATH: /app/fhir_packages_extra
+      FHIR_UPLOADS_PATH: /app/fhir_packages_uploads
+      FHIR_TEST_CASES_PATH: /app/test-cases
+      DEFAULT_IGS: ${DEFAULT_IGS:-hl7.fhir.us.core#9.0.0,hl7.fhir.us.davinci-crd#2.2.1,hl7.fhir.us.davinci-dtr#2.2.0,hl7.fhir.us.davinci-pas#2.2.1}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      AUTH_SECRET_KEY: ${AUTH_SECRET_KEY:-change-me-to-a-long-random-secret}
+      AUTH_ACCESS_TOKEN_EXPIRE_MINUTES: ${AUTH_ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
+      DISABLE_TX: ${DISABLE_TX:-true}
+      DISPLAY_ISSUES_ARE_WARNINGS: ${DISPLAY_ISSUES_ARE_WARNINGS:-false}
+      PYTHONUNBUFFERED: "1"
+      API_DEBUG: "false"
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
       PROFILES_PATH: /app/data/profiles
       QUESTIONNAIRES_PATH: /app/data/questionnaires
       CQL_LIBRARIES_PATH: /app/data/cql_libraries
       VALUE_SETS_PATH: /app/data/value_sets
       CRD_SCENARIOS_PATH: /app/data/scenarios/crd
       VALIDATION_RULES_PATH: /app/data/validation_rules
-      PYTHONUNBUFFERED: "1"
-      API_DEBUG: "false"
-      API_RELOAD: "false"
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
     volumes:
+      # Same FHIR assets as local compose (validator UI + IGs + samples)
+      - ./frontend/public:/app/frontend/public:ro
       - ./data:/app/data:ro
+      - ./backend/fhir_packages:/app/fhir_packages:ro
+      - ./backend/fhir_packages_extra:/app/fhir_packages_extra:ro
+      - ./backend/fhir_packages_uploads:/app/fhir_packages_uploads
+      - ./test-cases:/app/test-cases:ro
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+      fhir-validator-wrapper:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
       start_period: 60s
     networks:
       - interop_network
@@ -110,9 +172,8 @@ services:
       options:
         max-size: "20m"
         max-file: "10"
-    command: >
-      sh -c "alembic upgrade head &&
-             uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4"
+    # No alembic in this MVP image — start API the same way as local (without --reload)
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
 
   frontend:
     build:
@@ -156,4 +217,6 @@ volumes:
   postgres_data:
     driver: local
   redis_data:
+    driver: local
+  fhir_validator_pkg_cache:
     driver: local

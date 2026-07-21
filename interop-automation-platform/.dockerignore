@@ -52,3 +52,9 @@ venv/
 # Local Docker / dev volumes
 postgres_data/
 redis_data/
+
+# Regenerable FHIR caches / uploads (mounted or recreated at runtime)
+backend/fhir_package_cache/
+backend/fhir_packages_uploads/
+backend/fhir_packages_originals/
+frontend/node_modules/

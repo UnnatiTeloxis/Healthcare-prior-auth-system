@@ -40,11 +40,15 @@ dist-ssr/
 .env.local
 
 # User-uploaded FHIR packages (writable; fhir_packages is often Docker :ro)
-backend/fhir_packages_uploads/
+backend/fhir_packages_uploads/*
+!backend/fhir_packages_uploads/.gitkeep
 backend/fhir_package_cache/
+backend/fhir_packages_originals/
 
 # Local validation run artifacts (regenerated during dev)
-backend/test-history/runs/
+backend/test-history/runs/*
+!backend/test-history/runs/.gitkeep
+backend/test-history/index.json
 backend/test-history/validate-all-run.log
 backend/test-history/test-case-validation-report.json
 .env.*.local
