@@ -612,15 +612,12 @@
       align-items: center;
     }
     .ig-profile-select {
-      flex: 1 1 280px;
-      min-height: 40px;
-      padding: 0.5rem 0.75rem;
-      border: 2px solid var(--border);
-      border-radius: var(--radius-sm);
-      background: var(--card);
-      font-family: inherit;
-      font-size: 0.875rem;
-      color: var(--text);
+      /* kept for JS value sync; visually replaced by custom dropdown */
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
     }
     .ig-profile-hint {
       font-size: 0.75rem;
@@ -643,8 +640,31 @@
       align-items: center;
     }
     .ig-sample-select {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .ig-sample-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    /* Always-down custom dropdowns (profile + test sample) */
+    .ig-custom-dd {
+      position: relative;
       flex: 1 1 280px;
+      min-width: 0;
+    }
+    .ig-custom-dd-trigger {
+      width: 100%;
       min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
       padding: 0.5rem 0.75rem;
       border: 2px solid var(--border);
       border-radius: var(--radius-sm);
@@ -652,11 +672,78 @@
       font-family: inherit;
       font-size: 0.875rem;
       color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      transition: border-color var(--transition), box-shadow var(--transition);
     }
-    .ig-sample-hint {
-      font-size: 0.75rem;
+    .ig-custom-dd-trigger:hover { border-color: var(--secondary); }
+    .ig-custom-dd-trigger:focus {
+      outline: none;
+      border-color: var(--secondary);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    }
+    .ig-custom-dd-trigger-label {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ig-custom-dd-trigger .ig-custom-dd-chevron {
       color: var(--text-muted);
-      margin-top: 0.35rem;
+      font-size: 0.75rem;
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    .ig-custom-dd.open .ig-custom-dd-chevron {
+      transform: rotate(180deg);
+    }
+    .ig-custom-dd-panel {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      z-index: 120;
+      background: var(--card-solid, #fff);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-lg);
+      max-height: 260px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      flex-direction: column;
+    }
+    .ig-custom-dd.open .ig-custom-dd-panel {
+      display: flex;
+    }
+    .ig-custom-dd-group-label {
+      padding: 0.4rem 0.85rem 0.2rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .ig-custom-dd-option {
+      display: block;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+      padding: 0.55rem 0.85rem;
+      font-family: inherit;
+      font-size: 0.875rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .ig-custom-dd-option:hover {
+      background: rgba(59,130,246,0.06);
+    }
+    .ig-custom-dd-option.selected {
+      background: rgba(59,130,246,0.1);
+      font-weight: 600;
     }
 
     .ig-selector-top-row {
@@ -2308,18 +2395,32 @@
           <div class="ig-profile-wrap" id="igProfileWrap">
             <label class="ig-selector-label"><i class="fas fa-layer-group"></i> Profile (selected IG)</label>
             <div class="ig-profile-row">
-              <select class="ig-profile-select" id="igProfileSelect" aria-label="Choose a StructureDefinition profile for validation">
-                <option value="">Auto — best match for resource type</option>
-              </select>
+              <div class="ig-custom-dd" id="igProfileDd">
+                <button type="button" class="ig-custom-dd-trigger" id="igProfileTrigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="igProfilePanel">
+                  <span class="ig-custom-dd-trigger-label" id="igProfileTriggerLabel">Auto — best match for resource type</span>
+                  <i class="fas fa-chevron-down ig-custom-dd-chevron" aria-hidden="true"></i>
+                </button>
+                <div class="ig-custom-dd-panel" id="igProfilePanel" role="listbox" aria-label="StructureDefinition profiles"></div>
+                <select class="ig-profile-select" id="igProfileSelect" tabindex="-1" aria-hidden="true">
+                  <option value="">Auto — best match for resource type</option>
+                </select>
+              </div>
             </div>
             <p class="ig-profile-hint" id="igProfileHint">Pick a profile or leave Auto to match your file’s resource type and meta.profile.</p>
           </div>
           <div class="ig-sample-wrap" id="igSampleWrap">
             <label class="ig-selector-label"><i class="fas fa-vial"></i> Test sample (<span id="igSamplePackageLabel">IG</span>)</label>
             <div class="ig-sample-row">
-              <select class="ig-sample-select" id="igSampleSelect" aria-label="Choose a test case JSON for the selected IG">
-                <option value="">Choose a test file…</option>
-              </select>
+              <div class="ig-custom-dd" id="igSampleDd">
+                <button type="button" class="ig-custom-dd-trigger" id="igSampleTrigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="igSamplePanel">
+                  <span class="ig-custom-dd-trigger-label" id="igSampleTriggerLabel">Choose a test file…</span>
+                  <i class="fas fa-chevron-down ig-custom-dd-chevron" aria-hidden="true"></i>
+                </button>
+                <div class="ig-custom-dd-panel" id="igSamplePanel" role="listbox" aria-label="Test sample files"></div>
+                <select class="ig-sample-select" id="igSampleSelect" tabindex="-1" aria-hidden="true">
+                  <option value="">Choose a test file…</option>
+                </select>
+              </div>
               <button type="button" class="btn btn-secondary" id="loadIgSampleBtn" style="min-height:40px;">Load sample</button>
             </div>
             <p class="ig-sample-hint" id="igSampleHint">Folder name matches the IG package ID — e.g. hl7.fhir.us.core</p>
@@ -3237,6 +3338,55 @@
         }));
     }
 
+    function closeAllCustomDropdowns(exceptId) {
+      document.querySelectorAll('.ig-custom-dd.open').forEach(dd => {
+        if (exceptId && dd.id === exceptId) return;
+        dd.classList.remove('open');
+        const trigger = dd.querySelector('.ig-custom-dd-trigger');
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+      });
+    }
+
+    function syncCustomSelectFromNative(selectId, panelId, labelId, emptyLabel) {
+      const select = document.getElementById(selectId);
+      const panel = document.getElementById(panelId);
+      const label = document.getElementById(labelId);
+      if (!select || !panel || !label) return;
+
+      const current = select.value || '';
+      let html = '';
+      const children = Array.from(select.children);
+      for (const child of children) {
+        if (child.tagName === 'OPTGROUP') {
+          html += `<div class="ig-custom-dd-group-label">${escapeHtml(child.label || '')}</div>`;
+          Array.from(child.children).forEach(opt => {
+            const sel = opt.value === current ? ' selected' : '';
+            html += `<button type="button" class="ig-custom-dd-option${sel}" role="option" data-value="${escapeHtml(opt.value)}" aria-selected="${opt.value === current ? 'true' : 'false'}">${escapeHtml(opt.textContent || '')}</button>`;
+          });
+        } else if (child.tagName === 'OPTION') {
+          const sel = child.value === current ? ' selected' : '';
+          html += `<button type="button" class="ig-custom-dd-option${sel}" role="option" data-value="${escapeHtml(child.value)}" aria-selected="${child.value === current ? 'true' : 'false'}">${escapeHtml(child.textContent || emptyLabel)}</button>`;
+        }
+      }
+      panel.innerHTML = html;
+
+      const selectedOpt = select.options[select.selectedIndex];
+      label.textContent = (selectedOpt && selectedOpt.textContent) ? selectedOpt.textContent : emptyLabel;
+    }
+
+    function setNativeSelectValue(selectId, value, { fireChange = true } = {}) {
+      const select = document.getElementById(selectId);
+      if (!select) return;
+      select.value = value == null ? '' : value;
+      if (fireChange) {
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      } else if (selectId === 'igProfileSelect') {
+        syncCustomSelectFromNative('igProfileSelect', 'igProfilePanel', 'igProfileTriggerLabel', 'Auto — best match for resource type');
+      } else if (selectId === 'igSampleSelect') {
+        syncCustomSelectFromNative('igSampleSelect', 'igSamplePanel', 'igSampleTriggerLabel', 'Choose a test file…');
+      }
+    }
+
     function refreshIgProfileSelect() {
       const wrap = document.getElementById('igProfileWrap');
       const select = document.getElementById('igProfileSelect');
@@ -3247,6 +3397,8 @@
         wrap.classList.remove('visible');
         igState.selectedProfileUrl = null;
         select.innerHTML = '<option value="">Auto — best match for resource type</option>';
+        closeAllCustomDropdowns();
+        syncCustomSelectFromNative('igProfileSelect', 'igProfilePanel', 'igProfileTriggerLabel', 'Auto — best match for resource type');
         return;
       }
 
@@ -3276,6 +3428,7 @@
         igState.selectedProfileUrl = null;
       }
 
+      syncCustomSelectFromNative('igProfileSelect', 'igProfilePanel', 'igProfileTriggerLabel', 'Auto — best match for resource type');
       updateIgProfileHint(hint);
     }
 
@@ -3308,6 +3461,7 @@
     function onIgProfileSelectChange() {
       const select = document.getElementById('igProfileSelect');
       igState.selectedProfileUrl = select?.value || null;
+      syncCustomSelectFromNative('igProfileSelect', 'igProfilePanel', 'igProfileTriggerLabel', 'Auto — best match for resource type');
       updateIgProfileHint();
       refreshIgSampleSelect();
       refreshActiveProfile();
@@ -3344,6 +3498,8 @@
       if (!igState.selected?.name) {
         wrap.classList.remove('visible');
         select.innerHTML = '<option value="">Choose a test file…</option>';
+        closeAllCustomDropdowns();
+        syncCustomSelectFromNative('igSampleSelect', 'igSamplePanel', 'igSampleTriggerLabel', 'Choose a test file…');
         return;
       }
 
@@ -3397,6 +3553,8 @@
             : `${samples.length} sample(s) · folder: test-cases/${folder}/ — selecting a file loads it automatically`;
         }
       }
+
+      syncCustomSelectFromNative('igSampleSelect', 'igSamplePanel', 'igSampleTriggerLabel', 'Choose a test file…');
     }
 
     async function loadSelectedIgSample() {
@@ -3430,21 +3588,19 @@
         const igProfiles = igGetSelectedProfiles();
         if (sampleProfile && igProfiles.includes(sampleProfile)) {
           igState.selectedProfileUrl = sampleProfile;
-          const profileSelect = document.getElementById('igProfileSelect');
-          if (profileSelect) profileSelect.value = sampleProfile;
+          setNativeSelectValue('igProfileSelect', sampleProfile, { fireChange: false });
         } else if (sampleProfile && profileBelongsToSelectedIg(sampleProfile, packageId)) {
           igState.selectedProfileUrl = sampleProfile;
-          const profileSelect = document.getElementById('igProfileSelect');
-          if (profileSelect) profileSelect.value = sampleProfile;
+          setNativeSelectValue('igProfileSelect', sampleProfile, { fireChange: false });
         } else {
           igState.selectedProfileUrl = null;
-          const profileSelect = document.getElementById('igProfileSelect');
-          if (profileSelect) profileSelect.value = '';
+          setNativeSelectValue('igProfileSelect', '', { fireChange: false });
         }
 
         updateIgProfileHint();
         refreshActiveProfile();
         renderValidateSummary();
+        syncCustomSelectFromNative('igSampleSelect', 'igSamplePanel', 'igSampleTriggerLabel', 'Choose a test file…');
         showToast(`Loaded ${path.split('/').pop()} from test-cases`, 'success');
 
         if (igState.selected) {
@@ -3878,13 +4034,45 @@
       const sampleSelect = document.getElementById('igSampleSelect');
       if (sampleSelect) {
         sampleSelect.addEventListener('change', () => {
+          syncCustomSelectFromNative('igSampleSelect', 'igSamplePanel', 'igSampleTriggerLabel', 'Choose a test file…');
           if (sampleSelect.value) loadSelectedIgSample();
         });
       }
+
+      const wireCustomDd = (ddId, triggerId, panelId, selectId) => {
+        const dd = document.getElementById(ddId);
+        const trigger = document.getElementById(triggerId);
+        const panel = document.getElementById(panelId);
+        if (!dd || !trigger || !panel) return;
+        trigger.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const willOpen = !dd.classList.contains('open');
+          closeAllCustomDropdowns(willOpen ? ddId : null);
+          if (igState.isOpen) igToggleDropdown(false);
+          dd.classList.toggle('open', willOpen);
+          trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        });
+        panel.addEventListener('click', (e) => {
+          const option = e.target.closest('.ig-custom-dd-option');
+          if (!option) return;
+          e.preventDefault();
+          e.stopPropagation();
+          const value = option.getAttribute('data-value') || '';
+          setNativeSelectValue(selectId, value, { fireChange: true });
+          closeAllCustomDropdowns();
+        });
+      };
+      wireCustomDd('igProfileDd', 'igProfileTrigger', 'igProfilePanel', 'igProfileSelect');
+      wireCustomDd('igSampleDd', 'igSampleTrigger', 'igSamplePanel', 'igSampleSelect');
+
       document.addEventListener('click', (e) => {
         const container = document.getElementById('igSelectorContainer');
         if (igState.isOpen && container && !container.contains(e.target)) {
           igToggleDropdown(false);
+        }
+        if (!e.target.closest('.ig-custom-dd')) {
+          closeAllCustomDropdowns();
         }
       });
       igFetchAvailable();
@@ -7205,7 +7393,10 @@
           state.loadedSamplePath = null;
           state.lastLoadedSampleContent = null;
           const sampleSelect = document.getElementById('igSampleSelect');
-          if (sampleSelect) sampleSelect.value = '';
+          if (sampleSelect) {
+            sampleSelect.value = '';
+            syncCustomSelectFromNative('igSampleSelect', 'igSamplePanel', 'igSampleTriggerLabel', 'Choose a test file…');
+          }
         }
         refreshActiveProfile();
       });
