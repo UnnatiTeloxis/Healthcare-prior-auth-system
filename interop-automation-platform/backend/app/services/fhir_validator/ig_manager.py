@@ -247,13 +247,22 @@ class IGManager:
         # Another request is uploading — wait for it when wait=True
         if cache_key in self._loading_in_progress:
             if wait:
-                for _ in range(90):
+                for _ in range(180):
                     await asyncio.sleep(1.0)
-                    if cache_key in self._loaded_igs:
-                        return self._loaded_igs[cache_key]
+                    cached = self._loaded_igs.get(cache_key)
+                    if cached and not cached.get("inferno_pending"):
+                        return cached
                     if cache_key not in self._loading_in_progress:
+                        if inferno_client._is_ig_loaded(package_name, version) and cached:
+                            cached = dict(cached)
+                            cached["inferno_pending"] = False
+                            self._loaded_igs[cache_key] = cached
+                            return cached
                         break
             else:
+                cached = self._loaded_igs.get(cache_key)
+                if cached:
+                    return cached
                 return {
                     "package_name": package_name,
                     "version": version or "",
@@ -262,6 +271,7 @@ class IGManager:
                     "loaded_at": 0,
                     "preloaded": False,
                     "status": "loading",
+                    "inferno_pending": True,
                 }
 
         async with self._load_lock:
@@ -532,19 +542,44 @@ class IGManager:
 
     async def ensure_inferno_for_profiles(self, profile_urls: list[str]) -> None:
         """Load every IG required by explicit ?profile= URLs (validation hot path)."""
+        from app.services.fhir_validator.inferno_client import _ig_spec_for_profile_url, _split_ig_spec
+
         seen: set[str] = set()
         for profile_url in profile_urls or []:
-            from app.services.fhir_validator.inferno_client import _ig_spec_for_profile_url, _split_ig_spec
-
             ig_spec = _ig_spec_for_profile_url(profile_url)
-            if not ig_spec:
+            if ig_spec:
+                package_id, ver = _split_ig_spec(ig_spec)
+                key = f"{package_id}#{ver or ''}"
+                if key in seen:
+                    continue
+                seen.add(key)
+                await self.ensure_inferno_ready(package_id, ver)
                 continue
-            package_id, ver = _split_ig_spec(ig_spec)
+
+            # Custom / uploaded IGs: map profile URL → cached package from local .tgz scan.
+            owner = self._find_ig_for_profile(profile_url)
+            if not owner:
+                continue
+            package_id = owner.get("package_name") or ""
+            ver = owner.get("version") or None
+            if not package_id:
+                continue
             key = f"{package_id}#{ver or ''}"
             if key in seen:
                 continue
             seen.add(key)
             await self.ensure_inferno_ready(package_id, ver)
+
+    def _find_ig_for_profile(self, profile_url: str) -> dict[str, Any] | None:
+        """Return cached IG entry that owns this StructureDefinition URL."""
+        base = (profile_url or "").split("|", 1)[0].strip().lower()
+        if not base:
+            return None
+        for ig in self._loaded_igs.values():
+            for url in ig.get("profiles") or []:
+                if str(url).split("|", 1)[0].strip().lower() == base:
+                    return ig
+        return None
 
     def is_ig_loaded(self, package_name: str, version: str | None = None) -> bool:
         cache_key = f"{package_name}#{version}" if version else package_name
@@ -581,7 +616,7 @@ class IGManager:
             "profiles_by_type": {},
         }
         with tarfile.open(**open_kwargs) as tar:
-            for member in tar.getmembers():
+            for member in tar:
                 if not member.isfile():
                     continue
                 basename = os.path.basename(member.name)
@@ -596,7 +631,7 @@ class IGManager:
                     meta["canonical"] = data.get("canonical") or meta["canonical"]
                     continue
 
-                if "StructureDefinition" not in basename or not basename.endswith(".json"):
+                if not basename.startswith("StructureDefinition") or not basename.endswith(".json"):
                     continue
                 fobj = tar.extractfile(member)
                 if not fobj:
@@ -642,47 +677,89 @@ class IGManager:
         filename: str | None = None,
     ) -> dict[str, Any]:
         """
-        Upload a custom IG to Inferno, extract profiles from the archive, and cache
-        them so validation can send the same ?profile= URLs as Inferno Advanced.
+        Accept a custom IG upload: extract all resource profiles from the archive
+        immediately, return to the UI, and load the package into Inferno in the
+        background so validation stays accurate without blocking the upload response.
         """
+        from app.services.fhir_validator.fhir_loader import get_fhir_package_loader
         from app.services.fhir_validator.inferno_client import inferno_client
 
-        extracted = self.extract_package_definitions(package_data)
-        package_name = extracted.get("name") or (filename or "custom.ig").replace(".tgz", "").replace(".tar.gz", "")
+        t0 = time.monotonic()
+        extracted = await asyncio.to_thread(self.extract_package_definitions, package_data)
+        extract_ms = (time.monotonic() - t0) * 1000
+
+        package_name = extracted.get("name") or (filename or "custom.ig").replace(
+            ".tgz", ""
+        ).replace(".tar.gz", "")
         version = extracted.get("version") or "0.0.0"
         title = extracted.get("title") or package_name
-
-        try:
-            self.persist_uploaded_package(package_data, package_name=package_name, version=version)
-        except Exception as exc:
-            logger.warning("Could not persist uploaded package: %s", exc)
-
-        start = time.monotonic()
-        inferno_result = await inferno_client.upload_custom_ig(package_data)
-        inferno_client._register_loaded_ig(package_name, version, inferno_result)
-
-        # Prefer archive-extracted resource profiles; fall back to Inferno /profiles
-        # only for normal resource IGs (never for extensions/terminology packs — their
-        # URL heuristics would match unrelated core StructureDefinitions).
-        profiles = list(extracted.get("profiles") or [])
-        pkg_lower = package_name.lower()
-        is_support_pack = "extensions" in pkg_lower or "terminology" in pkg_lower
-        if not profiles and not is_support_pack:
-            try:
-                all_profiles = await inferno_client.get_profiles()
-                profiles = [p for p in all_profiles if _profile_belongs_to_ig(p, package_name)]
-            except Exception:
-                profiles = []
-
-        # Extensions / THO packages: expose extension URLs so the UI can still show readiness.
-        if not profiles and extracted.get("extension_urls"):
-            # Do not send Extension SD URLs as ?profile= for Patient/etc.
-            # Keep them available for membership checks / documentation only.
-            pass
-
-        elapsed_ms = (time.monotonic() - start) * 1000
         cache_key = f"{package_name}#{version}"
-        loaded_info = {
+        profiles = list(extracted.get("profiles") or [])
+
+        loader = get_fhir_package_loader()
+        loader.register_package_bytes(package_name, version, package_data)
+
+        inferno_ready = inferno_client._is_ig_loaded(package_name, version)
+        loaded_info = self._build_uploaded_ig_info(
+            package_name,
+            version,
+            title,
+            extracted,
+            profiles,
+            filename=filename,
+            extract_ms=extract_ms,
+            inferno_pending=not inferno_ready,
+        )
+        self._loaded_igs[cache_key] = loaded_info
+
+        if inferno_ready:
+            logger.info(
+                "IG upload %s (%d profiles) — already in Inferno (extract=%dms)",
+                cache_key,
+                len(profiles),
+                round(extract_ms),
+            )
+            asyncio.create_task(
+                asyncio.to_thread(
+                    self.persist_uploaded_package,
+                    package_data,
+                    package_name=package_name,
+                    version=version,
+                )
+            )
+            return loaded_info
+
+        if cache_key not in self._loading_in_progress:
+            self._loading_in_progress.add(cache_key)
+            asyncio.create_task(
+                self._finish_uploaded_package(
+                    package_data, package_name, version, cache_key
+                )
+            )
+
+        logger.info(
+            "IG upload accepted %s (%d profiles, extract=%dms) — Inferno load in background",
+            cache_key,
+            len(profiles),
+            round(extract_ms),
+        )
+        return loaded_info
+
+    def _build_uploaded_ig_info(
+        self,
+        package_name: str,
+        version: str,
+        title: str,
+        extracted: dict[str, Any],
+        profiles: list[str],
+        *,
+        filename: str | None,
+        extract_ms: float,
+        inferno_pending: bool,
+        inferno_result: dict[str, Any] | None = None,
+        inferno_ms: float = 0,
+    ) -> dict[str, Any]:
+        return {
             "package_name": package_name,
             "version": version,
             "title": title,
@@ -690,26 +767,74 @@ class IGManager:
             "profiles": profiles,
             "extension_urls": extracted.get("extension_urls") or [],
             "profiles_by_type": extracted.get("profiles_by_type") or {},
-            "load_time_ms": round(elapsed_ms),
+            "extract_time_ms": round(extract_ms),
+            "load_time_ms": round(inferno_ms),
             "loaded_at": time.time(),
             "preloaded": False,
             "status": "ready",
+            "inferno_pending": inferno_pending,
             "uploaded": True,
             "filename": filename or "",
             "inferno": {
-                "id": inferno_result.get("id") or inferno_result.get("package_id") or package_name,
-                "version": inferno_result.get("version") or version,
+                "id": (
+                    (inferno_result or {}).get("id")
+                    or (inferno_result or {}).get("package_id")
+                    or package_name
+                ),
+                "version": (inferno_result or {}).get("version") or version,
             },
         }
-        self._loaded_igs[cache_key] = loaded_info
-        logger.info(
-            "Uploaded custom IG %s (%d resource profiles, %d extensions) in %dms",
-            cache_key,
-            len(profiles),
-            len(loaded_info["extension_urls"]),
-            round(elapsed_ms),
-        )
-        return loaded_info
+
+    async def _finish_uploaded_package(
+        self,
+        package_data: bytes,
+        package_name: str,
+        version: str,
+        cache_key: str,
+    ) -> None:
+        """Persist package and upload to Inferno (background — does not block UI)."""
+        from app.services.fhir_validator.inferno_client import inferno_client
+
+        try:
+            await asyncio.to_thread(
+                self.persist_uploaded_package,
+                package_data,
+                package_name=package_name,
+                version=version,
+            )
+
+            start = time.monotonic()
+            inferno_result = await inferno_client.upload_custom_ig(package_data)
+            inferno_client._register_loaded_ig(package_name, version, inferno_result)
+            inferno_ms = (time.monotonic() - start) * 1000
+
+            cached = self._loaded_igs.get(cache_key) or {}
+            cached["inferno_pending"] = False
+            cached["load_time_ms"] = round(inferno_ms)
+            cached["status"] = "ready"
+            if inferno_result:
+                cached["inferno"] = {
+                    "id": inferno_result.get("id")
+                    or inferno_result.get("package_id")
+                    or package_name,
+                    "version": inferno_result.get("version") or version,
+                }
+            self._loaded_igs[cache_key] = cached
+            logger.info(
+                "Inferno ready for uploaded IG %s in %dms (%d profiles)",
+                cache_key,
+                round(inferno_ms),
+                len(cached.get("profiles") or []),
+            )
+        except Exception as exc:
+            logger.warning("Background Inferno upload failed for %s: %s", cache_key, exc)
+            cached = self._loaded_igs.get(cache_key) or {}
+            cached["inferno_pending"] = True
+            cached["status"] = "inferno_error"
+            cached["inferno_error"] = str(exc)
+            self._loaded_igs[cache_key] = cached
+        finally:
+            self._loading_in_progress.discard(cache_key)
 
 
 def _profile_belongs_to_ig(profile_url: str, package_name: str) -> bool:

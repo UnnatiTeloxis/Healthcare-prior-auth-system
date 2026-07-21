@@ -392,7 +392,10 @@
     .reports-table tr:hover { background: rgba(15,23,42,0.04); }
     .step-stage {
       position: relative;
-      transition: min-height 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: min-height 0.52s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .step-stage.is-transitioning {
+      overflow: hidden;
     }
     .step-stage > .step-panel {
       position: absolute;
@@ -401,11 +404,11 @@
       left: 0;
       opacity: 0;
       visibility: hidden;
-      transform: translate3d(28px, 0, 0);
+      transform: translate3d(36px, 0, 0);
       transition:
-        opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1),
-        transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
-        visibility 0.38s;
+        opacity 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0.48s;
       pointer-events: none;
       will-change: opacity, transform;
       backface-visibility: hidden;
@@ -421,23 +424,35 @@
     .step-stage > .step-panel.is-leaving {
       position: absolute;
       opacity: 0;
-      transform: translate3d(-22px, 0, 0);
+      transform: translate3d(-36px, 0, 0);
       z-index: 1;
       pointer-events: none;
     }
     .step-stage > .step-panel.is-entering {
       position: relative;
-      opacity: 1;
       visibility: visible;
-      transform: translate3d(0, 0, 0);
       z-index: 3;
       pointer-events: auto;
     }
+    .step-stage > .step-panel.is-entering.is-entering-from-right {
+      opacity: 0;
+      transform: translate3d(40px, 0, 0);
+    }
     .step-stage > .step-panel.is-entering.is-entering-from-left {
-      transform: translate3d(-28px, 0, 0);
+      opacity: 0;
+      transform: translate3d(-40px, 0, 0);
+    }
+    .step-stage > .step-panel.is-entering.is-entering-active {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+    .step-stage > .step-panel.is-leaving.is-leaving-to-left {
+      opacity: 0;
+      transform: translate3d(-40px, 0, 0);
     }
     .step-stage > .step-panel.is-leaving.is-leaving-to-right {
-      transform: translate3d(22px, 0, 0);
+      opacity: 0;
+      transform: translate3d(40px, 0, 0);
     }
     @media (prefers-reduced-motion: reduce) {
       .step-stage > .step-panel {
@@ -447,29 +462,37 @@
     }
 
     .results-header {
-      animation: fadeSlideIn 0.45s ease;
+      animation: fadeSlideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .summary-grid.results-enter .summary-card {
-      animation: countUp 0.55s ease backwards;
+      animation: countUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) backwards;
     }
-    .summary-grid.results-enter .summary-card:nth-child(1) { animation-delay: 0.08s; }
-    .summary-grid.results-enter .summary-card:nth-child(2) { animation-delay: 0.14s; }
-    .summary-grid.results-enter .summary-card:nth-child(3) { animation-delay: 0.2s; }
-    .summary-grid.results-enter .summary-card:nth-child(4) { animation-delay: 0.26s; }
-    .summary-grid.results-enter .summary-card:nth-child(5) { animation-delay: 0.32s; }
+    .summary-grid.results-enter .summary-card:nth-child(1) { animation-delay: 0.06s; }
+    .summary-grid.results-enter .summary-card:nth-child(2) { animation-delay: 0.12s; }
+    .summary-grid.results-enter .summary-card:nth-child(3) { animation-delay: 0.18s; }
+    .summary-grid.results-enter .summary-card:nth-child(4) { animation-delay: 0.24s; }
+    .summary-grid.results-enter .summary-card:nth-child(5) { animation-delay: 0.30s; }
     .batch-results-summary.results-enter .stat-card {
-      animation: countUp 0.55s ease backwards;
+      animation: countUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) backwards;
     }
-    .batch-results-summary.results-enter .stat-card:nth-child(1) { animation-delay: 0.08s; }
-    .batch-results-summary.results-enter .stat-card:nth-child(2) { animation-delay: 0.14s; }
-    .batch-results-summary.results-enter .stat-card:nth-child(3) { animation-delay: 0.2s; }
-    .batch-results-summary.results-enter .stat-card:nth-child(4) { animation-delay: 0.26s; }
+    .batch-results-summary.results-enter .stat-card:nth-child(1) { animation-delay: 0.06s; }
+    .batch-results-summary.results-enter .stat-card:nth-child(2) { animation-delay: 0.12s; }
+    .batch-results-summary.results-enter .stat-card:nth-child(3) { animation-delay: 0.18s; }
+    .batch-results-summary.results-enter .stat-card:nth-child(4) { animation-delay: 0.24s; }
     .issues-loading {
       text-align: center;
       padding: 2rem 1rem;
       color: var(--text-muted);
       font-size: 0.875rem;
     }
+    .issue-list.issues-reveal .issue-card {
+      animation: fadeSlideIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    }
+    .issue-list.issues-reveal .issue-card:nth-child(1) { animation-delay: 0.02s; }
+    .issue-list.issues-reveal .issue-card:nth-child(2) { animation-delay: 0.05s; }
+    .issue-list.issues-reveal .issue-card:nth-child(3) { animation-delay: 0.08s; }
+    .issue-list.issues-reveal .issue-card:nth-child(4) { animation-delay: 0.11s; }
+    .issue-list.issues-reveal .issue-card:nth-child(5) { animation-delay: 0.14s; }
 
     @keyframes fadeSlideIn {
       from { opacity: 0; transform: translateY(12px); }
@@ -634,6 +657,25 @@
       font-size: 0.75rem;
       color: var(--text-muted);
       margin-top: 0.35rem;
+    }
+
+    .ig-selector-top-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: stretch;
+      margin-bottom: 0.75rem;
+    }
+
+    .ig-selector-top-row .ig-selector-container {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .ig-upload-inline-btn {
+      white-space: nowrap;
+      min-width: 160px;
+      min-height: 40px;
+      padding: 0.5rem 1rem;
     }
     .ig-selector-label {
       display: flex;
@@ -1433,6 +1475,14 @@
       transform: scale(1.08);
       transition: transform 0.35s ease;
     }
+    .validation-progress-wrap.is-exiting {
+      opacity: 0;
+      transform: translateY(-8px);
+      transition:
+        opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: none;
+    }
     .rule-list {
       display: flex;
       flex-direction: column;
@@ -2221,28 +2271,40 @@
         <!-- IG Selector -->
         <div class="ig-selector-wrap" id="igSelectorWrap">
           <label class="ig-selector-label"><i class="fas fa-book-medical"></i> Implementation Guide</label>
-          <div class="ig-selector-container" id="igSelectorContainer">
-            <button type="button" class="ig-selector-trigger" id="igSelectorTrigger" aria-haspopup="listbox">
-              <span class="ig-trigger-text">
-                <span class="ig-trigger-name" id="igTriggerName">Base FHIR R4 (No IG)</span>
-                <span class="ig-trigger-meta" id="igTriggerMeta">Validates against base FHIR StructureDefinitions</span>
-              </span>
-              <i class="fas fa-chevron-down ig-trigger-chevron"></i>
-            </button>
-            <div class="ig-dropdown-panel" id="igDropdownPanel" role="listbox">
-              <div class="ig-search-wrap">
-                <i class="fas fa-search"></i>
-                <input type="text" class="ig-search-input" id="igSearchInput" placeholder="Search Implementation Guides..." autocomplete="off" />
-              </div>
-              <div class="ig-options-list" id="igOptionsList">
-                <!-- Populated by JS -->
+          <div class="ig-selector-top-row">
+            <div class="ig-selector-container" id="igSelectorContainer">
+              <button type="button" class="ig-selector-trigger" id="igSelectorTrigger" aria-haspopup="listbox">
+                <span class="ig-trigger-text">
+                  <span class="ig-trigger-name" id="igTriggerName">Base FHIR R4 (No IG)</span>
+                  <span class="ig-trigger-meta" id="igTriggerMeta">Validates against base FHIR StructureDefinitions</span>
+                </span>
+                <i class="fas fa-chevron-down ig-trigger-chevron"></i>
+              </button>
+              <div class="ig-dropdown-panel" id="igDropdownPanel" role="listbox">
+                <div class="ig-search-wrap">
+                  <i class="fas fa-search"></i>
+                  <input type="text" class="ig-search-input" id="igSearchInput" placeholder="Search Implementation Guides..." autocomplete="off" />
+                </div>
+                <div class="ig-options-list" id="igOptionsList">
+                  <!-- Populated by JS -->
+                </div>
               </div>
             </div>
+
+            <button
+              type="button"
+              class="btn btn-secondary ig-upload-inline-btn"
+              id="igUploadMiddleBtn"
+              aria-label="Upload an IG package (.tgz or .tar.gz)"
+            >
+              <i class="fas fa-upload"></i> Upload IG
+            </button>
           </div>
           <div class="ig-loading-indicator" id="igLoadingIndicator">
             <div class="ig-spinner"></div>
             <span id="igLoadingText">Loading IG...</span>
           </div>
+
           <div class="ig-profile-wrap" id="igProfileWrap">
             <label class="ig-selector-label"><i class="fas fa-layer-group"></i> Profile (selected IG)</label>
             <div class="ig-profile-row">
@@ -3090,8 +3152,10 @@
       RULE_STAGGER_MS: 10,
       RULE_COMPLETE_MS: 6,
       POLL_MS: 25,
-      STEP_TRANSITION_MS: 280,
-      VALIDATION_COMPLETE_HOLD_MS: 80,
+      STEP_TRANSITION_MS: 480,
+      VALIDATION_COMPLETE_HOLD_MS: 420,
+      VALIDATION_EXIT_FADE_MS: 320,
+      RESULTS_ENTRANCE_DELAY_MS: 60,
       MAX_STORED_REPORTS: 25,
       MAX_STORED_SOURCE_BYTES: 16 * 1024,
       MAX_STORED_ISSUES: 250
@@ -3100,6 +3164,7 @@
     let jsonWorker = null;
     let lineNumbersTimer = null;
     let batchProgressScheduled = false;
+    let stepTransitionLock = false;
 
     /* ─── IG Selector State & Logic ─── */
     const igState = {
@@ -3694,7 +3759,11 @@
 
         igState.selected = uploaded;
         const cacheKey = `${name}#${version}`;
-        igStoreLoadedIg(cacheKey, { profiles, profiles_by_type: payload.profiles_by_type || {} });
+        igStoreLoadedIg(cacheKey, {
+          profiles,
+          profiles_by_type: payload.profiles_by_type || {},
+          inferno_pending: payload.inferno_pending !== false
+        });
 
         if (trigger) trigger.textContent = title;
         if (meta) {
@@ -3713,10 +3782,26 @@
         else if (packageKind === 'terminology') readyMsg = '✓ Terminology pack loaded';
 
         document.getElementById('igLoadingText').textContent = readyMsg;
-        setTimeout(() => indicator.classList.remove('visible'), 1500);
         refreshIgProfileSelect();
         refreshIgSampleSelect();
         refreshActiveProfile();
+
+        if (payload.inferno_pending !== false) {
+          document.getElementById('igLoadingText').textContent =
+            `${readyMsg} — loading validator in background…`;
+          igWarmInfernoBackground(name, version, false).then(() => {
+            if (igState.selected?.name === name && String(igState.selected?.version) === String(version)) {
+              document.getElementById('igLoadingText').textContent = readyMsg.replace('loaded', 'ready');
+              setTimeout(() => {
+                const indicator = document.getElementById('igLoadingIndicator');
+                if (indicator) indicator.classList.remove('visible');
+              }, 1200);
+            }
+          });
+        } else {
+          igMarkInfernoReady(name, version);
+          setTimeout(() => indicator.classList.remove('visible'), 1200);
+        }
 
         if (packageKind === 'extensions' || packageKind === 'terminology') {
           showToast(
@@ -3749,6 +3834,7 @@
       const searchInput = document.getElementById('igSearchInput');
       const optionsList = document.getElementById('igOptionsList');
       const uploadInput = document.getElementById('igUploadInput');
+      const uploadMiddleBtn = document.getElementById('igUploadMiddleBtn');
 
       if (trigger) {
         trigger.addEventListener('click', (e) => { e.stopPropagation(); igToggleDropdown(); });
@@ -3771,6 +3857,14 @@
       if (uploadInput) {
         uploadInput.addEventListener('change', () => {
           if (uploadInput.files?.length) igUploadCustomPackage(uploadInput.files[0]);
+        });
+      }
+
+      if (uploadMiddleBtn) {
+        uploadMiddleBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          igPickUploadFile();
         });
       }
       const profileSelect = document.getElementById('igProfileSelect');
@@ -4735,12 +4829,32 @@
       if (step === 2) renderValidateSummary();
       if (step === 3) {
         if (state.viewingBatchFile && state.results) {
-          renderResults({ animateEntrance: false, deferIssues: true });
+          renderResults({ animateEntrance: false, deferIssues: true, scheduleIssueRender: false });
         } else if (state.mode === 'batch' && state.batchResults) {
           renderBatchResults({ animateEntrance: false });
         } else if (state.results) {
-          renderResults({ animateEntrance: false, deferIssues: true });
+          renderResults({ animateEntrance: false, deferIssues: true, scheduleIssueRender: false });
         }
+      }
+    }
+
+    function finishDeferredIssueRender() {
+      const issueList = document.getElementById('issueList');
+      if (issueList?.querySelector('.issues-loading')) {
+        renderIssues();
+        issueList.classList.remove('issues-reveal');
+        void issueList.offsetWidth;
+        issueList.classList.add('issues-reveal');
+        window.setTimeout(() => issueList.classList.remove('issues-reveal'), 800);
+      }
+    }
+
+    function scrollStepStageIntoView(behavior = 'smooth') {
+      const stage = document.getElementById('stepStage');
+      const nav = document.getElementById('validatorStepsNav');
+      const target = nav || stage;
+      if (target) {
+        target.scrollIntoView({ behavior, block: 'start' });
       }
     }
 
@@ -4763,8 +4877,10 @@
         circle.style.transition = 'none';
         circle.style.strokeDashoffset = String(circumference);
         requestAnimationFrame(() => {
-          circle.style.transition = 'stroke-dashoffset 1s ease';
-          circle.style.strokeDashoffset = String(circumference - (scoreNum / 100) * circumference);
+          requestAnimationFrame(() => {
+            circle.style.transition = 'stroke-dashoffset 1.1s cubic-bezier(0.22, 1, 0.36, 1)';
+            circle.style.strokeDashoffset = String(circumference - (scoreNum / 100) * circumference);
+          });
         });
       }
       const grid = document.getElementById('summaryGrid');
@@ -4773,11 +4889,20 @@
         void grid.offsetWidth;
         grid.classList.add('results-enter');
       }
+      const header = document.querySelector('#singleResults .results-header');
+      if (header) {
+        header.style.animation = 'none';
+        void header.offsetWidth;
+        header.style.animation = '';
+      }
+      window.setTimeout(finishDeferredIssueRender, 420);
     }
 
     async function goToStep(step, options = {}) {
       const animate = options.animate !== false && !prefersReducedMotion();
       if (step < 1 || step > STEP_COUNT) return;
+      if (stepTransitionLock) return;
+
       if (step === state.currentStep) {
         prepareStepContent(step);
         playResultsEntrance();
@@ -4793,65 +4918,95 @@
       prepareStepContent(step);
 
       if (animate && fromPanel && toPanel && stage) {
-        const fromHeight = fromPanel.offsetHeight;
-        // Stabilize container height to avoid sudden jumps.
-        stage.style.minHeight = `${fromHeight}px`;
+        stepTransitionLock = true;
+        stage.classList.add('is-transitioning');
+        try {
+          const fromHeight = fromPanel.offsetHeight;
+          stage.style.minHeight = `${fromHeight}px`;
 
-        // Place panels off-screen first, then animate in on the next frame.
-        toPanel.classList.add('active', 'is-entering');
-        fromPanel.classList.add('is-leaving');
-        if (goingForward) {
-          toPanel.classList.remove('is-entering-from-left');
-          fromPanel.classList.remove('is-leaving-to-right');
-        } else {
-          toPanel.classList.add('is-entering-from-left');
-          fromPanel.classList.add('is-leaving-to-right');
+          toPanel.classList.add('active', 'is-entering');
+          fromPanel.classList.add('is-leaving');
+          if (goingForward) {
+            toPanel.classList.add('is-entering-from-right');
+            toPanel.classList.remove('is-entering-from-left', 'is-entering-active');
+            fromPanel.classList.add('is-leaving-to-left');
+            fromPanel.classList.remove('is-leaving-to-right');
+          } else {
+            toPanel.classList.add('is-entering-from-left');
+            toPanel.classList.remove('is-entering-from-right', 'is-entering-active');
+            fromPanel.classList.add('is-leaving-to-right');
+            fromPanel.classList.remove('is-leaving-to-left');
+          }
+
+          state.currentStep = step;
+          renderSteps();
+          scrollStepStageIntoView('smooth');
+
+          await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+          toPanel.classList.add('is-entering-active');
+          toPanel.classList.remove('is-entering-from-right', 'is-entering-from-left');
+          fromPanel.classList.remove('is-leaving-to-left', 'is-leaving-to-right');
+
+          const toHeight = toPanel.offsetHeight || toPanel.scrollHeight || fromHeight;
+          stage.style.minHeight = `${Math.max(fromHeight, toHeight)}px`;
+
+          await delay(PERF.STEP_TRANSITION_MS);
+
+          fromPanel.classList.remove(
+            'active', 'is-leaving', 'is-leaving-to-left', 'is-leaving-to-right',
+            'is-entering', 'is-entering-from-left', 'is-entering-from-right', 'is-entering-active'
+          );
+          toPanel.classList.remove(
+            'is-entering', 'is-entering-from-left', 'is-entering-from-right', 'is-entering-active', 'is-leaving'
+          );
+          toPanel.classList.add('active');
+
+          stage.style.minHeight = `${toHeight}px`;
+          await delay(60);
+          stage.style.minHeight = '';
+        } finally {
+          stage.classList.remove('is-transitioning');
+          stepTransitionLock = false;
         }
-
-        state.currentStep = step;
-        renderSteps();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-
-        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-        toPanel.classList.remove('is-entering-from-left');
-        fromPanel.classList.remove('is-leaving-to-right');
-
-        // Transition minHeight to the incoming panel height for a smoother "settle".
-        const toHeight = toPanel.offsetHeight || toPanel.scrollHeight || fromHeight;
-        stage.style.minHeight = `${Math.max(fromHeight, toHeight)}px`;
-
-        await delay(PERF.STEP_TRANSITION_MS);
-
-        fromPanel.classList.remove('active', 'is-leaving', 'is-leaving-to-right', 'is-entering', 'is-entering-from-left');
-        toPanel.classList.remove('is-entering', 'is-entering-from-left', 'is-leaving', 'is-leaving-to-right');
-        toPanel.classList.add('active');
-
-        // Let the height transition finish before clearing.
-        stage.style.minHeight = `${toHeight}px`;
-        await new Promise(resolve => requestAnimationFrame(resolve));
-        stage.style.minHeight = '';
       } else {
         document.querySelectorAll('.step-panel').forEach(panel => {
-          panel.classList.remove('active', 'is-leaving', 'is-entering', 'is-entering-from-left', 'is-leaving-to-right');
+          panel.classList.remove(
+            'active', 'is-leaving', 'is-entering', 'is-entering-from-left',
+            'is-entering-from-right', 'is-entering-active', 'is-leaving-to-left', 'is-leaving-to-right'
+          );
         });
         toPanel?.classList.add('active');
         state.currentStep = step;
         renderSteps();
-        window.scrollTo({ top: 0, behavior: animate ? 'smooth' : 'auto' });
+        scrollStepStageIntoView(animate ? 'smooth' : 'auto');
       }
 
-      if (step === 3) playResultsEntrance();
+      if (step === 3) {
+        await delay(options.deferResultsEntrance ? PERF.RESULTS_ENTRANCE_DELAY_MS : 0);
+        playResultsEntrance();
+      }
     }
 
     async function transitionToResultsScreen(toastMessage) {
       const loadingWrap = document.getElementById('validateLoading');
       if (loadingWrap) loadingWrap.classList.add('validation-complete');
-      updateValidationSubtitle('Preparing your results...');
+      updateValidationSubtitle('Preparing your results…');
       updateValidationProgress(100);
+
+      prepareStepContent(3);
       await delay(PERF.VALIDATION_COMPLETE_HOLD_MS);
-      await goToStep(3, { animate: true });
+
+      if (loadingWrap) loadingWrap.classList.add('is-exiting');
+      await delay(PERF.VALIDATION_EXIT_FADE_MS);
+
+      await goToStep(3, { animate: true, deferResultsEntrance: true });
+
       resetValidationUI();
-      if (loadingWrap) loadingWrap.classList.remove('validation-complete');
+      if (loadingWrap) {
+        loadingWrap.classList.remove('validation-complete', 'is-exiting');
+        loadingWrap.style.opacity = '';
+        loadingWrap.style.transform = '';
+      }
       if (toastMessage) showToast(toastMessage.text, toastMessage.type);
     }
 
@@ -5539,9 +5694,10 @@
       state.ruleOutcomes = null;
       state.apiValidationError = null;
 
-      // Pre-warm IG in background (non-blocking); backend ensures Inferno on validate.
+      // Pre-warm IG before validate (wait when Inferno upload still pending).
       if (igState.selected) {
-        igWarmInfernoBackground(igState.selected.name, igState.selected.version, false);
+        const pending = !igIsInfernoReady(igState.selected.name, igState.selected.version);
+        igWarmInfernoBackground(igState.selected.name, igState.selected.version, pending);
       }
 
       const apiPromise = submitValidation(raw, parsed, profileUsed)
@@ -5576,7 +5732,6 @@
         state.results = normalizeValidationResult(apiResult, startedAt, profileUsed, parsed, raw);
         state.results.profile = profileUsed.name;
 
-        await delay(220);
         cleanupValidationMemory();
         await transitionToResultsScreen({
           text: state.results.status === 'PASSED' ? 'Validation passed!' : 'Validation complete with issues',
@@ -5945,7 +6100,7 @@
       state.viewingBatchFile = true;
       updateModePanels();
       navigateTo('validator', false);
-      await goToStep(3, { animate: true });
+      await goToStep(3, { animate: true, deferResultsEntrance: true });
       const label = report.sourceFileName || report.id;
       if (report.issuesTruncated && report.issuesTotal) {
         showToast(`Viewing ${label} (first ${PERF.MAX_STORED_ISSUES} of ${report.issuesTotal} issues from history)`, 'info');
@@ -6291,7 +6446,9 @@
       if (deferIssues) {
         document.getElementById('issueList').innerHTML =
           '<div class="issues-loading">Loading issue details...</div>';
-        requestAnimationFrame(() => renderIssues());
+        if (options.scheduleIssueRender !== false) {
+          requestAnimationFrame(() => renderIssues());
+        }
       } else {
         renderIssues();
       }

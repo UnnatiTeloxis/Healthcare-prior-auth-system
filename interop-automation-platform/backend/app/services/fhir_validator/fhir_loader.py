@@ -96,6 +96,13 @@ class FHIRPackageLoader:
             paths.extend(base / name for name in candidates)
         return paths
 
+    def register_package_bytes(
+        self, package_id: str, version: str | None, data: bytes
+    ) -> None:
+        """Keep uploaded package bytes in memory so Inferno load does not wait on disk."""
+        ref = FHIRPackageRef(package_id=package_id, version=version)
+        self._bytes_cache[ref.ig_key] = data
+
     def load_package_bytes(self, package_id: str, version: str | None = None) -> bytes | None:
         ref = FHIRPackageRef(package_id=package_id, version=version)
         cache_key = ref.ig_key

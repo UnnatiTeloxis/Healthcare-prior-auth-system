@@ -120,7 +120,10 @@ async def upload_ig(file: UploadFile = File(...)):
             "profiles": loaded.get("profiles") or [],
             "extension_urls": loaded.get("extension_urls") or [],
             "profiles_by_type": loaded.get("profiles_by_type") or {},
-            "status": "ready",
+            "status": loaded.get("status", "ready"),
+            "inferno_pending": bool(loaded.get("inferno_pending")),
+            "extract_time_ms": loaded.get("extract_time_ms", 0),
+            "load_time_ms": loaded.get("load_time_ms", 0),
             "uploaded": True,
             "package_kind": _classify_package(loaded),
         }
