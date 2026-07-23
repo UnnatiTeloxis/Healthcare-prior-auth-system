@@ -1449,6 +1449,13 @@
     .severity-pill.information { background: rgba(59,130,246,0.15); color: var(--info); }
     .issue-msg { font-weight: 600; font-size: 0.9375rem; }
     .issue-location { font-size: 0.8125rem; color: var(--text-muted); font-family: monospace; }
+    .issue-profile-from {
+      margin-top: 0.2rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      word-break: break-all;
+      line-height: 1.35;
+    }
     .issue-body {
       display: none;
       padding: 0 1.25rem 1.25rem;
@@ -2951,17 +2958,30 @@
         .replace(/\b\w/g, c => c.toUpperCase());
     }
 
+    function pinProfileVersion(url) {
+      // Inferno may resolve an unversioned URL to a different ballot/release than the
+      // IG package we loaded. Pin to the selected package version for accurate results.
+      if (!url || String(url).includes('|')) return url || '';
+      const ver = igState.selected?.version;
+      if (!ver) return url;
+      return `${url}|${ver}`;
+    }
+
     function profileFromUrl(url, resourceType) {
-      if (PROFILE_URL_INDEX[url]) return PROFILE_URL_INDEX[url];
+      const pinned = pinProfileVersion(url);
+      if (PROFILE_URL_INDEX[pinned] || PROFILE_URL_INDEX[url]) {
+        const base = PROFILE_URL_INDEX[pinned] || PROFILE_URL_INDEX[url];
+        return pinned === base.profile ? base : { ...base, profile: pinned };
+      }
       return {
-        id: url,
+        id: pinned || url,
         name: friendlyProfileName(url),
         icon: '📋',
         resourceType: resourceType || 'Resource',
         description: 'Validates against the profile declared in the resource (meta.profile), matching standard FHIR validators.',
         requiredFields: [],
         supportFields: [],
-        profile: url
+        profile: pinned
       };
     }
 
@@ -3016,7 +3036,7 @@
             description: `Validates against the profile you selected for ${igTitle} v${igState.selected.version}.`,
             requiredFields: [],
             supportFields: [],
-            profile: igState.selectedProfileUrl
+            profile: pinProfileVersion(igState.selectedProfileUrl)
           };
         }
       }
@@ -3040,7 +3060,7 @@
           description: `Validates against ${igState.selected.title || igState.selected.name} v${igState.selected.version} — same profile parameter as Inferno Advanced.`,
           requiredFields: [],
           supportFields: [],
-          profile: igProfile
+          profile: pinProfileVersion(igProfile)
         };
       }
 
@@ -3612,19 +3632,25 @@
     }
 
     function igWarmInfernoBackground(name, version, wait = false) {
-      if (wait && igIsInfernoReady(name, version)) return Promise.resolve();
+      if (igIsInfernoReady(name, version)) return Promise.resolve();
       return fetch('/api/v1/igs/load', {
         method: 'POST',
         headers: authHeaders(),
-        body: JSON.stringify({ package_name: name, version, wait })
+        body: JSON.stringify({ package_name: name, version, wait: !!wait })
       })
-        .then(r => r.ok ? r.json() : null)
+        .then(r => {
+          if (!r.ok) throw new Error(`IG load failed (${r.status})`);
+          return r.json();
+        })
         .then(data => {
-          if (!data?.ig) return;
+          if (!data?.ig) return data;
           const key = igCacheKey(name, version);
           igStoreLoadedIg(key, data.ig);
-        })
-        .catch(() => {});
+          if (wait || data.ig.inferno_pending === false) {
+            igMarkInfernoReady(name, version);
+          }
+          return data;
+        });
     }
 
     async function igFetchAvailable() {
@@ -5882,10 +5908,15 @@
       state.ruleOutcomes = null;
       state.apiValidationError = null;
 
-      // Pre-warm IG before validate (wait when Inferno upload still pending).
-      if (igState.selected) {
-        const pending = !igIsInfernoReady(igState.selected.name, igState.selected.version);
-        igWarmInfernoBackground(igState.selected.name, igState.selected.version, pending);
+      // Backend ensure_inferno_for_profiles uploads if needed — only pre-warm when
+      // this browser session has not confirmed Inferno has the IG yet.
+      if (igState.selected && !igIsInfernoReady(igState.selected.name, igState.selected.version)) {
+        try {
+          await igWarmInfernoBackground(igState.selected.name, igState.selected.version, true);
+        } catch (e) {
+          console.warn('IG warm before validate failed:', e);
+          showToast('Loading Implementation Guide into validator…', 'info');
+        }
       }
 
       const apiPromise = submitValidation(raw, parsed, profileUsed)
@@ -5996,6 +6027,9 @@
         if (parseOutcome.error && !parseOutcome.isXml) {
           file.result = buildBatchErrorResult(file, parseOutcome.error, batchId);
         } else {
+          if (igState.selected && index === 0) {
+            await igWarmInfernoBackground(igState.selected.name, igState.selected.version, true);
+          }
           const apiResult = await submitValidation(file.content, parsed, profileUsed);
           file.result = normalizeValidationResult(apiResult, startedAt, profileUsed, parsed, file.content, {
             id: `VAL-${Date.now()}-${index + 1}`,
@@ -6378,22 +6412,47 @@
       throw lastError || new Error('Validation API is unavailable');
     }
 
+    function splitIssueMessage(message) {
+      // HAPI often emits "Resource.element: detail (from http://…|version)".
+      // Surface the element path as the primary distinction between similar errors.
+      const raw = String(message || '').trim();
+      const fromMatch = raw.match(/\s*\(from\s+(.+?)\)\s*$/i);
+      const profileFrom = fromMatch ? fromMatch[1].trim() : '';
+      const core = fromMatch ? raw.slice(0, fromMatch.index).trim() : raw;
+      const pathMatch = core.match(
+        /^([A-Za-z][A-Za-z0-9]*(?:\.[A-Za-z0-9\[\]:_-]+)+)\s*:\s*(.*)$/
+      );
+      if (pathMatch) {
+        return {
+          elementPath: pathMatch[1],
+          detail: pathMatch[2],
+          profileFrom,
+          headline: `${pathMatch[1]} — ${pathMatch[2]}`,
+          raw
+        };
+      }
+      return { elementPath: null, detail: core, profileFrom, headline: core, raw };
+    }
+
     function normalizeValidationResult(apiResult, startedAt, profileUsed, parsed, sourceText, overrides = {}) {
-      const issues = (apiResult.issues || []).map(normalizeIssue);
-      // Prefer Inferno-derived API counts — never recompute from remapped UI severities.
-      const errors = Number(
-        apiResult.error_count
-          ?? issues.filter(i => i.severity === 'error' || i.severity === 'fatal').length
+      const seen = new Set();
+      const issues = [];
+      for (const raw of apiResult.issues || []) {
+        const issue = normalizeIssue(raw);
+        const key = `${issue.severity}\0${issue.message}\0${issue.rawLocation || ''}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        issues.push(issue);
+      }
+      // Counts follow the deduped issue list so summary matches what the UI shows.
+      const errors = issues.filter(i => i.severity === 'error' || i.severity === 'fatal').length;
+      const warnings = issues.filter(i => i.severity === 'warning').length;
+      const info = issues.filter(i => i.severity === 'information' || i.severity === 'info').length;
+      const scoreInfo = calculateComplianceScore(
+        issues.map(i => ({ severity: i.severity, message: i.message })),
+        sourceText || '',
+        apiResult.valid
       );
-      const warnings = Number(
-        apiResult.warning_count
-          ?? issues.filter(i => i.severity === 'warning').length
-      );
-      const info = Number(
-        apiResult.info_count
-          ?? issues.filter(i => i.severity === 'information' || i.severity === 'info').length
-      );
-      const scoreInfo = calculateComplianceScore(apiResult.issues || [], sourceText || '', apiResult.valid);
       const execSeconds = (performance.now() - startedAt) / 1000;
       const testCases = buildTestCases(parsed, issues, profileUsed, execSeconds);
       const passedTests = testCases.filter(t => t.status === 'passed').length;
@@ -6432,7 +6491,15 @@
       // Keep Inferno severity exactly (fatal/error/warning/information).
       // Never swap error↔warning — that was the main UI/API drift vs Inferno.
       const severity = normalizeSeverity(issue.severity);
-      const location = issue.location || 'Resource';
+      const parsedMsg = splitIssueMessage(issue.message);
+      let location = issue.location || 'Resource';
+      if (parsedMsg.elementPath) {
+        const locStr = String(location);
+        const resourceOnly = parsedMsg.elementPath.split('.', 1)[0];
+        if (!locStr || locStr === 'Resource' || locStr === resourceOnly) {
+          location = parsedMsg.elementPath;
+        }
+      }
       const line = Number.isInteger(issue.line) ? issue.line : (issue.line ? Number(issue.line) : null);
       const column = Number.isInteger(issue.column) ? issue.column : (issue.column ? Number(issue.column) : null);
       const lineInfo = line ? `Line ${line}${column ? ', column ' + column : ''}` : '';
@@ -6445,7 +6512,9 @@
         line: line || null,
         column: column || null,
         jsonPath: escapeHtml(toJsonPath(location)),
-        message: issue.message || 'Validator returned an issue without diagnostics.',
+        message: parsedMsg.raw || issue.message || 'Validator returned an issue without diagnostics.',
+        headline: parsedMsg.headline || parsedMsg.raw,
+        profileFrom: parsedMsg.profileFrom || '',
         suggestion: escapeHtml(suggestionForIssue(issue, severity)),
         example: escapeHtml(lineInfo || 'Review the submitted FHIR JSON at the reported path.'),
         documentation: 'Returned by the Inferno/HL7 FHIR validator using the selected IG profile.'
@@ -6711,8 +6780,9 @@
             <div class="issue-left">
               <span class="severity-pill ${pillClass}">${pillIcon} ${pillLabel}</span>
               <div>
-                <div class="issue-msg">${escapeHtml(issue.message)}</div>
+                <div class="issue-msg">${escapeHtml(issue.headline || issue.message)}</div>
                 <div class="issue-location">${issue.location} · ${issue.code}${issue.line ? ' · line ' + issue.line : ''}</div>
+                ${issue.profileFrom ? `<div class="issue-profile-from">from ${escapeHtml(issue.profileFrom)}</div>` : ''}
               </div>
             </div>
             <i class="fas fa-chevron-down" aria-hidden="true"></i>

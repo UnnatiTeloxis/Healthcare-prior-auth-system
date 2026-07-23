@@ -63,6 +63,47 @@ async def load_ig_on_demand(request: LoadIGRequest):
         ) from exc
 
 
+class ForceReloadRequest(BaseModel):
+    package_name: str
+    version: str | None = None
+
+
+@router.post("/force-reload")
+async def force_reload_ig(request: ForceReloadRequest):
+    """
+    Clear stale in-memory loaded markers and re-upload the package to Inferno.
+    Use on servers where validate returns HTTP 500 for a selected IG that looks loaded.
+    """
+    try:
+        from app.services.fhir_validator.ig_constants import IG_PREFERRED_VERSIONS
+
+        version = request.version or IG_PREFERRED_VERSIONS.get(request.package_name)
+        inferno_client._forget_ig(request.package_name, version)
+        cache_key = f"{request.package_name}#{version}" if version else request.package_name
+        pending = ig_manager._loaded_igs.get(cache_key)
+        if pending is not None:
+            pending = dict(pending)
+            pending["inferno_pending"] = True
+            ig_manager._loaded_igs[cache_key] = pending
+
+        result = await inferno_client.load_ig_by_id(
+            request.package_name, version, force=True
+        )
+        await ig_manager.ensure_inferno_ready(request.package_name, version)
+        return {
+            "success": True,
+            "package_name": request.package_name,
+            "version": version,
+            "inferno": result,
+            "ig": ig_manager._loaded_igs.get(cache_key),
+        }
+    except Exception as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Failed to force-reload IG {request.package_name}: {exc}",
+        ) from exc
+
+
 @router.get("/profile-cache")
 async def get_profile_cache():
     """Pre-extracted profile URLs for all popular IGs (instant dropdown selection)."""

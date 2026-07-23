@@ -34,10 +34,13 @@ class InfernoClient:
         # Packages we successfully loaded in this process (upload/PUT), or confirmed
         # present via /profiles (auto-loaded from /home/igs).
         self._loaded_igs: set[str] = set()
+        # StructureDefinition URLs confirmed present in the engine (from /igs load or /profiles).
+        self._known_profiles: set[str] = set()
         self._ready = asyncio.Event()
         self._engine_warm = False
         self._startup_lock = asyncio.Lock()
         self._validate_sem = asyncio.Semaphore(_VALIDATE_CONCURRENCY)
+        self._validate_profile_lock = asyncio.Lock()
         self._result_cache: dict[str, tuple[float, dict[str, Any]]] = {}
 
     async def _get_client(self) -> httpx.AsyncClient:
@@ -129,6 +132,21 @@ class InfernoClient:
             if resp_pid:
                 self._loaded_igs.add(_ig_key(resp_pid, resp_ver))
                 self._loaded_igs.add(resp_pid)
+            for url in result.get("profiles") or []:
+                base = str(url).split("|", 1)[0].strip()
+                if base:
+                    self._known_profiles.add(base)
+
+    def _forget_ig(self, package_id: str, version: str | None = None) -> None:
+        """Clear load markers so the next ensure re-uploads the package."""
+        self._loaded_igs.discard(_ig_key(package_id, version))
+        self._loaded_igs.discard(package_id)
+        if version:
+            self._loaded_igs.discard(_ig_key(package_id, None))
+        prefix = f"{package_id}#"
+        for key in list(self._loaded_igs):
+            if key.startswith(prefix):
+                self._loaded_igs.discard(key)
 
     def _is_ig_loaded(self, package_id: str, version: str | None) -> bool:
         if _ig_key(package_id, version) in self._loaded_igs:
@@ -139,6 +157,28 @@ class InfernoClient:
             prefix = f"{package_id}#"
             return any(key.startswith(prefix) for key in self._loaded_igs)
         return False
+
+    def _profiles_known(self, profiles: list[str]) -> bool:
+        if not profiles:
+            return True
+        if not self._known_profiles:
+            return False
+        for url in profiles:
+            base = (url or "").split("|", 1)[0].strip()
+            if base and base not in self._known_profiles:
+                return False
+        return True
+
+    async def _refresh_known_profiles(self) -> None:
+        """Refresh local profile index from Inferno (used after load misses)."""
+        try:
+            profiles = await self.get_profiles()
+            for url in profiles or []:
+                base = str(url).split("|", 1)[0].strip()
+                if base:
+                    self._known_profiles.add(base)
+        except Exception as exc:
+            logger.warning("Could not refresh Inferno profile index: %s", exc)
 
     async def _us_core_profiles_loaded(self) -> bool:
         """True when US Core StructureDefinitions are in the engine (not just catalog)."""
@@ -172,12 +212,19 @@ class InfernoClient:
         """Detect IGs loaded in Inferno by scanning profile URLs."""
         try:
             profiles = await self.get_profiles()
+            for url in profiles or []:
+                base = str(url).split("|", 1)[0].strip()
+                if base:
+                    self._known_profiles.add(base)
             ig_patterns = {
                 "hl7.fhir.us.core": "/us/core/",
                 "hl7.fhir.us.davinci-hrex": "/davinci-hrex/",
                 "hl7.fhir.us.davinci-crd": "/davinci-crd/",
                 "hl7.fhir.us.davinci-dtr": "/davinci-dtr/",
                 "hl7.fhir.us.davinci-pas": "/davinci-pas/",
+                "hl7.fhir.uv.ipa": "/uv/ipa/",
+                "hl7.fhir.uv.ips": "/uv/ips/",
+                "hl7.fhir.uv.sdc": "/uv/sdc/",
             }
             profiles_lower = [p.lower() for p in profiles]
             for pid, pattern in ig_patterns.items():
@@ -251,6 +298,12 @@ class InfernoClient:
             logger.warning("Inferno warm-up probe failed: %s", exc)
 
     async def validate_resource(self, resource: str, profiles: list[str]) -> dict[str, Any]:
+        from app.services.fhir_validator.ig_manager import ig_manager
+
+        # Pin unversioned profile URLs to the local IG package version before cache /
+        # Inferno so results stay accurate (avoids Inferno resolving a different ballot).
+        profiles = ig_manager.pin_profile_versions(profiles or [])
+
         cache_key = self._cache_key(resource, profiles)
         cached = self._cache_get(cache_key)
         if cached is not None:
@@ -262,48 +315,110 @@ class InfernoClient:
                 return cached
 
             # Ensure IGs only for explicitly requested Advanced profiles (?profile=).
-            # Do NOT auto-fetch IGs from meta.profile — Inferno hosted skips unknown
-            # profiles ("validator is set to not fetch unknown profiles").
-            from app.services.fhir_validator.ig_manager import ig_manager
-
+            # Confirms StructureDefinitions are actually in Inferno (not a stale flag).
             if profiles:
                 await ig_manager.ensure_inferno_for_profiles(profiles)
 
-            headers = {"Content-Type": self._content_type_for_resource(resource)}
-            params = {"profile": ",".join(profiles)} if profiles else None
-            body = resource.encode("utf-8") if isinstance(resource, str) else resource
+            payload = await self._post_validate(resource, profiles)
 
-            response = await self._request(
-                "POST",
-                f"{self.base_url}/validate",
-                startup=False,
-                content=body,
-                headers=headers,
-                params=params,
-            )
-            if response.status_code == 503:
-                raise RuntimeError("Validator engine is still initializing. Please wait and try again.")
+            # Inferno returns HTTP 500 when a ?profile= StructureDefinition is missing.
+            if payload is None and profiles:
+                logger.warning(
+                    "Profile validate returned engine error for %s — reloading IG and retrying",
+                    profiles,
+                )
+                await self._force_reload_for_profiles(profiles)
+                payload = await self._post_validate(resource, profiles)
 
-            # Do not silently fall back to base FHIR — that diverges from Inferno.
-            # Surface the engine error so unresolved profiles are visible.
-            if response.status_code >= 400:
-                detail = ""
-                try:
-                    detail = response.text[:500]
-                except Exception:
-                    pass
-                if profiles and response.status_code == 500:
-                    logger.warning(
-                        "Profile validation error for %s: %s",
-                        profiles,
-                        detail or response.status_code,
-                    )
-                response.raise_for_status()
+            if payload is None:
+                missing = ", ".join(profiles) if profiles else "(none)"
+                raise RuntimeError(
+                    "Validator could not resolve the selected profile(s): "
+                    f"{missing}. Re-select the IG (or Upload IG) and try again."
+                )
 
-            payload = response.json()
             self._engine_warm = True
             self._cache_set(cache_key, payload)
             return payload
+
+    async def _post_validate(
+        self, resource: str, profiles: list[str]
+    ) -> dict[str, Any] | None:
+        """POST /validate. Returns OperationOutcome dict, or None on recoverable 500."""
+        headers = {"Content-Type": self._content_type_for_resource(resource)}
+        params = {"profile": ",".join(profiles)} if profiles else None
+        body = resource.encode("utf-8") if isinstance(resource, str) else resource
+
+        response = await self._request(
+            "POST",
+            f"{self.base_url}/validate",
+            startup=False,
+            content=body,
+            headers=headers,
+            params=params,
+        )
+        if response.status_code == 503:
+            raise RuntimeError("Validator engine is still initializing. Please wait and try again.")
+
+        if response.status_code >= 400:
+            detail = ""
+            try:
+                detail = response.text[:500]
+            except Exception:
+                pass
+            if profiles and response.status_code == 500:
+                logger.warning(
+                    "Profile validation error for %s: %s",
+                    profiles,
+                    detail or response.status_code,
+                )
+                return None
+            response.raise_for_status()
+
+        return response.json()
+
+    async def _force_reload_for_profiles(self, profiles: list[str]) -> None:
+        """Clear stale load markers and re-upload packages that own these profiles."""
+        from app.services.fhir_validator.ig_constants import IG_PREFERRED_VERSIONS
+        from app.services.fhir_validator.ig_manager import ig_manager
+
+        async with self._validate_profile_lock:
+            for profile_url in profiles or []:
+                ig_spec = _ig_spec_for_profile_url(profile_url)
+                package_id: str | None = None
+                version: str | None = None
+                if ig_spec:
+                    package_id, version = _split_ig_spec(ig_spec)
+                    version = version or IG_PREFERRED_VERSIONS.get(package_id)
+                else:
+                    owner = ig_manager._find_ig_for_profile(profile_url)
+                    if owner:
+                        package_id = owner.get("package_name") or None
+                        version = owner.get("version") or None
+                if not package_id:
+                    continue
+                self._forget_ig(package_id, version)
+                # Drop pending cache so wait=True re-uploads.
+                cache_key = f"{package_id}#{version}" if version else package_id
+                pending = ig_manager._loaded_igs.get(cache_key)
+                if pending is not None:
+                    pending = dict(pending)
+                    pending["inferno_pending"] = True
+                    ig_manager._loaded_igs[cache_key] = pending
+                try:
+                    await ig_manager.load_ig(package_id, version, wait=True)
+                    # Prefer explicit force upload if still marked without profiles.
+                    if not self._profiles_known([profile_url]):
+                        await self.load_ig_by_id(package_id, version, force=True)
+                        local = ig_manager._local_resource_profiles(package_id, version)
+                        for url in (local or {}).get("profiles") or []:
+                            base = str(url).split("|", 1)[0].strip()
+                            if base:
+                                self._known_profiles.add(base)
+                except Exception as exc:
+                    logger.warning("Force reload failed for %s: %s", package_id, exc)
+            if not self._profiles_known(profiles):
+                await self._refresh_known_profiles()
 
     async def _ensure_igs_for_profile_urls(self, profiles: list[str]) -> None:
         for profile_url in profiles:
@@ -357,9 +472,17 @@ class InfernoClient:
         version: str | None = None,
         *,
         startup: bool = False,
+        force: bool = False,
     ) -> dict[str, Any]:
-        if self._is_ig_loaded(package_id, version):
+        from app.services.fhir_validator.ig_constants import IG_PREFERRED_VERSIONS
+
+        version = version or IG_PREFERRED_VERSIONS.get(package_id)
+
+        if not force and self._is_ig_loaded(package_id, version):
             return {"package_id": package_id, "version": version}
+
+        if force:
+            self._forget_ig(package_id, version)
 
         loader = get_fhir_package_loader()
         if loader.is_enabled():
@@ -384,6 +507,9 @@ class InfernoClient:
         return result
 
     async def upload_custom_ig(self, package_data: bytes, *, startup: bool = False) -> dict[str, Any]:
+        # Inferno docs: POST /igs with raw package.tgz bytes + Content-Encoding: gzip.
+        # Package must include package/.index.json (see custom-igs/build_packages.py).
+        # https://github.com/inferno-framework/fhir-validator-wrapper/blob/main/rest-api.md
         response = await self._request(
             "POST",
             f"{self.base_url}/igs",
@@ -391,7 +517,13 @@ class InfernoClient:
             content=package_data,
             headers={"Content-Encoding": "gzip"},
         )
-        response.raise_for_status()
+        if response.status_code >= 400:
+            detail = (response.text or "")[:800]
+            logger.error("Inferno POST /igs failed (%s): %s", response.status_code, detail)
+            raise RuntimeError(
+                f"Inferno rejected IG package ({response.status_code}): "
+                f"{detail or response.reason_phrase}"
+            )
         return response.json()
 
     async def get_version(self) -> dict[str, Any]:

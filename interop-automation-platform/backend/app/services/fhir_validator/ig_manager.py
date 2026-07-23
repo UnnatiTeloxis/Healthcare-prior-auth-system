@@ -519,26 +519,119 @@ class IGManager:
         logger.info("Local profile cache warmed for %d/%d IGs", warmed, len(packages))
         return warmed
 
-    async def ensure_inferno_ready(self, package_name: str, version: str | None = None) -> None:
+    async def ensure_inferno_ready(
+        self,
+        package_name: str,
+        version: str | None = None,
+        *,
+        required_profiles: list[str] | None = None,
+    ) -> None:
         """
         Guarantee the IG package is loaded in Inferno before ?profile= validation.
         UI may show profiles from local .tgz (inferno_pending); validation must upload first.
+
+        required_profiles: when set, do not trust a stale in-memory loaded flag —
+        confirm those StructureDefinition URLs are known to the engine (or re-upload).
         """
         from app.services.fhir_validator.inferno_client import inferno_client
 
+        version = version or IG_PREFERRED_VERSIONS.get(package_name)
+
         pkg_l = (package_name or "").lower()
-        if "davinci-" in pkg_l and "hrex" not in pkg_l:
+        # Da Vinci DTR depends on HRex + SDC Questionnaire profiles.
+        if "davinci-dtr" in pkg_l:
+            await self.ensure_inferno_ready(
+                "hl7.fhir.us.davinci-hrex",
+                IG_PREFERRED_VERSIONS.get("hl7.fhir.us.davinci-hrex", "1.2.0"),
+            )
+            await self.ensure_inferno_ready(
+                "hl7.fhir.uv.sdc",
+                IG_PREFERRED_VERSIONS.get("hl7.fhir.uv.sdc", "4.0.0"),
+            )
+        elif "davinci-" in pkg_l and "hrex" not in pkg_l:
             hrex_ver = IG_PREFERRED_VERSIONS.get("hl7.fhir.us.davinci-hrex", "1.2.0")
             await self.ensure_inferno_ready("hl7.fhir.us.davinci-hrex", hrex_ver)
 
-        if inferno_client._is_ig_loaded(package_name, version):
+        needed = [p for p in (required_profiles or []) if p]
+        if needed and inferno_client._profiles_known(needed):
             cache_key = f"{package_name}#{version}" if version else package_name
             cached = self._loaded_igs.get(cache_key)
             if cached:
                 cached["inferno_pending"] = False
             return
 
+        if inferno_client._is_ig_loaded(package_name, version):
+            if needed:
+                # Stale marker after Inferno restart is common on the server —
+                # confirm via /profiles once, then force re-upload if still missing.
+                if not inferno_client._profiles_known(needed):
+                    await inferno_client._refresh_known_profiles()
+                if inferno_client._profiles_known(needed):
+                    cache_key = f"{package_name}#{version}" if version else package_name
+                    cached = self._loaded_igs.get(cache_key)
+                    if cached:
+                        cached["inferno_pending"] = False
+                    return
+                logger.warning(
+                    "IG %s marked loaded but profile(s) missing in Inferno — re-uploading",
+                    package_name,
+                )
+                inferno_client._forget_ig(package_name, version)
+                cache_key = f"{package_name}#{version}" if version else package_name
+                pending = self._loaded_igs.get(cache_key)
+                if pending is not None:
+                    pending = dict(pending)
+                    pending["inferno_pending"] = True
+                    self._loaded_igs[cache_key] = pending
+            else:
+                cache_key = f"{package_name}#{version}" if version else package_name
+                cached = self._loaded_igs.get(cache_key)
+                if cached:
+                    cached["inferno_pending"] = False
+                return
+
         await self.load_ig(package_name, version, wait=True)
+        if needed:
+            # Seed known profiles from local package scan (Inferno POST may omit full list).
+            local = self._local_resource_profiles(package_name, version)
+            for url in (local or {}).get("profiles") or []:
+                base = str(url).split("|", 1)[0].strip()
+                if base:
+                    inferno_client._known_profiles.add(base)
+            for url in needed:
+                base = str(url).split("|", 1)[0].strip()
+                if base:
+                    inferno_client._known_profiles.add(base)
+
+    def pin_profile_versions(self, profile_urls: list[str]) -> list[str]:
+        """
+        Append |version when the client sends an unversioned StructureDefinition URL.
+        Pins to the locally loaded / preferred package version so Inferno does not
+        resolve a different ballot/release and report misleading profile versions.
+        Local dict lookup only — no network.
+        """
+        from app.services.fhir_validator.inferno_client import _ig_spec_for_profile_url, _split_ig_spec
+
+        pinned: list[str] = []
+        for url in profile_urls or []:
+            text = (url or "").strip()
+            if not text or "|" in text:
+                pinned.append(text)
+                continue
+
+            version: str | None = None
+            owner = self._find_ig_for_profile(text)
+            if owner:
+                version = (owner.get("version") or None) or None
+
+            if not version:
+                ig_spec = _ig_spec_for_profile_url(text)
+                if ig_spec:
+                    package_id, ver = _split_ig_spec(ig_spec)
+                    version = ver or IG_PREFERRED_VERSIONS.get(package_id)
+
+            pinned.append(f"{text}|{version}" if version else text)
+        return pinned
 
     async def ensure_inferno_for_profiles(self, profile_urls: list[str]) -> None:
         """Load every IG required by explicit ?profile= URLs (validation hot path)."""
@@ -546,14 +639,19 @@ class IGManager:
 
         seen: set[str] = set()
         for profile_url in profile_urls or []:
+            base = (profile_url or "").split("|", 1)[0].strip()
             ig_spec = _ig_spec_for_profile_url(profile_url)
             if ig_spec:
                 package_id, ver = _split_ig_spec(ig_spec)
+                # Always pin to preferred local package version (e.g. IPA → 1.1.0).
+                ver = ver or IG_PREFERRED_VERSIONS.get(package_id)
                 key = f"{package_id}#{ver or ''}"
                 if key in seen:
                     continue
                 seen.add(key)
-                await self.ensure_inferno_ready(package_id, ver)
+                await self.ensure_inferno_ready(
+                    package_id, ver, required_profiles=[base] if base else None
+                )
                 continue
 
             # Custom / uploaded IGs: map profile URL → cached package from local .tgz scan.
@@ -564,11 +662,14 @@ class IGManager:
             ver = owner.get("version") or None
             if not package_id:
                 continue
+            ver = ver or IG_PREFERRED_VERSIONS.get(package_id)
             key = f"{package_id}#{ver or ''}"
             if key in seen:
                 continue
             seen.add(key)
-            await self.ensure_inferno_ready(package_id, ver)
+            await self.ensure_inferno_ready(
+                package_id, ver, required_profiles=[base] if base else None
+            )
 
     def _find_ig_for_profile(self, profile_url: str) -> dict[str, Any] | None:
         """Return cached IG entry that owns this StructureDefinition URL."""
@@ -699,7 +800,9 @@ class IGManager:
         loader = get_fhir_package_loader()
         loader.register_package_bytes(package_name, version, package_data)
 
-        inferno_ready = inferno_client._is_ig_loaded(package_name, version)
+        inferno_ready = inferno_client._is_ig_loaded(package_name, version) and (
+            not profiles or inferno_client._profiles_known(profiles[:1])
+        )
         loaded_info = self._build_uploaded_ig_info(
             package_name,
             version,

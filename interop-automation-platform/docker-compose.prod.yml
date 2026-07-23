@@ -2,8 +2,10 @@
 # FHIR Conformance Validator parity with docker-compose.yml:
 # Inferno wrapper + IG packages + test-cases + static validator UI.
 #
+# Sized for small VPS (1 vCPU). Raise limits on larger hosts.
+#
 # Usage:
-#   Copy-Item .env.example .env   # set POSTGRES_PASSWORD, AUTH_SECRET_KEY, etc.
+#   cp .env.example .env   # set POSTGRES_PASSWORD, AUTH_SECRET_KEY, etc.
 #   docker compose -f docker-compose.prod.yml up -d --build
 
 services:
@@ -14,7 +16,7 @@ services:
       DISPLAY_ISSUES_ARE_WARNINGS: ${DISPLAY_ISSUES_ARE_WARNINGS:-false}
       DISABLE_TX: ${DISABLE_TX:-true}
       TX_SERVER_URL: ${TX_SERVER_URL:-}
-      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--DfhirOffline=true -Xmx4g}
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--DfhirOffline=true -Xmx2g}
     volumes:
       - ./backend/fhir_packages_inferno:/home/igs:ro
       - fhir_validator_pkg_cache:/home/fhir
@@ -30,11 +32,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "2.0"
-          memory: 5G
+          cpus: "0.90"
+          memory: 2560M
         reservations:
-          cpus: "0.5"
-          memory: 1G
+          cpus: "0.10"
+          memory: 512M
     logging:
       driver: json-file
       options:
@@ -62,11 +64,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1.0"
-          memory: 1G
+          cpus: "0.50"
+          memory: 512M
         reservations:
-          cpus: "0.25"
-          memory: 256M
+          cpus: "0.05"
+          memory: 128M
     logging:
       driver: json-file
       options:
@@ -76,7 +78,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: interop_redis_prod
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
     volumes:
       - redis_data:/data
     healthcheck:
@@ -90,11 +92,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.5"
-          memory: 512M
+          cpus: "0.25"
+          memory: 192M
         reservations:
-          cpus: "0.1"
-          memory: 128M
+          cpus: "0.05"
+          memory: 64M
     logging:
       driver: json-file
       options:
@@ -136,7 +138,6 @@ services:
       CRD_SCENARIOS_PATH: /app/data/scenarios/crd
       VALIDATION_RULES_PATH: /app/data/validation_rules
     volumes:
-      # Same FHIR assets as local compose (validator UI + IGs + samples)
       - ./frontend/public:/app/frontend/public:ro
       - ./data:/app/data:ro
       - ./backend/fhir_packages:/app/fhir_packages:ro
@@ -162,18 +163,17 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "2.0"
-          memory: 2G
+          cpus: "0.75"
+          memory: 768M
         reservations:
-          cpus: "0.5"
-          memory: 512M
+          cpus: "0.10"
+          memory: 256M
     logging:
       driver: json-file
       options:
         max-size: "20m"
         max-file: "10"
-    # No alembic in this MVP image — start API the same way as local (without --reload)
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1
 
   frontend:
     build:
@@ -198,11 +198,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.5"
-          memory: 256M
+          cpus: "0.25"
+          memory: 128M
         reservations:
-          cpus: "0.1"
-          memory: 64M
+          cpus: "0.05"
+          memory: 32M
     logging:
       driver: json-file
       options:

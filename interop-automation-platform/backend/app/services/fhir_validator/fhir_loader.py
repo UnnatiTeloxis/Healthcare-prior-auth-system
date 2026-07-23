@@ -51,12 +51,23 @@ class FHIRPackageLoader:
     def is_enabled(self) -> bool:
         return bool(self.packages_dir and self.packages_dir.is_dir())
 
+    def _resolve_version(self, package_id: str, version: str | None) -> str | None:
+        """Prefer explicit version, else catalog pin (so hl7.fhir.uv.ipa → 1.1.0 .tgz)."""
+        if version:
+            return version
+        try:
+            from app.services.fhir_validator.ig_constants import IG_PREFERRED_VERSIONS
+
+            return IG_PREFERRED_VERSIONS.get(package_id)
+        except Exception:
+            return None
+
     def _candidate_paths(self, ref: FHIRPackageRef) -> list[Path]:
         dirs = [d for d in (self.packages_dir, self.extra_packages_dir, self.uploads_dir) if d]
         if not dirs:
             return []
         pid = ref.package_id
-        ver = ref.version
+        ver = self._resolve_version(pid, ref.version)
 
         # Common naming conventions (support both dash and hash variants)
         candidates: list[str] = []
@@ -94,6 +105,11 @@ class FHIRPackageLoader:
         paths: list[Path] = []
         for base in dirs:
             paths.extend(base / name for name in candidates)
+            # Fallback: versioned archives when caller omitted version
+            # (e.g. hl7.fhir.uv.ipa-1.1.0.tgz).
+            if not ver:
+                paths.extend(sorted(base.glob(f"{pid}-*.tgz")))
+                paths.extend(sorted(base.glob(f"{pid}#*.tgz")))
         return paths
 
     def register_package_bytes(
